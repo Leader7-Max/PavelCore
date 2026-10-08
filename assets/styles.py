@@ -3,12 +3,13 @@ import streamlit as st
 def inject_custom_design():
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-        /* 1. FOND DE PAGE PRO */
+        /* 1. FOND DE PAGE BLANC PUR */
         html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .stApp {
-            background-color: #0F1117 !important;
-            color: #F0F2F6 !important;
+            background-color: #FFFFFF !important;
+            background: #FFFFFF !important;
+            color: #0F172A !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
@@ -19,22 +20,22 @@ def inject_custom_design():
             display: none !important;
         }
 
-        /* Titres et labels */
+        /* Titres et labels en Noir Anthracite très foncé */
         h1, h2, h3, h4, label, label p {
-            color: #FFFFFF !important;
-            font-weight: 600 !important;
+            color: #0F172A !important;
+            font-weight: 700 !important;
         }
 
-        /* 2. CORRECTION CRITIQUE : ONGLET / TABS (VOIR CALENDRIER & LISTE) */
+        /* 2. ONGLET / TABS (AJOUTER UN ÉVÉNEMENT / VUE CALENDRIER) */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px !important;
-            background-color: #1A1D27 !important;
+            background-color: #F1F5F9 !important;
             padding: 6px !important;
             border-radius: 12px !important;
-            border: 1px solid #2E3345 !important;
+            border: 1px solid #E2E8F0 !important;
         }
 
-        /* Onglet individuel (Inactif par défaut) : Texte BLANC / GRIS CLAIR BIEN VISIBLE */
+        /* Onglet Inactif (Bien visible avec texte sombre) */
         .stTabs [data-baseweb="tab"] {
             height: auto !important;
             padding: 10px 18px !important;
@@ -44,30 +45,23 @@ def inject_custom_design():
             transition: all 0.2s ease !important;
         }
 
-        /* Style du texte à l'intérieur de l'onglet INACTIF */
         .stTabs [data-baseweb="tab"] p, 
         .stTabs [data-baseweb="tab"] div,
         .stTabs [data-baseweb="tab"] span {
-            color: #E2E8F0 !important; /* Blanc cassé / Gris très clair */
+            color: #334155 !important; /* Gris foncé très lisible */
             font-weight: 600 !important;
             font-size: 0.9rem !important;
         }
 
-        /* Survol de l'onglet inactif */
+        /* Survol onglet inactif */
         .stTabs [data-baseweb="tab"]:hover {
-            background-color: #2E3345 !important;
+            background-color: #E2E8F0 !important;
         }
 
-        .stTabs [data-baseweb="tab"]:hover p,
-        .stTabs [data-baseweb="tab"]:hover div,
-        .stTabs [data-baseweb="tab"]:hover span {
-            color: #FFFFFF !important;
-        }
-
-        /* Onglet SÉLECTIONNÉ / ACTIF (Rouge Néon) */
+        /* Onglet Sélectionné / Actif (Rouge) */
         .stTabs [aria-selected="true"] {
             background-color: #FF3B30 !important;
-            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.35) !important;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25) !important;
         }
 
         .stTabs [aria-selected="true"] p, 
@@ -77,55 +71,57 @@ def inject_custom_design():
             font-weight: 700 !important;
         }
 
-        /* Supprimer la barre rouge inférieure par défaut de Streamlit sous les tabs */
         .stTabs [data-baseweb="tab-highlight-title"] {
             display: none !important;
         }
 
-        /* 3. CHAMPS DE SAISIE (INPUTS & TEXTAREAS) */
+        /* 3. CHAMPS DE SAISIE (INPUTS & TEXTAREAS BLANCS) */
         div[data-baseweb="input"], 
         div[data-baseweb="textarea"] {
-            background-color: #1A1D27 !important;
-            border: 1px solid #2E3345 !important;
+            background-color: #F8FAFC !important;
+            border: 1px solid #CBD5E1 !important;
             border-radius: 10px !important;
         }
 
         input, textarea {
-            color: #FFFFFF !important;
+            color: #0F172A !important;
             font-size: 0.95rem !important;
             background-color: transparent !important;
         }
 
         input::placeholder, textarea::placeholder {
-            color: #8C94A8 !important;
+            color: #64748B !important;
         }
 
+        /* Focus sur champ actif */
         div[data-baseweb="input"]:focus-within, 
         div[data-baseweb="textarea"]:focus-within {
             border-color: #FF3B30 !important;
-            box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.2) !important;
+            background-color: #FFFFFF !important;
+            box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.15) !important;
         }
 
         /* 4. MENUS DÉROULANTS (SELECTBOX & LISTES) */
         div[data-baseweb="select"] > div {
-            background-color: #1A1D27 !important;
-            border: 1px solid #2E3345 !important;
+            background-color: #F8FAFC !important;
+            border: 1px solid #CBD5E1 !important;
             border-radius: 10px !important;
-            color: #FFFFFF !important;
+            color: #0F172A !important;
         }
 
         div[data-baseweb="popover"], 
         div[role="listbox"], 
         ul[role="listbox"] {
-            background-color: #1A1D27 !important;
-            border: 1px solid #3A3F54 !important;
+            background-color: #FFFFFF !important;
+            border: 1px solid #CBD5E1 !important;
             border-radius: 10px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
         }
 
         li[role="option"], 
         div[role="option"] {
-            background-color: #1A1D27 !important;
-            color: #FFFFFF !important;
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
             font-size: 0.95rem !important;
             padding: 10px 14px !important;
         }
@@ -138,29 +134,30 @@ def inject_custom_design():
         }
 
         div[data-baseweb="select"] span {
-            color: #FFFFFF !important;
+            color: #0F172A !important;
         }
 
         [data-testid="InputInstructions"] {
             display: none !important;
         }
 
-        /* 5. BOUTONS ACTION ROUGE */
+        /* 5. BOUTONS ROUGE ACTION */
         .stButton > button {
             background-color: #FF3B30 !important;
             color: #FFFFFF !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             font-size: 0.95rem !important;
             border: none !important;
             border-radius: 10px !important;
             padding: 10px 20px !important;
             transition: all 0.2s ease !important;
+            box-shadow: 0 4px 14px rgba(255, 59, 48, 0.25) !important;
             width: 100% !important;
         }
 
         .stButton > button:hover {
             background-color: #E03228 !important;
-            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3) !important;
+            box-shadow: 0 6px 18px rgba(255, 59, 48, 0.35) !important;
         }
 
         /* 6. NAVIGATION HORIZONTALE (RADIO BUTTONS) */
@@ -171,8 +168,8 @@ def inject_custom_design():
         }
 
         div[data-testid="stRadio"] label {
-            background-color: #1A1D27 !important;
-            border: 1px solid #2E3345 !important;
+            background-color: #F1F5F9 !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 20px !important;
             padding: 8px 16px !important;
             cursor: pointer !important;
@@ -184,26 +181,31 @@ def inject_custom_design():
         }
 
         div[data-testid="stRadio"] label span {
-            color: #FFFFFF !important;
-            font-weight: 500 !important;
+            color: #334155 !important;
+            font-weight: 600 !important;
             font-size: 0.85rem !important;
         }
 
-        /* 7. CARTES ET ENCADRÉS */
+        div[data-testid="stRadio"] label:has(input:checked) span {
+            color: #FFFFFF !important;
+        }
+
+        /* 7. CARTES ET ENCADRÉS EN BLANC RELIEF */
         .zapio-card {
-            background-color: #181B24 !important;
-            border: 1px solid #2A2E3D !important;
-            border-radius: 12px;
-            padding: 20px;
+            background-color: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 14px;
+            padding: 22px;
             margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .zapio-badge {
             display: inline-flex;
             align-items: center;
-            background: rgba(255, 59, 48, 0.15);
-            color: #FF5247;
-            border: 1px solid rgba(255, 59, 48, 0.3);
+            background: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FECACA;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
@@ -213,9 +215,9 @@ def inject_custom_design():
         .zapio-badge-green {
             display: inline-flex;
             align-items: center;
-            background: rgba(48, 209, 88, 0.15);
-            color: #30D158;
-            border: 1px solid rgba(48, 209, 88, 0.3);
+            background: #F0FDF4;
+            color: #16A34A;
+            border: 1px solid #BBF7D0;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
