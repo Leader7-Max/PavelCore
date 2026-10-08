@@ -1,8 +1,6 @@
 import streamlit as st
-import os
 from assets.styles import inject_custom_design
 
-# 1. Configuration de la page Streamlit
 st.set_page_config(
     page_title="PavelCore — Coffre-Fort & Workspace",
     page_icon="🔒",
@@ -10,16 +8,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Injection du design CSS Ultra Premium avec les correctifs mobile
 inject_custom_design()
 
-# 3. Gestion de l'état de la session (Authentification)
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-# ----------------------------------------------------
-# ÉCRAN DE CONNEXION / AUTHENTIFICATION
-# ----------------------------------------------------
+# --- ECRAN DE CONNEXION ---
 if not st.session_state.authenticated:
     st.markdown("<br><br>", unsafe_allow_html=True)
     
@@ -36,28 +30,24 @@ if not st.session_state.authenticated:
         with st.form("login_form"):
             st.subheader("Authentification")
             
-            # Saisie de l'email MASQUÉE dans la barre
-            email = st.text_input("Adresse Email", type="password", placeholder="••••••••••••••••")
+            # Email lisible
+            email = st.text_input("Adresse Email", placeholder="exemple@domaine.com")
             
-            # Mot de passe / Code Master
+            # Mot de passe masqué
             master_key = st.text_input("Clé Maîtresse / PIN", type="password", placeholder="••••••••")
             
             submit = st.form_submit_button("Déverrouiller le Coffre", use_container_width=True)
 
             if submit:
-                # Logique de vérification
                 if master_key != "":
                     st.session_state.authenticated = True
                     st.success("Accès accordé.")
                     st.rerun()
                 else:
-                    st.error("Veuillez saisir votre clé d'accès.")
+                    st.error("Saisis ta clé d'accès.")
 
-# ----------------------------------------------------
-# APPLICATION PRINCIPALE (Navigation)
-# ----------------------------------------------------
+# --- APPLICATION PRINCIPALE ---
 else:
-    # Sidebar de navigation
     with st.sidebar:
         st.markdown("<h2 style='color: #00F2FE;'>PavelCore</h2>", unsafe_allow_html=True)
         st.markdown('<span class="badge">Session Sécurisée</span>', unsafe_allow_html=True)
@@ -66,7 +56,7 @@ else:
         menu = st.radio(
             "Navigation",
             ["Dashboard", "Mes Prompts & Code", "Projets & Agenda", "Boîte à Idées", "Coffre-Fort Docs"],
-            index=1  # Sélectionne "Mes Prompts & Code" par défaut
+            index=0
         )
         
         st.markdown("<br><br><br>", unsafe_allow_html=True)
@@ -74,7 +64,6 @@ else:
             st.session_state.authenticated = False
             st.rerun()
 
-    # Router vers les différents modules
     if menu == "Dashboard":
         st.markdown("## 🚀 Dashboard")
         c1, c2, c3 = st.columns(3)
@@ -108,13 +97,13 @@ else:
         render_prompts_module()
 
     elif menu == "Projets & Agenda":
-        st.markdown("## 📅 Projets & Agenda")
-        st.info("Module Projets & Agenda en cours de configuration.")
+        from modules.projects_agenda import render_projects_agenda
+        render_projects_agenda()
 
     elif menu == "Boîte à Idées":
-        st.markdown("## 💡 Boîte à Idées")
-        st.info("Module Boîte à Idées en cours de configuration.")
+        from modules.ideas import render_ideas
+        render_ideas()
 
     elif menu == "Coffre-Fort Docs":
-        st.markdown("## 🔐 Coffre-Fort Documents & Contacts")
-        st.info("Module Coffre-Fort en cours de configuration.")
+        from modules.vault import render_vault
+        render_vault()
