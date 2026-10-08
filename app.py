@@ -165,7 +165,7 @@ else:
     st.markdown("<hr style='border-color: rgba(255,255,255,0.08); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
 
     # ====================================================
-    # 📆 AGENDA PREMIUM
+    # 📆 AGENDA PREMIUM (Avec Lecteur d'Alarme Fiable)
     # ====================================================
     if menu == "📆 Agenda Premium":
         st.markdown("""
@@ -189,11 +189,30 @@ else:
                 </div>
             """, unsafe_allow_html=True)
             
-            st.components.v1.html("""
-                <audio autoplay>
-                    <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
-                </audio>
-            """, height=0)
+            # Intégration du composant audio interactif pour contourner la restriction Autoplay
+            components.html("""
+                <div style="text-align: center; background: #16161E; padding: 12px; border-radius: 12px; border: 1px solid #FF3B30;">
+                    <p style="color: #FFF; font-family: sans-serif; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
+                        🔊 RAPPEL SONORE ACTIF
+                    </p>
+                    <button onclick="playAlarm()" style="background: #FF3B30; color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
+                        🔔 Déclencher / Tester la Sonnerie
+                    </button>
+                    <audio id="alarmAudio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+                    <script>
+                        function playAlarm() {
+                            var audio = document.getElementById('alarmAudio');
+                            audio.play().catch(function(error) {
+                                console.log("Autoplay bloqué par le navigateur");
+                            });
+                        }
+                        // Tentative automatique de lecture
+                        window.onload = function() {
+                            playAlarm();
+                        };
+                    </script>
+                </div>
+            """, height=100)
 
         tab_add, tab_view = st.tabs(["➕ Ajouter un Événement", "📅 Vue Calendrier & Liste"])
 
@@ -238,6 +257,7 @@ else:
                             <div style="font-size:0.85rem; color:#FFF; display:flex; gap:20px;">
                                 <span>📅 Date : <b>{ev['date'].strftime('%d/%m/%Y')}</b></span>
                                 <span>⏰ Heure : <b>{ev['time'].strftime('%H:%M')}</b></span>
+                                <span>🔔 Sonnerie : <b>{ev['ringtone']}</b></span>
                             </div>
                         </div>
                     """, unsafe_allow_html=True)
@@ -401,7 +421,7 @@ else:
             """, unsafe_allow_html=True)
 
     # ====================================================
-    # 🚀 PROJETS EN COURS (Sans la barre d'avancement)
+    # 🚀 PROJETS EN COURS
     # ====================================================
     elif menu == "🚀 Projets en cours":
         st.markdown("## 🚀 Suivi des Projets Actifs")
