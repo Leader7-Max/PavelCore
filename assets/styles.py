@@ -3,64 +3,89 @@ import streamlit as st
 def inject_custom_design():
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-        /* 1. FOND GLOBAL : GRIS SLATE / ANTHRACITE CLAIR */
+        /* 1. FOND DE PAGE PRO (Anthracite très sombre, zéro reflet parasite) */
         html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .stApp {
-            background-color: #2A2E3D !important;
-            background: #2A2E3D !important;
-            color: #FFFFFF !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0F1117 !important;
+            color: #F0F2F6 !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
-        /* Masquage de la Sidebar */
+        /* Masquage Sidebar */
         [data-testid="stSidebarCollapseButton"], 
         [data-testid="collapsedControl"],
         [data-testid="stSidebar"] {
             display: none !important;
         }
 
-        h1, h2, h3, h4, label, label p, span {
+        /* Titres et labels bien lisibles */
+        h1, h2, h3, h4, label, label p {
             color: #FFFFFF !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
         }
 
-        /* 2. CHAMPS DE SAISIE & INPUTS (FOND CLAIR LISIBLE #3F4457) */
+        /* 2. CHAMPS DE SAISIE (Inputs & Textareas) */
         div[data-baseweb="input"], 
-        div[data-baseweb="textarea"], 
-        div[data-baseweb="select"] > div,
-        input, textarea, select {
-            background-color: #3F4457 !important;
-            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        div[data-baseweb="textarea"] {
+            background-color: #1A1D27 !important;
+            border: 1px solid #2E3345 !important;
             border-radius: 10px !important;
-            color: #FFFFFF !important;
         }
 
-        /* Placeholder / Texte indicatif bien lisible */
+        input, textarea {
+            color: #FFFFFF !important;
+            font-size: 0.95rem !important;
+            background-color: transparent !important;
+        }
+
         input::placeholder, textarea::placeholder {
-            color: #B0B7C6 !important;
-            opacity: 1 !important;
+            color: #8C94A8 !important;
         }
 
         /* Focus sur champ actif */
         div[data-baseweb="input"]:focus-within, 
         div[data-baseweb="textarea"]:focus-within {
             border-color: #FF3B30 !important;
-            background-color: #484E63 !important;
-            box-shadow: 0 0 10px rgba(255, 59, 48, 0.4) !important;
+            box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.2) !important;
         }
 
-        div[data-baseweb="input"] input, 
-        div[data-baseweb="textarea"] textarea {
+        /* 3. MENUS DÉROULANTS (SELECTBOX & LISTES) — CORRECTION TOTALE */
+        div[data-baseweb="select"] > div {
+            background-color: #1A1D27 !important;
+            border: 1px solid #2E3345 !important;
+            border-radius: 10px !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Conteneur de la liste déroulante (Pop-over) */
+        div[data-baseweb="popover"], 
+        div[role="listbox"], 
+        ul[role="listbox"] {
+            background-color: #1A1D27 !important;
+            border: 1px solid #3A3F54 !important;
+            border-radius: 10px !important;
+        }
+
+        /* Éléments individuels de la liste */
+        li[role="option"], 
+        div[role="option"] {
+            background-color: #1A1D27 !important;
             color: #FFFFFF !important;
             font-size: 0.95rem !important;
-            background-color: transparent !important;
+            padding: 10px 14px !important;
         }
 
-        /* Harmonisation spécifique des Pickers Date & Heure */
-        div[data-baseweb="calendar"], 
-        div[role="listbox"] {
-            background-color: #3F4457 !important;
+        /* Élément survolé ou sélectionné dans la liste */
+        li[role="option"]:hover, 
+        div[role="option"]:hover,
+        li[aria-selected="true"] {
+            background-color: #FF3B30 !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Texte du composant Select */
+        div[data-baseweb="select"] span {
             color: #FFFFFF !important;
         }
 
@@ -68,26 +93,25 @@ def inject_custom_design():
             display: none !important;
         }
 
-        /* 3. BOUTONS ROUGE NÉON ACCENTUÉS */
+        /* 4. BOUTONS ACTION ROUGE PRO */
         .stButton > button {
-            background: linear-gradient(135deg, #FF3B30 0%, #D7261C 100%) !important;
+            background-color: #FF3B30 !important;
             color: #FFFFFF !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
             font-size: 0.95rem !important;
             border: none !important;
             border-radius: 10px !important;
             padding: 10px 20px !important;
-            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4) !important;
-            transition: all 0.2s ease-in-out !important;
+            transition: all 0.2s ease !important;
             width: 100% !important;
         }
 
         .stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 59, 48, 0.6) !important;
+            background-color: #E03228 !important;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3) !important;
         }
 
-        /* 4. NAVIGATION HORIZONTALE (BOUTONS RADIO) */
+        /* 5. NAVIGATION HORIZONTALE (RADIO BUTTONS) */
         div[data-testid="stRadio"] > div {
             display: flex;
             flex-wrap: wrap;
@@ -95,43 +119,39 @@ def inject_custom_design():
         }
 
         div[data-testid="stRadio"] label {
-            background-color: #3F4457 !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            border-radius: 25px !important;
+            background-color: #1A1D27 !important;
+            border: 1px solid #2E3345 !important;
+            border-radius: 20px !important;
             padding: 8px 16px !important;
-            margin: 0 !important;
             cursor: pointer !important;
         }
 
         div[data-testid="stRadio"] label:has(input:checked) {
             background-color: #FF3B30 !important;
             border-color: #FF3B30 !important;
-            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4) !important;
         }
 
         div[data-testid="stRadio"] label span {
             color: #FFFFFF !important;
-            font-weight: 600 !important;
+            font-weight: 500 !important;
             font-size: 0.85rem !important;
         }
 
-        /* 5. CARTES ET ENCADRÉS */
+        /* 6. CARTES ET ENCADRÉS */
         .zapio-card {
-            background: #353A4B !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 14px;
+            background-color: #181B24 !important;
+            border: 1px solid #2A2E3D !important;
+            border-radius: 12px;
             padding: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         .zapio-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(255, 59, 48, 0.25);
-            color: #FF6B63;
-            border: 1px solid rgba(255, 59, 48, 0.4);
+            background: rgba(255, 59, 48, 0.15);
+            color: #FF5247;
+            border: 1px solid rgba(255, 59, 48, 0.3);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
@@ -139,27 +159,30 @@ def inject_custom_design():
         }
 
         .zapio-badge-green {
-            background: rgba(48, 209, 88, 0.25);
-            color: #34C759;
-            border: 1px solid rgba(48, 209, 88, 0.4);
+            display: inline-flex;
+            align-items: center;
+            background: rgba(48, 209, 88, 0.15);
+            color: #30D158;
+            border: 1px solid rgba(48, 209, 88, 0.3);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
         }
 
-        /* ONGLET (TABS) */
+        /* ONGLETS (TABS) */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            background-color: #353A4B !important;
-            padding: 6px;
+            gap: 6px;
+            background-color: #1A1D27 !important;
+            padding: 4px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid #2E3345;
         }
 
         .stTabs [aria-selected="true"] {
             background-color: #FF3B30 !important;
             color: #FFFFFF !important;
+            border-radius: 8px;
         }
         </style>
     """, unsafe_allow_html=True)
