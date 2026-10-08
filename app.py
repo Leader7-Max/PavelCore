@@ -17,7 +17,7 @@ st.set_page_config(
 from assets.styles import inject_custom_design
 inject_custom_design()
 
-# Détecteur automatique de secours
+# Détecteur automatique de langage
 def detect_language(code):
     if not code or not isinstance(code, str):
         return "python"
@@ -41,7 +41,6 @@ def detect_language(code):
     
     return "python"
 
-# Map pour Streamlit syntax highlighter
 LANG_MAP = {
     "Python": "python",
     "JavaScript / React": "javascript",
@@ -402,7 +401,7 @@ else:
             """, unsafe_allow_html=True)
 
     # ====================================================
-    # 🚀 PROJETS EN COURS
+    # 🚀 PROJETS EN COURS (Mise à jour avec Description)
     # ====================================================
     elif menu == "🚀 Projets en cours":
         st.markdown("## 🚀 Suivi des Projets Actifs")
@@ -412,10 +411,12 @@ else:
             progress = st.slider("Avancement (%)", 0, 100, 25)
             next_step = st.text_input("Prochaine étape")
             deadline = st.date_input("Date limite")
+            project_desc = st.text_area("Description / Notes détaillées du projet", height=120, placeholder="Détails, spécifications ou cahier des charges...")
+            
             if st.form_submit_button("Enregistrer"):
                 if name:
                     st.session_state.saved_current_projects.append({
-                        "name": name, "client": client, "progress": progress, "next": next_step, "deadline": str(deadline)
+                        "name": name, "client": client, "progress": progress, "next": next_step, "deadline": str(deadline), "desc": project_desc
                     })
                     st.rerun()
 
@@ -426,7 +427,8 @@ else:
                         <h3 style="margin:0; color:#FF3B30;">{cp['name']}</h3>
                         <span style="color:#FFF;">Client: <b>{cp['client']}</b></span>
                     </div>
-                    <p style="margin:10px 0; color:#8E8E93;">Prochaine étape: <b>{cp['next']}</b></p>
+                    <p style="margin:10px 0; color:#E0E6ED;">{cp.get('desc', '')}</p>
+                    <p style="margin:5px 0; color:#8E8E93;">Prochaine étape: <b>{cp['next']}</b></p>
                     <div style="font-size:0.85rem; color:#FFF;">Avancement: {cp['progress']}% | Échéance: {cp['deadline']}</div>
                 </div>
             """, unsafe_allow_html=True)
