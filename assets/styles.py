@@ -16,14 +16,11 @@ def inject_custom_design():
             background-color: #0B0B0E !important;
         }
 
-        /* Sidebar Sombre */
+        /* MASQUAGE DEFINITIF DE LA SIDEBAR ET DES FLECHES (<< / >>) */
+        [data-testid="stSidebarCollapseButton"], 
+        [data-testid="collapsedControl"],
         [data-testid="stSidebar"] {
-            background-color: #121217 !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-        }
-
-        [data-testid="stSidebar"] * {
-            color: #A0A0AB !important;
+            display: none !important;
         }
 
         /* Titres et labels */
@@ -64,10 +61,10 @@ def inject_custom_design():
             background: linear-gradient(135deg, #FF3B30 0%, #E02B20 100%) !important;
             color: #FFFFFF !important;
             font-weight: 700 !important;
-            font-size: 1rem !important;
+            font-size: 0.95rem !important;
             border: none !important;
-            border-radius: 14px !important;
-            padding: 14px 28px !important;
+            border-radius: 12px !important;
+            padding: 10px 20px !important;
             box-shadow: 0 6px 20px rgba(255, 59, 48, 0.35) !important;
             transition: all 0.2s ease-in-out !important;
             width: 100% !important;
@@ -78,7 +75,37 @@ def inject_custom_design():
             box-shadow: 0 8px 25px rgba(255, 59, 48, 0.5) !important;
         }
 
-        /* Cartes d'informations Zapio (Pilules & Badges) */
+        /* Navigation Horizontale TACTILE (Barre Supérieure) */
+        div[data-testid="stRadio"] > div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        div[data-testid="stRadio"] label {
+            background-color: #16161E !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 30px !important;
+            padding: 8px 18px !important;
+            margin: 0 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+        }
+
+        div[data-testid="stRadio"] label:has(input:checked) {
+            background-color: #FF3B30 !important;
+            border-color: #FF3B30 !important;
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4) !important;
+        }
+
+        div[data-testid="stRadio"] label span {
+            color: #FFFFFF !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Cartes d'informations Zapio */
         .zapio-card {
             background: #16161E;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -92,7 +119,7 @@ def inject_custom_design():
             border-color: rgba(255, 59, 48, 0.4);
         }
 
-        /* Pilules de statut (ex: Live, TV Player, etc.) */
+        /* Badges */
         .zapio-badge {
             display: inline-flex;
             align-items: center;
@@ -116,7 +143,7 @@ def inject_custom_design():
             font-weight: 600;
         }
 
-        /* Onglets (Tabs) Style Dark Red */
+        /* Onglets (Tabs) */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
             background-color: #121217;
