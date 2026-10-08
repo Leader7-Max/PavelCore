@@ -9,7 +9,7 @@ st.set_page_config(
     page_title="PavelCore — Dark Red Edition",
     page_icon="🔴",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 from assets.styles import inject_custom_design
@@ -55,28 +55,36 @@ if not st.session_state.authenticated:
                     st.error("Veuillez saisir votre clé d'accès.")
 
 # ----------------------------------------------------
-# 2. APPLICATION PRINCIPALE
+# 2. APPLICATION PRINCIPALE (Navigation Supérieure sans Sidebar)
 # ----------------------------------------------------
 else:
-    with st.sidebar:
+    # En-tête Supérieur
+    col_logo, col_logout = st.columns([3, 1])
+    
+    with col_logo:
         st.markdown("""
-            <h2 style="font-size: 1.8rem;">
+            <h2 style="font-size: 1.8rem; margin: 0; display: flex; align-items: center; gap: 10px;">
                 <span style="color: #FFF;">pavel</span><span style="background: #FF3B30; color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.2rem;">CORE</span>
+                <span class="zapio-badge-green" style="font-size: 0.75rem;">● Connecté</span>
             </h2>
         """, unsafe_allow_html=True)
-        st.markdown('<span class="zapio-badge-green">● Connecté</span>', unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        menu = st.radio(
-            "Navigation",
-            ["Dashboard", "Mes Prompts & Code", "Projets & Agenda", "Boîte à Idées", "Coffre-Fort Docs"],
-            index=0
-        )
         
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        if st.button("Déconnexion"):
+    with col_logout:
+        if st.button("Déconnexion", key="top_logout"):
             st.session_state.authenticated = False
             st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Navigation horizontale tactile
+    menu = st.radio(
+        "Navigation",
+        ["Dashboard", "Mes Prompts & Code", "Projets & Agenda", "Boîte à Idées", "Coffre-Fort Docs"],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+
+    st.markdown("<hr style='border-color: rgba(255,255,255,0.08); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
 
     # --- DASHBOARD ---
     if menu == "Dashboard":
