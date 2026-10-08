@@ -15,21 +15,20 @@ def inject_custom_design():
             background-color: #0B0B0E !important;
         }
 
-        /* SUPPRESSION DÉFINITIVE DE LA SIDEBAR ET DES FLÈCHES (<< / >>) */
+        /* Suppression de la sidebar et des flèches */
         [data-testid="stSidebarCollapseButton"], 
         [data-testid="collapsedControl"],
         [data-testid="stSidebar"] {
             display: none !important;
         }
 
-        /* Titres & Labels */
         h1, h2, h3, h4, label p {
             color: #FFFFFF !important;
             font-weight: 700 !important;
         }
 
-        /* Champs de Saisie (Inputs Zapio Style) */
-        div[data-baseweb="input"], div[data-baseweb="textarea"], select {
+        /* Champs de Saisie & Dropdowns */
+        div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] > div {
             background-color: #16161E !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             border-radius: 12px !important;
@@ -50,7 +49,7 @@ def inject_custom_design():
             display: none !important;
         }
 
-        /* Boutons Rouge Néon */
+        /* Boutons */
         .stButton > button {
             background: linear-gradient(135deg, #FF3B30 0%, #E02B20 100%) !important;
             color: #FFFFFF !important;
@@ -69,7 +68,7 @@ def inject_custom_design():
             box-shadow: 0 8px 25px rgba(255, 59, 48, 0.5) !important;
         }
 
-        /* Menu Tactile Supérieur */
+        /* Menu Horizontal Tactile */
         div[data-testid="stRadio"] > div {
             display: flex;
             flex-wrap: wrap;
@@ -83,7 +82,6 @@ def inject_custom_design():
             padding: 8px 16px !important;
             margin: 0 !important;
             cursor: pointer !important;
-            transition: all 0.2s ease !important;
         }
 
         div[data-testid="stRadio"] label:has(input:checked) {
@@ -130,30 +128,12 @@ def inject_custom_design():
             font-weight: 600;
         }
 
-        .code-box {
-            font-family: 'JetBrains Mono', monospace;
-            background: #0D0E15;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 12px;
-            color: #FF3B30;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-
-        /* Onglets Tabs */
+        /* Tabs */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
             background-color: #121217;
             padding: 6px;
             border-radius: 12px;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            border-radius: 8px;
-            color: #A0A0AB;
-            font-weight: 600;
         }
 
         .stTabs [aria-selected="true"] {
