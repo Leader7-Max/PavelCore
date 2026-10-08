@@ -1,6 +1,6 @@
 import streamlit as st
 
-def inject_custom_design(theme="dark"):
+def inject_custom_design(theme="light"):
     if theme == "light":
         # ==================== THÈME CLAIR / BLANC PUR ====================
         st.markdown("""
@@ -23,7 +23,7 @@ def inject_custom_design(theme="dark"):
                 font-weight: 700 !important;
             }
 
-            /* TABS CLAIR */
+            /* ONGLETED / TABS */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 8px !important;
                 background-color: #F1F5F9 !important;
@@ -54,7 +54,11 @@ def inject_custom_design(theme="dark"):
                 font-weight: 700 !important;
             }
 
-            /* INPUTS CLAIR */
+            .stTabs [data-baseweb="tab-highlight-title"] {
+                display: none !important;
+            }
+
+            /* INPUTS & FORM */
             div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] > div {
                 background-color: #F8FAFC !important;
                 border: 1px solid #CBD5E1 !important;
@@ -123,7 +127,7 @@ def inject_custom_design(theme="dark"):
                 font-weight: 700 !important;
             }
 
-            /* TABS SOMBRE (Correction visibilité) */
+            /* ONGLETED / TABS */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 8px !important;
                 background-color: #1A1D27 !important;
@@ -154,7 +158,11 @@ def inject_custom_design(theme="dark"):
                 font-weight: 700 !important;
             }
 
-            /* INPUTS SOMBRE */
+            .stTabs [data-baseweb="tab-highlight-title"] {
+                display: none !important;
+            }
+
+            /* INPUTS & FORM */
             div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] > div {
                 background-color: #1A1D27 !important;
                 border: 1px solid #2E3345 !important;
