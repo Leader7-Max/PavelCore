@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PavelCore - Snippet & Prompt Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-dark: #0D0E15;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --cyan-neon: #00F2FE;
+      --indigo-accent: #4F46E5;
+      --text-main: #E0E6ED;
+      --text-muted: #8E9BAE;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 15px;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(0, 242, 254, 0.3);
+    }
+
+    .header-title {
+      color: var(--cyan-neon);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .sub-title {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+
+    .badge {
+      background: rgba(0, 242, 254, 0.1);
+      color: var(--cyan-neon);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      display: inline-block;
+    }
+
+    .btn-neon {
+      background: linear-gradient(135deg, var(--indigo-accent) 0%, var(--cyan-neon) 100%);
+      color: #FFF;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-neon:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+    }
+
+    .code-box {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      color: #A5F3FC;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      position: relative;
+      margin: 10px 0;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--cyan-neon);
+      color: #000;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(24, 26, 38, 0.9);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      color: var(--text-main);
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--cyan-neon);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glass-card">
+    <div class="header-title">⚡ Snippets & Prompts Manager</div>
+    <div class="sub-title">Stockage et copie instantanée de vos ressources de code et prompts IA.</div>
+    
+    <input type="text" id="snippetTitle" class="input-field" placeholder="Titre du snippet ou prompt...">
+    <textarea id="snippetContent" class="input-field" rows="4" placeholder="Saisissez le code ou le prompt ici..."></textarea>
+    
+    <button class="btn-neon" onclick="addSnippet()"><i class="fa-solid fa-plus"></i> Enregistrer</button>
+  </div>
+
+  <div id="snippetsContainer"></div>
+
+  <script>
+    let snippets = JSON.parse(localStorage.getItem('pavelcore_snippets')) || [
+      {
+        id: 1,
+        title: "Prompt Midjourney - Cyberpunk Logo",
+        content: "Modern minimalist logo, vector style, neon cyan accent, dark background --ar 1:1"
+      }
+    ];
+
+    function saveAndRender() {
+      localStorage.setItem('pavelcore_snippets', JSON.stringify(snippets));
+      const container = document.getElementById('snippetsContainer');
+      container.innerHTML = '';
+
+      snippets.forEach(s => {
+        container.innerHTML += `
+          <div class="glass-card">
+            <div style="display:flex; justify-between; align-items:center;">
+              <span class="badge">Snippet</span>
+              <strong style="color: var(--cyan-neon); font-size: 1rem;">${s.title}</strong>
+            </div>
+            <div class="code-box">
+              <button class="copy-btn" onclick="copyText(\`${s.content.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copier</button>
+              ${s.content}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addSnippet() {
+      const title = document.getElementById('snippetTitle').value;
+      const content = document.getElementById('snippetContent').value;
+      if (!title || !content) return alert("Veuillez remplir les deux champs.");
+
+      snippets.unshift({ id: Date.now(), title, content });
+      document.getElementById('snippetTitle').value = '';
+      document.getElementById('snippetContent').value = '';
+      saveAndRender();
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      alert("Copié dans le presse-papier !");
+    }
+
+    saveAndRender();
+  </script>
+</body>
+</html>
