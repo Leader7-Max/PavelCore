@@ -5,15 +5,17 @@ def inject_custom_design():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-        /* Fond général de l'application : Anthracite Moderne au lieu du noir total */
+        /* Fond général : Dégradé sombre d'anthracite & bleu nuit moderne */
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #13141C !important;
+            background: linear-gradient(135deg, #181924 0%, #12131C 100%) !important;
+            background-attachment: fixed !important;
             color: #FFFFFF !important;
         }
 
         .stApp {
-            background-color: #13141C !important;
+            background: linear-gradient(135deg, #181924 0%, #12131C 100%) !important;
+            background-attachment: fixed !important;
         }
 
         /* Masquage de la Sidebar et des flèches */
@@ -28,13 +30,13 @@ def inject_custom_design():
             font-weight: 700 !important;
         }
 
-        /* Champs de saisie & Inputs avec fond adouci */
+        /* Champs de saisie & Inputs avec fond clair & bordures adoucies */
         div[data-baseweb="input"], 
         div[data-baseweb="textarea"], 
         div[data-baseweb="select"] > div,
         input, textarea {
-            background-color: #1D1E2A !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            background-color: #222433 !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
             border-radius: 12px !important;
             color: #FFFFFF !important;
         }
@@ -42,7 +44,7 @@ def inject_custom_design():
         div[data-baseweb="input"]:focus-within, 
         div[data-baseweb="textarea"]:focus-within {
             border-color: #FF3B30 !important;
-            box-shadow: 0 0 12px rgba(255, 59, 48, 0.35) !important;
+            box-shadow: 0 0 14px rgba(255, 59, 48, 0.4) !important;
         }
 
         div[data-baseweb="input"] input, 
@@ -83,12 +85,18 @@ def inject_custom_design():
         }
 
         div[data-testid="stRadio"] label {
-            background-color: #1D1E2A !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background-color: #222433 !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
             border-radius: 30px !important;
             padding: 8px 16px !important;
             margin: 0 !important;
             cursor: pointer !important;
+            transition: all 0.2s ease !important;
+        }
+
+        div[data-testid="stRadio"] label:hover {
+            border-color: rgba(255, 59, 48, 0.5) !important;
+            background-color: #2B2D40 !important;
         }
 
         div[data-testid="stRadio"] label:has(input:checked) {
@@ -103,23 +111,23 @@ def inject_custom_design():
             font-size: 0.85rem !important;
         }
 
-        /* Cartes & Encart d'information adoucis */
+        /* Cartes & Encart d'information adoucis avec relief */
         .zapio-card {
-            background: #1D1E2A;
+            background: #202230;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 20px;
+            padding: 22px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
 
         .zapio-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(255, 59, 48, 0.15);
-            color: #FF3B30;
-            border: 1px solid rgba(255, 59, 48, 0.3);
+            background: rgba(255, 59, 48, 0.18);
+            color: #FF5247;
+            border: 1px solid rgba(255, 59, 48, 0.35);
             padding: 4px 12px;
             border-radius: 30px;
             font-size: 0.8rem;
@@ -127,9 +135,9 @@ def inject_custom_design():
         }
 
         .zapio-badge-green {
-            background: rgba(48, 209, 88, 0.15);
-            color: #30D158;
-            border: 1px solid rgba(48, 209, 88, 0.3);
+            background: rgba(48, 209, 88, 0.18);
+            color: #34C759;
+            border: 1px solid rgba(48, 209, 88, 0.35);
             padding: 4px 12px;
             border-radius: 30px;
             font-size: 0.8rem;
@@ -139,7 +147,7 @@ def inject_custom_design():
         /* Onglets (Tabs) */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
-            background-color: #181923;
+            background-color: #1C1D2B;
             padding: 6px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.08);
