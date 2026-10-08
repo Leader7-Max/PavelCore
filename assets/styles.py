@@ -23,7 +23,7 @@ def inject_custom_design(theme="light"):
                 font-weight: 700 !important;
             }
 
-            /* ONGLETED / TABS */
+            /* TABS */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 8px !important;
                 background-color: #F1F5F9 !important;
@@ -95,7 +95,7 @@ def inject_custom_design(theme="light"):
                 width: 100% !important;
             }
 
-            .zapio-card {
+            .pavel-card {
                 background-color: #FFFFFF !important;
                 border: 1px solid #E2E8F0 !important;
                 border-radius: 14px;
@@ -127,7 +127,7 @@ def inject_custom_design(theme="light"):
                 font-weight: 700 !important;
             }
 
-            /* ONGLETED / TABS */
+            /* TABS */
             .stTabs [data-baseweb="tab-list"] {
                 gap: 8px !important;
                 background-color: #1A1D27 !important;
@@ -195,15 +195,4 @@ def inject_custom_design(theme="light"):
                 font-weight: 700 !important;
                 border: none !important;
                 border-radius: 10px !important;
-                padding: 10px 20px !important;
-                width: 100% !important;
-            }
-
-            .zapio-card {
-                background-color: #181B24 !important;
-                border: 1px solid #2A2E3D !important;
-                border-radius: 14px;
-                padding: 22px;
-            }
-            </style>
-        """, unsafe_allow_html=True)
+                padding: 10
