@@ -1,6 +1,0 @@
-[theme]
-primaryColor = "#00F2FE"            # Cyan lumineux / Neon
-backgroundColor = "#0D0E15"         # Noir / Bleu nuit profond
-secondaryBackgroundColor = "#181A26" # Arrière-plan des cartes / sidebar
-textColor = "#E0E6ED"               # Texte clair très lisible
-font = "sans serif"
