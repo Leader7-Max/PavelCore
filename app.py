@@ -1,6 +1,13 @@
+import sys
+import os
+
+# Forcer Python à inclure le dossier racine du projet pour les imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import streamlit as st
 from assets.styles import inject_custom_design
 
+# Configuration de la page
 st.set_page_config(
     page_title="PavelCore — Coffre-Fort & Workspace",
     page_icon="🔒",
@@ -8,8 +15,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Injection du thème et des styles
 inject_custom_design()
 
+# État de session
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
@@ -33,7 +42,7 @@ if not st.session_state.authenticated:
             # Email lisible
             email = st.text_input("Adresse Email", placeholder="exemple@domaine.com")
             
-            # Mot de passe masqué
+            # Clé masquée
             master_key = st.text_input("Clé Maîtresse / PIN", type="password", placeholder="••••••••")
             
             submit = st.form_submit_button("Déverrouiller le Coffre", use_container_width=True)
