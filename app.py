@@ -1,7 +1,8 @@
 import streamlit as st
+import os
 from assets.styles import inject_custom_design
 
-# Configuration de la page
+# 1. Configuration de la page Streamlit
 st.set_page_config(
     page_title="PavelCore — Coffre-Fort & Workspace",
     page_icon="🔒",
@@ -9,15 +10,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Injection du design CSS Ultra Premium
+# 2. Injection du design CSS Ultra Premium avec les correctifs mobile
 inject_custom_design()
 
-# Gestion de la session
+# 3. Gestion de l'état de la session (Authentification)
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 # ----------------------------------------------------
-# ECRAN DE CONNEXION / ACCÈS SÉCURISÉ
+# ÉCRAN DE CONNEXION / AUTHENTIFICATION
 # ----------------------------------------------------
 if not st.session_state.authenticated:
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -35,7 +36,7 @@ if not st.session_state.authenticated:
         with st.form("login_form"):
             st.subheader("Authentification")
             
-            # Saisie de l'email MASQUÉE dans la barre pour des raisons de confidentialité
+            # Saisie de l'email MASQUÉE dans la barre
             email = st.text_input("Adresse Email", type="password", placeholder="••••••••••••••••")
             
             # Mot de passe / Code Master
@@ -44,16 +45,16 @@ if not st.session_state.authenticated:
             submit = st.form_submit_button("Déverrouiller le Coffre", use_container_width=True)
 
             if submit:
-                # Logique de vérification (à coupler avec votre base de données)
+                # Logique de vérification
                 if master_key != "":
                     st.session_state.authenticated = True
                     st.success("Accès accordé.")
                     st.rerun()
                 else:
-                    st.error("Identifiants incorrects.")
+                    st.error("Veuillez saisir votre clé d'accès.")
 
 # ----------------------------------------------------
-# APPLICATION PRINCIPALE (Abonnement / Coffre)
+# APPLICATION PRINCIPALE (Navigation)
 # ----------------------------------------------------
 else:
     # Sidebar de navigation
@@ -65,7 +66,7 @@ else:
         menu = st.radio(
             "Navigation",
             ["Dashboard", "Mes Prompts & Code", "Projets & Agenda", "Boîte à Idées", "Coffre-Fort Docs"],
-            index=0
+            index=1  # Sélectionne "Mes Prompts & Code" par défaut
         )
         
         st.markdown("<br><br><br>", unsafe_allow_html=True)
@@ -73,11 +74,9 @@ else:
             st.session_state.authenticated = False
             st.rerun()
 
-    # Contenu principal
-    st.markdown(f"## 🚀 {menu}")
-    
+    # Router vers les différents modules
     if menu == "Dashboard":
-        # Cartes statistiques stylisées
+        st.markdown("## 🚀 Dashboard")
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown("""
@@ -105,15 +104,17 @@ else:
             """, unsafe_allow_html=True)
 
     elif menu == "Mes Prompts & Code":
-        st.markdown("""
-            <div class="glass-card">
-                <h3>Ajouter un nouveau Snippet / Prompt</h3>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        title = st.text_input("Titre du prompt ou code")
-        language = st.selectbox("Langage / Catégorie", ["Python", "JavaScript", "SQL", "Prompt Midjourney", "Prompt LLM"])
-        code_content = st.text_area("Contenu du Code / Prompt", height=180)
-        
-        if st.button("Enregistrer au Coffre"):
-            st.toast("Snippet sauvegardé avec succès !", icon="🔐")
+        from modules.prompts import render_prompts_module
+        render_prompts_module()
+
+    elif menu == "Projets & Agenda":
+        st.markdown("## 📅 Projets & Agenda")
+        st.info("Module Projets & Agenda en cours de configuration.")
+
+    elif menu == "Boîte à Idées":
+        st.markdown("## 💡 Boîte à Idées")
+        st.info("Module Boîte à Idées en cours de configuration.")
+
+    elif menu == "Coffre-Fort Docs":
+        st.markdown("## 🔐 Coffre-Fort Documents & Contacts")
+        st.info("Module Coffre-Fort en cours de configuration.")
