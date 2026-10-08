@@ -195,4 +195,15 @@ def inject_custom_design(theme="light"):
                 font-weight: 700 !important;
                 border: none !important;
                 border-radius: 10px !important;
-                padding: 10
+                padding: 10px 20px !important;
+                width: 100% !important;
+            }
+
+            .pavel-card {
+                background-color: #181B24 !important;
+                border: 1px solid #2A2E3D !important;
+                border-radius: 14px;
+                padding: 22px;
+            }
+            </style>
+        """, unsafe_allow_html=True)
