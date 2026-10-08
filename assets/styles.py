@@ -15,7 +15,7 @@ def inject_custom_design():
             background-color: #0B0B0E !important;
         }
 
-        /* Suppression de la sidebar et des flèches */
+        /* Masquage de la Sidebar et des flèches */
         [data-testid="stSidebarCollapseButton"], 
         [data-testid="collapsedControl"],
         [data-testid="stSidebar"] {
@@ -27,29 +27,35 @@ def inject_custom_design():
             font-weight: 700 !important;
         }
 
-        /* Champs de Saisie & Dropdowns */
-        div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] > div {
+        /* CORRECTION FOND DES INPUTS ET ZONES DE TEXTE (SOMBRE ET LISIBLE) */
+        div[data-baseweb="input"], 
+        div[data-baseweb="textarea"], 
+        div[data-baseweb="select"] > div,
+        input, textarea {
             background-color: #16161E !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
             border-radius: 12px !important;
             color: #FFFFFF !important;
         }
 
-        div[data-baseweb="input"]:focus-within, div[data-baseweb="textarea"]:focus-within {
+        div[data-baseweb="input"]:focus-within, 
+        div[data-baseweb="textarea"]:focus-within {
             border-color: #FF3B30 !important;
             box-shadow: 0 0 12px rgba(255, 59, 48, 0.3) !important;
         }
 
-        div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
+        div[data-baseweb="input"] input, 
+        div[data-baseweb="textarea"] textarea {
             color: #FFFFFF !important;
             font-size: 0.95rem !important;
+            background-color: transparent !important;
         }
 
         [data-testid="InputInstructions"] {
             display: none !important;
         }
 
-        /* Boutons */
+        /* Boutons Rouge Néon */
         .stButton > button {
             background: linear-gradient(135deg, #FF3B30 0%, #E02B20 100%) !important;
             color: #FFFFFF !important;
@@ -68,7 +74,7 @@ def inject_custom_design():
             box-shadow: 0 8px 25px rgba(255, 59, 48, 0.5) !important;
         }
 
-        /* Menu Horizontal Tactile */
+        /* Navigation Horizontale Tactile */
         div[data-testid="stRadio"] > div {
             display: flex;
             flex-wrap: wrap;
