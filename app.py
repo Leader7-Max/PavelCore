@@ -88,9 +88,6 @@ MONTH_NAMES_FR = [
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-if "direct_agenda" not in st.session_state:
-    st.session_state.direct_agenda = False
-
 if "agenda_active_tab" not in st.session_state:
     st.session_state.agenda_active_tab = "vue"
 
@@ -147,26 +144,6 @@ def sync_offline():
 
 # Fonction d'affichage du calendrier dynamique
 def render_agenda_module():
-    # Barre supérieure avec bouton de retour
-    col_header, col_back = st.columns([3, 1])
-    with col_header:
-        st.markdown(
-            '<h1 style="font-size: 1.8rem; margin: 0; display: flex; align-items: center; gap: 8px;">'
-            '<span style="color: #FFF;">pavel</span>'
-            '<span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.2rem;">CORE</span>'
-            '<span class="zapio-badge-green" style="font-size: 0.75rem;">● Agenda Offline</span>'
-            '</h1>', 
-            unsafe_allow_html=True
-        )
-    with col_back:
-        btn_label = "🔒 Déconnexion" if st.session_state.authenticated else "🔒 Connexion Workspace"
-        if st.button(btn_label, key="back_to_login", use_container_width=True, type="secondary"):
-            st.session_state.direct_agenda = False
-            st.session_state.authenticated = False
-            st.query_params.clear()
-            st.rerun()
-
-    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
     st.markdown('<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
 
     col_btn1, col_btn2, col_clear = st.columns([2.3, 2.5, 2])
