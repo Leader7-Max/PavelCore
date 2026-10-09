@@ -1,6 +1,8 @@
 import sys
 import os
 import re
+import calendar
+import json
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, time
@@ -19,6 +21,32 @@ st.set_page_config(
 
 from assets.styles import inject_custom_design
 inject_custom_design()
+
+# Injector PWA Service Worker & LocalStorage Sync (Mode Hors-Ligne)
+pwa_offline_script = """
+<script>
+// Enregistrement du Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('ServiceWorker Offline PavelCore actif:', reg.scope);
+        }).catch(function(err) {
+            console.log('Erreur SW:', err);
+        });
+    });
+}
+
+// Synchronisation des évènements dans le LocalStorage du navigateur
+function syncAgendaToOfflineStorage(eventsData) {
+    try {
+        localStorage.setItem('pavelcore_offline_agenda', JSON.stringify(eventsData));
+    } catch(e) {
+        console.error('Erreur LocalStorage', e);
+    }
+}
+</script>
+"""
+components.html(pwa_offline_script, height=0, width=0)
 
 # Détecteur automatique de langage
 def detect_language(code):
@@ -56,6 +84,11 @@ LANG_MAP = {
     "JSON / Config": "json"
 }
 
+MONTH_NAMES_FR = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+]
+
 # Global State
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -63,7 +96,6 @@ if "authenticated" not in st.session_state:
 if "agenda_active_tab" not in st.session_state:
     st.session_state.agenda_active_tab = "vue"
 
-# Vider les événements par défaut
 if "agenda_events" not in st.session_state:
     st.session_state.agenda_events = []
 
@@ -101,6 +133,22 @@ if "saved_user_credentials" not in st.session_state:
     st.session_state.saved_user_credentials = []
 
 
+# Synchro JS des événements pour le mode hors-ligne à chaque modification
+def sync_offline():
+    serializable_events = [
+        {
+            "title": e["title"],
+            "date": e["date"].strftime("%Y-%m-%d"),
+            "time": e["time"].strftime("%H:%M"),
+            "category": e["category"],
+            "desc": e["desc"],
+            "ringtone": e["ringtone"]
+        } for e in st.session_state.agenda_events
+    ]
+    js_sync = f"<script>syncAgendaToOfflineStorage({json.dumps(serializable_events)});</script>"
+    components.html(js_sync, height=0, width=0)
+
+
 # ----------------------------------------------------
 # 1. AUTHENTIFICATION
 # ----------------------------------------------------
@@ -129,7 +177,7 @@ else:
     col_logo, col_logout = st.columns([3, 1])
     
     with col_logo:
-        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Connecté</span></h1>', unsafe_allow_html=True)
+        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Connecté / Offline Ready</span></h1>', unsafe_allow_html=True)
         
     with col_logout:
         if st.button("Déconnexion", key="top_logout"):
@@ -161,7 +209,7 @@ else:
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
 
     # ====================================================
-    # 📆 AGENDA PREMIUM (Grille Mensuelle Interactive Pro)
+    # 📆 AGENDA PREMIUM (DYNAMIQUE + OPTIMISÉ HORS-LIGNE)
     # ====================================================
     if menu == "📆 Agenda Premium":
         st.markdown('<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 DESIGN CALENDAR TEMPLATE</span><h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
@@ -194,24 +242,34 @@ else:
             if st.session_state.agenda_events:
                 if st.button("🗑️ Vider tout l'agenda", key="clear_all_events"):
                     st.session_state.agenda_events = []
+                    sync_offline()
                     st.rerun()
 
         st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
 
         # ----------------------------------------------------
-        # ONGLET 1 : VUE CALENDRIER MENSUEL
+        # ONGLET 1 : VUE CALENDRIER MENSUEL AUTOMATIQUE
         # ----------------------------------------------------
         if st.session_state.agenda_active_tab == "vue":
-            col_m1, col_m2, col_m3 = st.columns([1, 2, 1])
-            with col_m2:
-                selected_month = st.selectbox(
+            today = date.today()
+            
+            col_m1, col_m2 = st.columns(2)
+            with col_m1:
+                selected_month_idx = st.selectbox(
                     "Mois",
-                    ["Octobre 2026", "Novembre 2026", "Décembre 2026"],
-                    index=0,
-                    label_visibility="collapsed"
+                    range(1, 13),
+                    format_func=lambda x: MONTH_NAMES_FR[x-1],
+                    index=today.month - 1
+                )
+            with col_m2:
+                selected_year = st.selectbox(
+                    "Année",
+                    range(2025, 2031),
+                    index=range(2025, 2031).index(today.year) if today.year in range(2025, 2031) else 1
                 )
 
-            # Entête des jours de la semaine
+            st.markdown("<div style='margin-bottom:15px;'></div>", unsafe_allow_html=True)
+
             days_header = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
             cols_h = st.columns(7)
             for idx, h in enumerate(days_header):
@@ -219,29 +277,25 @@ else:
 
             st.markdown("<div style='margin-bottom:8px;'></div>", unsafe_allow_html=True)
 
-            # Événements du mois (Octobre 2026)
             events_by_day = {}
             for ev in st.session_state.agenda_events:
-                if ev['date'].month == 10 and ev['date'].year == 2026:
+                if ev['date'].month == selected_month_idx and ev['date'].year == selected_year:
                     day_num = ev['date'].day
                     if day_num not in events_by_day:
                         events_by_day[day_num] = []
                     events_by_day[day_num].append(ev)
 
-            start_day_offset = 3 
-            total_days = 31
-            current_day = 1
+            cal = calendar.Calendar(firstweekday=0)
+            month_days = cal.monthdayscalendar(selected_year, selected_month_idx)
 
-            for week in range(5):
+            for week in month_days:
                 cols_w = st.columns(7)
-                for day_idx in range(7):
-                    if week == 0 and day_idx < start_day_offset:
-                        cols_w[day_idx].markdown('<div style="background:rgba(20,9,35,0.4); border:1px solid #261245; border-radius:12px; min-height:85px; padding:6px; opacity:0.3;"></div>', unsafe_allow_html=True)
-                    elif current_day > total_days:
+                for day_idx, day_num in enumerate(week):
+                    if day_num == 0:
                         cols_w[day_idx].markdown('<div style="background:rgba(20,9,35,0.4); border:1px solid #261245; border-radius:12px; min-height:85px; padding:6px; opacity:0.3;"></div>', unsafe_allow_html=True)
                     else:
-                        is_today = (current_day == 9)
-                        day_events = events_by_day.get(current_day, [])
+                        is_today = (day_num == today.day and selected_month_idx == today.month and selected_year == today.year)
+                        day_events = events_by_day.get(day_num, [])
                         
                         border_color = "#EC4899" if is_today else "#5B21B6"
                         bg_color = "linear-gradient(135deg, #3B1578 0%, #261245 100%)" if is_today else "#1E0A3C"
@@ -259,27 +313,29 @@ else:
 
                         day_marker = '📌' if is_today else ''
                         day_color = '#EC4899' if is_today else '#FFF'
-                        cols_w[day_idx].markdown(f'<div style="background:{bg_color}; border:1px solid {border_color}; border-radius:12px; min-height:85px; max-height:115px; padding:6px; overflow:hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:800; font-size:0.85rem; color:{day_color};">{current_day} {day_marker}</span></div>{event_html}</div>', unsafe_allow_html=True)
-                        
-                        current_day += 1
+                        cols_w[day_idx].markdown(f'<div style="background:{bg_color}; border:1px solid {border_color}; border-radius:12px; min-height:85px; max-height:115px; padding:6px; overflow:hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:800; font-size:0.85rem; color:{day_color};">{day_num} {day_marker}</span></div>{event_html}</div>', unsafe_allow_html=True)
 
             st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0 15px 0;'>", unsafe_allow_html=True)
 
-            st.subheader("📋 Liste chronologique des événements")
-            if st.session_state.agenda_events:
-                sorted_events = sorted(st.session_state.agenda_events, key=lambda x: (x['date'], x['time']))
+            st.subheader(f"📋 Liste chronologique des événements ({MONTH_NAMES_FR[selected_month_idx-1]} {selected_year})")
+            
+            month_events = [ev for ev in st.session_state.agenda_events if ev['date'].month == selected_month_idx and ev['date'].year == selected_year]
+            
+            if month_events:
+                sorted_events = sorted(month_events, key=lambda x: (x['date'], x['time']))
                 for idx, ev in enumerate(sorted_events):
                     desc_text = ev['desc'] if ev['desc'] else '<i>Aucune note fournie</i>'
                     
                     c_card, c_del = st.columns([5, 1])
                     with c_card:
-                        st.markdown(f'<div class="calendar-event-card"><div class="calendar-date-box"><span style="font-size: 0.75rem; text-transform: uppercase;">{ev["date"].strftime("%b").upper()}</span><span style="font-size: 1.5rem; line-height: 1;">{ev["date"].strftime("%d")}</span><span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev["time"].strftime("%H:%M")}</span></div><div style="flex-grow: 1;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev["title"]}</h3><span class="zapio-badge">{ev["category"]}</span></div><p style="color:#CBD5E1; margin: 6px 0; font-size: 0.85rem;">{desc_text}</p><div style="font-size: 0.8rem; color: #A78BFA;">🔔 Notification : <b style="color:#FFF;">{ev["ringtone"]}</b></div></div></div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="calendar-event-card"><div class="calendar-date-box"><span style="font-size: 0.75rem; text-transform: uppercase;">{MONTH_NAMES_FR[ev["date"].month-1][:3].upper()}</span><span style="font-size: 1.5rem; line-height: 1;">{ev["date"].strftime("%d")}</span><span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev["time"].strftime("%H:%M")}</span></div><div style="flex-grow: 1;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev["title"]}</h3><span class="zapio-badge">{ev["category"]}</span></div><p style="color:#CBD5E1; margin: 6px 0; font-size: 0.85rem;">{desc_text}</p><div style="font-size: 0.8rem; color: #A78BFA;">🔔 Notification : <b style="color:#FFF;">{ev["ringtone"]}</b></div></div></div>', unsafe_allow_html=True)
                     with c_del:
                         if st.button("🗑️ Supprimer", key=f"del_ev_{idx}"):
                             st.session_state.agenda_events.remove(ev)
+                            sync_offline()
                             st.rerun()
             else:
-                st.info("Aucun événement dans l'agenda.")
+                st.info(f"Aucun événement enregistré pour {MONTH_NAMES_FR[selected_month_idx-1]} {selected_year}.")
 
         # ----------------------------------------------------
         # ONGLET 2 : PROGRAMMER UN ÉVÉNEMENT
@@ -287,7 +343,7 @@ else:
         elif st.session_state.agenda_active_tab == "add":
             with st.form("add_event_form"):
                 st.subheader("Planifier une nouvelle date")
-                title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Concert / Réunion PavelCore")
+                title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Prestation DJ / Réunion PavelCore")
                 
                 c_date, c_time = st.columns(2)
                 with c_date:
@@ -309,8 +365,9 @@ else:
                             "title": title, "date": event_date, "time": event_time,
                             "category": category, "desc": desc, "ringtone": ringtone
                         })
+                        sync_offline()
                         st.session_state.agenda_active_tab = "vue"
-                        st.success("Événement ajouté sur le calendrier !")
+                        st.success("Événement ajouté au calendrier et synchronisé hors-ligne !")
                         st.rerun()
 
     # ====================================================
