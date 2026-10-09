@@ -21,53 +21,31 @@ def inject_custom_design():
             font-weight: 700 !important;
         }
 
-        /* ====================================================
-           🔥 NAVIGATION EN DEFILEMENT HORIZONTAL (SWIPE / TABS)
-           ==================================================== */
-        
-        /* Transformer les onglets Streamlit en carrousel mobile */
-        div[data-baseweb="tab-list"] {
-            display: flex !important;
-            flex-direction: row !important;
-            overflow-x: auto !important;
-            scroll-behavior: smooth !important;
-            -webkit-overflow-scrolling: touch !important;
-            gap: 10px !important;
-            padding: 10px 5px !important;
-            border-bottom: 1px solid rgba(236, 72, 153, 0.2) !important;
+        /* Champs de Saisie Lisibles */
+        div[data-baseweb="input"] input, 
+        div[data-baseweb="textarea"] textarea,
+        .stTextInput input, 
+        .stTextArea textarea {
+            color: #1A0B2E !important;
+            background-color: #FFFFFF !important;
+            border: 2px solid #D8B4FE !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
         }
 
-        /* Masquer la barre de défilement tout en gardant le swipe */
-        div[data-baseweb="tab-list"]::-webkit-scrollbar {
-            display: none !important;
-        }
-
-        /* Style de chaque carte/pilule de menu */
-        button[data-baseweb="tab"] {
-            background: linear-gradient(135deg, #2D1452 0%, #1E0A3C 100%) !important;
-            border: 1px solid #5B21B6 !important;
-            border-radius: 50px !important;
-            padding: 10px 20px !important;
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            white-space: nowrap !important;
-            flex-shrink: 0 !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        /* Onglet sélectionné (Actif) */
-        button[aria-selected="true"] {
-            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-            border-color: #F472B6 !important;
-            box-shadow: 0 0 18px rgba(236, 72, 153, 0.7) !important;
-            transform: scale(1.03) !important;
+        div[data-baseweb="select"] > div {
+            background-color: #FFFFFF !important;
+            color: #1A0B2E !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
         }
 
         /* ====================================================
            🔥 FORÇAGE RESPONSIVE MOBILE POUR LA GRILLE 7 JOURS
            ==================================================== */
         
+        /* Garder 7 colonnes en ligne même sur mobile */
         div[data-testid="stHorizontalBlock"]:has(.calendar-day-box),
         div[data-testid="stHorizontalBlock"]:has(.calendar-header-box) {
             display: flex !important;
@@ -119,6 +97,72 @@ def inject_custom_design():
             .calendar-day-number {
                 font-size: 0.75rem !important;
             }
+        }
+
+        /* ====================================================
+           🔥 STYLES DES BOUTONS DE NAVIGATION EN PILULES 3D
+           ==================================================== */
+
+        button[kind="primary"] {
+            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            border: 2px solid #F472B6 !important;
+            border-radius: 50px !important;
+            padding: 12px 24px !important;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.7), 0 6px 15px rgba(0,0,0,0.4) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        button[kind="secondary"] {
+            background: linear-gradient(135deg, #2D1452 0%, #1E0A3C 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            border: 2px solid #5B21B6 !important;
+            border-radius: 50px !important;
+            padding: 12px 24px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        button[kind="primary"] p, button[kind="secondary"] p,
+        button[kind="primary"] span, button[kind="secondary"] span {
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+        }
+
+        button[kind="secondary"]:hover {
+            background: linear-gradient(135deg, #4C1D95 0%, #31105E 100%) !important;
+            border-color: #EC4899 !important;
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 8px 22px rgba(236, 72, 153, 0.45) !important;
+        }
+
+        button[kind="primary"]:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.9) !important;
+        }
+
+        div[data-testid="stFormSubmitButton"] > button {
+            background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 1rem !important;
+            border: none !important;
+            border-radius: 14px !important;
+            padding: 14px 24px !important;
+            width: 100% !important;
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        div[data-testid="stFormSubmitButton"] > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6) !important;
         }
 
         .zapio-card {
