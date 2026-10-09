@@ -84,7 +84,7 @@ MONTH_NAMES_FR = [
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
 ]
 
-# Liste des pages du livre avec leurs icônes et titres
+# Liste exacte des pages du livre
 BOOK_PAGES = [
     ("📆 Agenda Premium", "Agenda & Calendrier Interactif"),
     ("🤖 Prompts AI Code", "Mes Prompts AI Code"),
@@ -110,7 +110,6 @@ if "direct_agenda" not in st.session_state:
 if "agenda_active_tab" not in st.session_state:
     st.session_state.agenda_active_tab = "vue"
 
-# Index de la page courante du livre (0 à 11)
 if "book_page_index" not in st.session_state:
     st.session_state.book_page_index = 0
 
@@ -167,6 +166,25 @@ def sync_offline():
 
 # Fonction d'affichage du calendrier dynamique
 def render_agenda_module():
+    col_header, col_back = st.columns([3, 1])
+    with col_header:
+        st.markdown(
+            '<h1 style="font-size: 1.8rem; margin: 0; display: flex; align-items: center; gap: 8px;">'
+            '<span style="color: #FFF;">pavel</span>'
+            '<span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.2rem;">CORE</span>'
+            '<span class="zapio-badge-green" style="font-size: 0.75rem;">● Agenda Offline</span>'
+            '</h1>', 
+            unsafe_allow_html=True
+        )
+    with col_back:
+        btn_label = "🔒 Déconnexion" if st.session_state.authenticated else "🔒 Connexion Workspace"
+        if st.button(btn_label, key="back_to_login", use_container_width=True, type="secondary"):
+            st.session_state.direct_agenda = False
+            st.session_state.authenticated = False
+            st.query_params.clear()
+            st.rerun()
+
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
     st.markdown('<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
 
     col_btn1, col_btn2, col_clear = st.columns([2.3, 2.5, 2])
@@ -202,6 +220,7 @@ def render_agenda_module():
 
     st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
 
+    # VUE CALENDRIER MENSUEL MULTI-ANNÉES AUTOMATIQUE
     if st.session_state.agenda_active_tab == "vue":
         today = date.today()
         current_year = today.year
@@ -300,6 +319,7 @@ def render_agenda_module():
         else:
             st.info(f"Aucun événement enregistré pour {MONTH_NAMES_FR[selected_month_idx-1]} {selected_year}.")
 
+    # PROGRAMMER UN ÉVÉNEMENT
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form"):
             st.subheader("Planifier une nouvelle date")
@@ -362,7 +382,6 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # EN-TÊTE DU LIVRE NUMÉRIQUE
     col_logo, col_logout = st.columns([3, 1])
     
     with col_logo:
@@ -381,19 +400,17 @@ else:
     total_pages = len(BOOK_PAGES)
     current_page_title, current_page_header = BOOK_PAGES[curr_idx]
 
-    # Contrôles de tour de page (Précédent / Sélecteur / Suivant)
     col_prev, col_sel, col_next = st.columns([1.5, 3.5, 1.5])
 
     with col_prev:
-        if st.button("◀️ Page Précédente", use_container_width=True):
+        if st.button("◀️ Précédent", use_container_width=True):
             if st.session_state.book_page_index > 0:
                 st.session_state.book_page_index -= 1
             else:
-                st.session_state.book_page_index = total_pages - 1 # Boucle sur la dernière
+                st.session_state.book_page_index = total_pages - 1
             st.rerun()
 
     with col_sel:
-        # Sélecteur direct de page façon index de livre
         selected_book_page = st.selectbox(
             "Navigation Livre",
             options=range(total_pages),
@@ -406,14 +423,13 @@ else:
             st.rerun()
 
     with col_next:
-        if st.button("Page Suivante ▶️", use_container_width=True):
+        if st.button("Suivant ▶️", use_container_width=True):
             if st.session_state.book_page_index < total_pages - 1:
                 st.session_state.book_page_index += 1
             else:
-                st.session_state.book_page_index = 0 # Boucle sur la première
+                st.session_state.book_page_index = 0
             st.rerun()
 
-    # Indicateur de reliure / page active stylisé
     st.markdown(
         f'<div style="text-align: center; margin: 15px 0; padding: 8px; background: rgba(45,20,82,0.6); border: 1px solid #7C3AED; border-radius: 12px;">'
         f'<span style="color: #F472B6; font-weight: 800; font-size: 0.95rem;">📖 Page {curr_idx + 1} sur {total_pages} — {current_page_title}</span>'
@@ -423,7 +439,7 @@ else:
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.3); margin: 10px 0 20px 0;'>", unsafe_allow_html=True)
 
-    # AFFICHAGE DE LA PAGE COURANTE DU LIVRE
+    # AFFICHAGE DE LA PAGE ACTIVE DU LIVRE
     if curr_idx == 0:
         render_agenda_module()
 
@@ -488,4 +504,153 @@ else:
                     if final_lang == "auto":
                         final_lang = detect_language(code_content)
                     st.session_state.saved_code_snippets.append({
-                        "title": title, "type_label": selected_lang, "type": final_lang, "
+                        "title": title, "type_label": selected_lang, "type": final_lang, "code": code_content, "note": usage_note
+                    })
+                    st.rerun()
+
+        for cd in st.session_state.saved_code_snippets:
+            type_lbl = cd.get('type_label', cd['type'].upper())
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><h3 style="margin:0; color:#FFF;">{cd["title"]}</h3><span class="zapio-badge">{type_lbl}</span></div><p style="color:#CBD5E1; font-size:0.8rem; margin:2px 0;">{cd["note"]}</p>', unsafe_allow_html=True)
+            st.code(cd['code'], language=cd['type'])
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    elif curr_idx == 4:
+        st.subheader("🎨 Mes Prompts d'Images")
+        with st.form("form_img_prompt"):
+            title = st.text_input("Titre / Concept Visuel")
+            generator = st.selectbox("Générateur", ["Midjourney v6", "DALL-E 3", "Flux.1", "Stable Diffusion"])
+            prompt_text = st.text_area("Prompt complet", height=120)
+            aspect_ratio = st.selectbox("Format d'image", ["1:1 (Carré)", "16:9 (Ecran)", "9:16 (Story/Kakemono)", "4:5 (Instagram)"])
+            negative_prompt = st.text_input("Prompt négatif")
+            if st.form_submit_button("Enregistrer"):
+                if title and prompt_text:
+                    st.session_state.saved_image_prompts.append({
+                        "title": title, "gen": generator, "prompt": prompt_text, "ar": aspect_ratio, "neg": negative_prompt
+                    })
+                    st.rerun()
+
+        for img in st.session_state.saved_image_prompts:
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#EC4899;">{img["title"]}</h3><span class="zapio-badge">{img["gen"]}</span></div>', unsafe_allow_html=True)
+            st.code(img['prompt'], language="text")
+            st.markdown(f'<div style="font-size:0.8rem; color:#A78BFA;">Format: <b>{img["ar"]}</b> | Exclure: <b>{img["neg"]}</b></div></div>', unsafe_allow_html=True)
+
+    elif curr_idx == 5:
+        st.subheader("💡 Boîte à Idées")
+        with st.form("form_ideas"):
+            title = st.text_input("Titre de l'idée")
+            category = st.selectbox("Domaine", ["Business & E-commerce", "Développement Web & App", "Événementiel & DJ", "Personnel"])
+            description = st.text_area("Description de l'idée", height=120)
+            impact = st.select_slider("Niveau d'impact", options=["Faible", "Moyen", "Fort", "Révolutionnaire !"])
+            if st.form_submit_button("Sauvegarder"):
+                if title:
+                    st.session_state.saved_ideas.append({"title": title, "cat": category, "desc": description, "impact": impact})
+                    st.rerun()
+
+        for id_item in st.session_state.saved_ideas:
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{id_item["title"]}</h3><span class="zapio-badge">{id_item["cat"]}</span></div><p style="color:#CBD5E1; margin-top:10px;">{id_item["desc"]}</p><span class="zapio-badge-green">Impact: {id_item["impact"]}</span></div>', unsafe_allow_html=True)
+
+    elif curr_idx == 6:
+        st.subheader("🚀 Suivi des Projets Actifs")
+        with st.form("form_curr_proj"):
+            name = st.text_input("Nom du projet")
+            client = st.text_input("Client / Marque")
+            priority = st.selectbox("Priorité / Urgence", ["🔴 Haute / Urgente", "🟠 Moyenne", "🟢 Basse"])
+            next_step = st.text_input("Prochaine étape")
+            deadline = st.date_input("Date limite")
+            project_desc = st.text_area("Description / Notes détaillées du projet", height=120)
+            if st.form_submit_button("Enregistrer le Projet"):
+                if name:
+                    st.session_state.saved_current_projects.append({
+                        "name": name, "client": client, "priority": priority, "next": next_step, "deadline": str(deadline), "desc": project_desc
+                    })
+                    st.rerun()
+
+        for cp in st.session_state.saved_current_projects:
+            priority_val = cp.get('priority', '🔴 Haute')
+            desc_val = cp.get('desc', '')
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#EC4899;">{cp["name"]}</h3><div><span class="zapio-badge" style="margin-right:8px;">{priority_val}</span><span style="color:#FFF; font-size:0.9rem;">Client: <b>{cp["client"]}</b></span></div></div><p style="margin:12px 0 8px 0; color:#E2E8F0;">{desc_val}</p><div style="font-size:0.85rem; color:#A78BFA; display:flex; gap:20px; margin-top:8px;"><span>🎯 Prochaine étape : <b style="color:#FFF;">{cp["next"]}</b></span><span>⏰ Échéance : <b style="color:#FFF;">{cp["deadline"]}</b></span></div></div>', unsafe_allow_html=True)
+
+    elif curr_idx == 7:
+        st.subheader("🔮 Projets Futurs")
+        with st.form("form_fut_proj"):
+            name = st.text_input("Nom du projet futur")
+            horizon = st.selectbox("Horizon", ["Court terme (1-3 mois)", "Moyen terme (6 mois)", "Long terme (1 an et +)"])
+            resources = st.text_area("Ressources requises", height=100)
+            goal = st.text_input("Objectif principal")
+            if st.form_submit_button("Ajouter à la vision"):
+                if name:
+                    st.session_state.saved_future_projects.append({"name": name, "horizon": horizon, "resources": resources, "goal": goal})
+                    st.rerun()
+
+        for fp in st.session_state.saved_future_projects:
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{fp["name"]}</h3><span class="zapio-badge">{fp["horizon"]}</span></div><p style="color:#CBD5E1; margin-top:10px;"><b>Objectif:</b> {fp["goal"]}</p><p style="color:#A78BFA; font-size:0.85rem;"><b>Ressources:</b> {fp["resources"]}</p></div>', unsafe_allow_html=True)
+
+    elif curr_idx == 8:
+        st.subheader("🔗 Sauvegarde de Liens Web")
+        with st.form("form_links"):
+            title = st.text_input("Nom du site / Application")
+            url = st.text_input("Lien URL (https://...)")
+            category = st.selectbox("Catégorie", ["Doc Tech & API", "Outils Design & AI", "Téléchargement d'Apps & Logiciels", "Sites Web Utiles & Services", "Ressources & Banques d'Images", "E-commerce & Business", "Inspiration / Modèles", "Administration / Finance"])
+            note = st.text_input("Note")
+            if st.form_submit_button("Enregistrer le Lien"):
+                if title and url:
+                    st.session_state.saved_links.append({"title": title, "url": url, "cat": category, "note": note})
+                    st.rerun()
+
+        for lk in st.session_state.saved_links:
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#EC4899;">{lk["title"]}</h3><span class="zapio-badge">{lk["cat"]}</span></div><a href="{lk["url"]}" target="_blank" style="color:#38BDF8; display:block; margin:8px 0;">{lk["url"]}</a><span style="color:#A78BFA; font-size:0.8rem;">{lk["note"]}</span></div>', unsafe_allow_html=True)
+
+    elif curr_idx == 9:
+        st.subheader("📦 Banque de Fichiers ZIP")
+        with st.form("form_zip"):
+            title = st.text_input("Nom du projet / Archive")
+            cloud_link = st.text_input("Lien de Téléchargement")
+            version = st.text_input("Version", value="v1.0")
+            contents = st.text_area("Contenu détaillé du dossier ZIP", height=100)
+            if st.form_submit_button("Enregistrer"):
+                if title and cloud_link:
+                    st.session_state.saved_zip_files.append({"title": title, "link": cloud_link, "version": version, "contents": contents})
+                    st.rerun()
+
+        for zp in st.session_state.saved_zip_files:
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{zp["title"]} <span style="font-size:0.8rem; color:#A78BFA;">({zp["version"]})</span></h3><a href="{zp["link"]}" target="_blank" class="zapio-badge-green" style="text-decoration:none;">📥 Télécharger ZIP</a></div><p style="color:#CBD5E1; margin-top:10px; font-size:0.85rem;"><b>Contenu:</b> {zp["contents"]}</p></div>', unsafe_allow_html=True)
+
+    elif curr_idx == 10:
+        st.subheader("🔑 Sauvegarde Sécurisée de Clés API")
+        with st.form("form_api_key"):
+            service_name = st.text_input("Service / Plateforme")
+            api_key_val = st.text_input("Clé API / Secret Token", type="password")
+            provider_env = st.selectbox("Environnement", ["Production", "Développement / Test", "Staging"])
+            notes = st.text_input("Notes / Projet associé")
+            if st.form_submit_button("🔑 Sauvegarder la clé API"):
+                if service_name and api_key_val:
+                    st.session_state.saved_api_keys.append({"service": service_name, "key": api_key_val, "env": provider_env, "notes": notes})
+                    st.success("Clé API enregistrée !")
+                    st.rerun()
+
+        for ak in st.session_state.saved_api_keys:
+            note_txt = ak['notes'] if ak['notes'] else 'Aucune note'
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;"><h3 style="margin:0; color:#EC4899;">🔑 {ak["service"]}</h3><span class="zapio-badge">{ak["env"]}</span></div><p style="color:#CBD5E1; font-size:0.85rem; margin: 4px 0;"><b>Notes:</b> {note_txt}</p>', unsafe_allow_html=True)
+            st.code(ak['key'], language="text")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    elif curr_idx == 11:
+        st.subheader("🔐 Coffre-Fort d'Accès, PIN & Mots de Passe")
+        with st.form("form_user_cred"):
+            platform_name = st.text_input("Plateforme / Site / Application")
+            username_val = st.text_input("Identifiant / Email")
+            password_val = st.text_input("Mot de passe / PIN", type="password")
+            cred_type = st.selectbox("Type d'accès", ["Compte Web / Service", "Code PIN / Sécurité", "Serveur / SSH / BDD", "Application Mobile"])
+            cred_notes = st.text_input("Notes & URL de connexion")
+            if st.form_submit_button("🔐 Enregistrer les Identifiants"):
+                if platform_name and (username_val or password_val):
+                    st.session_state.saved_user_credentials.append({"platform": platform_name, "username": username_val, "password": password_val, "type": cred_type, "notes": cred_notes})
+                    st.success("Accès enregistré !")
+                    st.rerun()
+
+        for cred in st.session_state.saved_user_credentials:
+            user_txt = cred['username'] if cred['username'] else 'N/A'
+            notes_txt = cred['notes'] if cred['notes'] else 'Aucune note'
+            st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;"><h3 style="margin:0; color:#EC4899;">🔐 {cred["platform"]}</h3><span class="zapio-badge">{cred["type"]}</span></div><p style="color:#FFFFFF; font-size:0.9rem; margin: 4px 0;"><b>User :</b> {user_txt}</p><p style="color:#CBD5E1; font-size:0.85rem; margin: 4px 0;"><b>Notes / URL :</b> {notes_txt}</p>', unsafe_allow_html=True)
+            st.code(cred['password'], language="text")
+            st.markdown('</div>', unsafe_allow_html=True)
