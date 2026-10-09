@@ -63,11 +63,9 @@ if "authenticated" not in st.session_state:
 if "agenda_active_tab" not in st.session_state:
     st.session_state.agenda_active_tab = "vue"
 
+# Vider les événements par défaut
 if "agenda_events" not in st.session_state:
-    st.session_state.agenda_events = [
-        {"title": "Lancement Application PavelCore", "date": date(2026, 10, 25), "time": time(10, 0), "category": "Dev & Tech", "desc": "Mise en ligne globale sur Streamlit Cloud", "ringtone": "Alarme Digitale"},
-        {"title": "Session DJ & Mixing Event", "date": date(2026, 10, 28), "time": time(21, 30), "category": "Événement DJ / Prestation", "desc": "Préparation set Afrobeat & Zouglou", "ringtone": "Bip Futuriste"}
-    ]
+    st.session_state.agenda_events = []
 
 if "saved_ai_prompts" not in st.session_state:
     st.session_state.saved_ai_prompts = []
@@ -168,8 +166,7 @@ else:
     if menu == "📆 Agenda Premium":
         st.markdown('<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 DESIGN CALENDAR TEMPLATE</span><h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
 
-        # Boutons de navigation en pilules circulaires 3D
-        col_btn1, col_btn2, col_spacer = st.columns([2.3, 2.5, 4])
+        col_btn1, col_btn2, col_clear = st.columns([2.3, 2.5, 2])
         
         with col_btn1:
             btn_vue = st.button(
@@ -192,6 +189,12 @@ else:
             if btn_add:
                 st.session_state.agenda_active_tab = "add"
                 st.rerun()
+
+        with col_clear:
+            if st.session_state.agenda_events:
+                if st.button("🗑️ Vider tout l'agenda", key="clear_all_events"):
+                    st.session_state.agenda_events = []
+                    st.rerun()
 
         st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
 
@@ -265,9 +268,16 @@ else:
             st.subheader("📋 Liste chronologique des événements")
             if st.session_state.agenda_events:
                 sorted_events = sorted(st.session_state.agenda_events, key=lambda x: (x['date'], x['time']))
-                for ev in sorted_events:
+                for idx, ev in enumerate(sorted_events):
                     desc_text = ev['desc'] if ev['desc'] else '<i>Aucune note fournie</i>'
-                    st.markdown(f'<div class="calendar-event-card"><div class="calendar-date-box"><span style="font-size: 0.75rem; text-transform: uppercase;">{ev["date"].strftime("%b").upper()}</span><span style="font-size: 1.5rem; line-height: 1;">{ev["date"].strftime("%d")}</span><span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev["time"].strftime("%H:%M")}</span></div><div style="flex-grow: 1;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev["title"]}</h3><span class="zapio-badge">{ev["category"]}</span></div><p style="color:#CBD5E1; margin: 6px 0; font-size: 0.85rem;">{desc_text}</p><div style="font-size: 0.8rem; color: #A78BFA;">🔔 Notification : <b style="color:#FFF;">{ev["ringtone"]}</b></div></div></div>', unsafe_allow_html=True)
+                    
+                    c_card, c_del = st.columns([5, 1])
+                    with c_card:
+                        st.markdown(f'<div class="calendar-event-card"><div class="calendar-date-box"><span style="font-size: 0.75rem; text-transform: uppercase;">{ev["date"].strftime("%b").upper()}</span><span style="font-size: 1.5rem; line-height: 1;">{ev["date"].strftime("%d")}</span><span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev["time"].strftime("%H:%M")}</span></div><div style="flex-grow: 1;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev["title"]}</h3><span class="zapio-badge">{ev["category"]}</span></div><p style="color:#CBD5E1; margin: 6px 0; font-size: 0.85rem;">{desc_text}</p><div style="font-size: 0.8rem; color: #A78BFA;">🔔 Notification : <b style="color:#FFF;">{ev["ringtone"]}</b></div></div></div>', unsafe_allow_html=True)
+                    with c_del:
+                        if st.button("🗑️ Supprimer", key=f"del_ev_{idx}"):
+                            st.session_state.agenda_events.remove(ev)
+                            st.rerun()
             else:
                 st.info("Aucun événement dans l'agenda.")
 
