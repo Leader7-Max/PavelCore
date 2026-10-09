@@ -60,6 +60,9 @@ LANG_MAP = {
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
+if "agenda_active_tab" not in st.session_state:
+    st.session_state.agenda_active_tab = "vue"
+
 if "agenda_events" not in st.session_state:
     st.session_state.agenda_events = [
         {"title": "Lancement Application PavelCore", "date": date(2026, 10, 25), "time": time(10, 0), "category": "Dev & Tech", "desc": "Mise en ligne globale sur Streamlit Cloud", "ringtone": "Alarme Digitale"},
@@ -165,9 +168,37 @@ else:
     if menu == "📆 Agenda Premium":
         st.markdown('<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 DESIGN CALENDAR TEMPLATE</span><h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
 
-        tab_cal, tab_add = st.tabs(["📅 Vue Calendrier Mensuel", "➕ Programmer un Événement"])
+        # Boutons de navigation en pilules circulaires 3D
+        col_btn1, col_btn2, col_spacer = st.columns([2.3, 2.5, 4])
+        
+        with col_btn1:
+            btn_vue = st.button(
+                "📅 Vue Calendrier Mensuel", 
+                type="primary" if st.session_state.agenda_active_tab == "vue" else "secondary",
+                use_container_width=True,
+                key="nav_btn_vue"
+            )
+            if btn_vue:
+                st.session_state.agenda_active_tab = "vue"
+                st.rerun()
 
-        with tab_cal:
+        with col_btn2:
+            btn_add = st.button(
+                "➕ Programmer un Événement", 
+                type="primary" if st.session_state.agenda_active_tab == "add" else "secondary",
+                use_container_width=True,
+                key="nav_btn_add"
+            )
+            if btn_add:
+                st.session_state.agenda_active_tab = "add"
+                st.rerun()
+
+        st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
+
+        # ----------------------------------------------------
+        # ONGLET 1 : VUE CALENDRIER MENSUEL
+        # ----------------------------------------------------
+        if st.session_state.agenda_active_tab == "vue":
             col_m1, col_m2, col_m3 = st.columns([1, 2, 1])
             with col_m2:
                 selected_month = st.selectbox(
@@ -240,7 +271,10 @@ else:
             else:
                 st.info("Aucun événement dans l'agenda.")
 
-        with tab_add:
+        # ----------------------------------------------------
+        # ONGLET 2 : PROGRAMMER UN ÉVÉNEMENT
+        # ----------------------------------------------------
+        elif st.session_state.agenda_active_tab == "add":
             with st.form("add_event_form"):
                 st.subheader("Planifier une nouvelle date")
                 title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Concert / Réunion PavelCore")
@@ -265,6 +299,7 @@ else:
                             "title": title, "date": event_date, "time": event_time,
                             "category": category, "desc": desc, "ringtone": ringtone
                         })
+                        st.session_state.agenda_active_tab = "vue"
                         st.success("Événement ajouté sur le calendrier !")
                         st.rerun()
 
