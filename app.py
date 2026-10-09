@@ -114,7 +114,7 @@ else:  # Sombre Nuit
     capsule_border = "rgba(255, 255, 255, 0.12)"
     capsule_btn_bg = "rgba(25, 10, 45, 0.6)"
 
-# INJECTION DES STYLES (Contrôle total sur l'apparence et les widgets)
+# INJECTION DES STYLES (Contrôle total sur l'apparence, les cartes et la capsule en ligne)
 st.markdown(f"""
     <style>
     .stApp {{
@@ -217,12 +217,18 @@ st.markdown(f"""
         justify-content: flex-end;
         box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }}
+    /* FORÇAGE RESPONSIVE : Empêche les colonnes de la capsule de s'empiler sur mobile */
+    .reference-capsule-wrapper [data-testid="column"] {{
+        width: auto !important;
+        flex: 1 !important;
+        min-width: unset !important;
+    }}
     .reference-capsule-wrapper button {{
         background: {capsule_btn_bg} !important;
         border: 1px solid {capsule_border} !important;
         color: {text_color} !important;
         border-radius: 20px !important;
-        padding: 2px 6px !important;
+        padding: 2px 4px !important;
         font-size: 0.75rem !important;
         min-height: 24px !important;
         max-height: 28px !important;
@@ -467,7 +473,7 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Capsule ultra-compacte alignée à droite
+    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Capsule ultra-compacte alignée à droite sur une seule ligne
     col_logo, col_spacer, col_capsule = st.columns([1.2, 0.4, 2.0])
     
     with col_logo:
