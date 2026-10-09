@@ -42,38 +42,38 @@ def inject_custom_design():
         }
 
         /* ====================================================
-           🔥 FORÇAGE ABSOLU STYLE DES ONGLETS (ST.TABS)
+           🔥 ONGLETS STYLE BOUTONS CIRCULAIRES / PILLULES 3D
            ==================================================== */
 
         /* Conteneur de la barre d'onglets */
         [data-testid="stTabs"] [data-baseweb="tab-list"] {
-            gap: 10px !important;
-            background-color: #261245 !important;
-            padding: 8px !important;
-            border-radius: 16px !important;
-            border: 1px solid #5B21B6 !important;
+            gap: 16px !important;
+            background: rgba(38, 18, 69, 0.6) !important;
+            padding: 10px 14px !important;
+            border-radius: 50px !important; /* Barre englobante arrondie */
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            display: inline-flex !important;
+            backdrop-filter: blur(12px) !important;
         }
 
-        /* Supprime la barre rouge/orange de soulignement par défaut de Streamlit */
-        [data-testid="stTabs"] [data-baseweb="tab-highlight-title"] {
-            background-color: transparent !important;
-            display: none !important;
-        }
+        /* Suppression des lignes de soulignement Streamlit */
+        [data-testid="stTabs"] [data-baseweb="tab-highlight-title"],
         [data-testid="stTabs"] [data-baseweb="tab-border"] {
             display: none !important;
         }
 
-        /* Boutons d'onglets (Boutons individuels) */
+        /* STYLE DES BOUTONS CIRCULAIRES (INACTIFS) */
         [data-testid="stTabs"] button[role="tab"] {
-            background: linear-gradient(135deg, #2A134E 0%, #1E0A3C 100%) !important;
-            border-radius: 12px !important;
-            padding: 10px 20px !important;
-            border: 1px solid #5B21B6 !important;
-            margin-right: 4px !important;
-            transition: all 0.3s ease !important;
+            background: linear-gradient(135deg, #2D1452 0%, #1E0A3C 100%) !important;
+            border-radius: 50px !important; /* Forme circulaire / pillule parfaite */
+            padding: 12px 26px !important;
+            border: 2px solid #5B21B6 !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            cursor: pointer !important;
         }
 
-        /* FORCE LE TEXTE EN BLANC PUR ET GRAS SUR TOUS LES ONGLETS */
+        /* FORÇAGE DU TEXTE : BLANC PUR & ULTRA LISIBLE */
         [data-testid="stTabs"] button[role="tab"] *,
         [data-testid="stTabs"] button[role="tab"] p,
         [data-testid="stTabs"] button[role="tab"] div,
@@ -82,26 +82,23 @@ def inject_custom_design():
             font-weight: 800 !important;
             font-size: 0.95rem !important;
             -webkit-text-fill-color: #FFFFFF !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
         }
 
-        /* SURVOL (HOVER) sur onglet inactif */
+        /* EFFET DE SURVOL (HOVER) AVEC GLOW ROSE */
         [data-testid="stTabs"] button[role="tab"]:hover {
             background: linear-gradient(135deg, #4C1D95 0%, #31105E 100%) !important;
             border-color: #EC4899 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
+            transform: translateY(-3px) scale(1.03) !important;
+            box-shadow: 0 8px 22px rgba(236, 72, 153, 0.45) !important;
         }
 
-        /* ONGLET ACTIF (SÉLECTIONNÉ) - NÉON 3D VIOLET / ROSE */
+        /* STYLE BOUTON CIRCULAIRE ACTIF (SÉLECTIONNÉ) - EFFET NÉON 3D */
         [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
             background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-            border: 1px solid #F472B6 !important;
-            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6) !important;
-        }
-
-        [data-testid="stTabs"] button[role="tab"][aria-selected="true"] * {
-            color: #FFFFFF !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+            border: 2px solid #F472B6 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.7), 0 6px 20px rgba(139, 92, 246, 0.5) !important;
         }
 
         /* ==================================================== */
@@ -114,7 +111,7 @@ def inject_custom_design():
             font-weight: 800 !important;
             font-size: 1rem !important;
             border: none !important;
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             padding: 14px 24px !important;
             width: 100% !important;
             box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4) !important;
