@@ -24,7 +24,7 @@ try:
 except ImportError:
     pass
 
-# Gestionnaire d'État Global
+# Gestionnaire d'État Global (Initialisation robuste)
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Sombre Nuit"
 
@@ -227,6 +227,7 @@ def render_agenda_module():
         if st.session_state.agenda_events:
             if st.button("🗑️ Vider tout l'agenda", key="clear_all_events"):
                 st.session_state.agenda_events = []
+                st.toast("🗑️ Agenda vidé avec succès.", icon="ℹ️")
                 st.rerun()
 
     st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
@@ -313,7 +314,7 @@ def render_agenda_module():
                 if title:
                     st.session_state.agenda_events.append({"title": title, "date": event_date, "time": event_time, "category": category, "desc": desc, "ringtone": ringtone})
                     st.session_state.agenda_active_tab = "vue"
-                    st.success("Événement enregistré !")
+                    st.toast("✅ Événement ajouté avec succès dans l'agenda !", icon="🎉")
                     st.rerun()
 
 # AUTH & NAVIGATION
@@ -334,6 +335,7 @@ elif not st.session_state.authenticated:
             if submit:
                 if master_key != "":
                     st.session_state.authenticated = True
+                    st.toast("🔓 Connexion réussie au Workspace.", icon="✨")
                     st.rerun()
                 else:
                     st.error("Veuillez saisir votre clé d'accès.")
@@ -350,6 +352,7 @@ else:
         if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
             st.session_state.authenticated = False
             st.session_state.current_view = "home"
+            st.toast("🔒 Déconnexion effectuée.", icon="👋")
             st.rerun()
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
@@ -391,6 +394,80 @@ else:
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
+        # --- SECTION EXPORT / IMPORT (BACKUP GLOBAL - POINT 5) ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        with st.expander("⚙️ Gestion & Sauvegarde Globale du Workspace (Backup JSON)"):
+            st.markdown(f"<p style='color:{desc_color}; font-size:0.9rem;'>Exportez l'intégralité de vos données (Agenda, Projets, Prompts, Coffre-Fort) pour ne jamais rien perdre, ou restaurez un ancien fichier de sauvegarde.</p>", unsafe_allow_html=True)
+            
+            # Préparation des données pour l'export JSON
+            workspace_data = {
+                "agenda_events": [
+                    {
+                        "title": e["title"],
+                        "date": e["date"].strftime("%Y-%m-%d"),
+                        "time": e["time"].strftime("%H:%M"),
+                        "category": e["category"],
+                        "desc": e["desc"],
+                        "ringtone": e["ringtone"]
+                    } for e in st.session_state.agenda_events
+                ],
+                "saved_ai_prompts": st.session_state.saved_ai_prompts,
+                "saved_claude_prompts": st.session_state.saved_claude_prompts,
+                "saved_code_snippets": st.session_state.saved_code_snippets,
+                "saved_image_prompts": st.session_state.saved_image_prompts,
+                "saved_ideas": st.session_state.saved_ideas,
+                "saved_current_projects": st.session_state.saved_current_projects,
+                "saved_future_projects": st.session_state.saved_future_projects,
+                "saved_links": st.session_state.saved_links,
+                "saved_zip_files": st.session_state.saved_zip_files,
+                "saved_api_keys": st.session_state.saved_api_keys,
+                "saved_user_credentials": st.session_state.saved_user_credentials
+            }
+            json_str = json.dumps(workspace_data, indent=4, ensure_ascii=False)
+            
+            c_exp, c_imp = st.columns(2)
+            with c_exp:
+                st.download_button(
+                    label="📥 Exporter tout le Workspace (.json)",
+                    data=json_str,
+                    file_name=f"pavelcore_backup_{date.today().strftime('%Y-%m-%d')}.json",
+                    mime="application/json",
+                    use_container_width=True
+                )
+            with c_imp:
+                uploaded_backup = st.file_uploader("📤 Restaurer une sauvegarde (.json)", type=["json"], key="backup_uploader")
+                if uploaded_backup is not None:
+                    try:
+                        imported_data = json.load(uploaded_backup)
+                        st.session_state.saved_ai_prompts = imported_data.get("saved_ai_prompts", [])
+                        st.session_state.saved_claude_prompts = imported_data.get("saved_claude_prompts", [])
+                        st.session_state.saved_code_snippets = imported_data.get("saved_code_snippets", [])
+                        st.session_state.saved_image_prompts = imported_data.get("saved_image_prompts", [])
+                        st.session_state.saved_ideas = imported_data.get("saved_ideas", [])
+                        st.session_state.saved_current_projects = imported_data.get("saved_current_projects", [])
+                        st.session_state.saved_future_projects = imported_data.get("saved_future_projects", [])
+                        st.session_state.saved_links = imported_data.get("saved_links", [])
+                        st.session_state.saved_zip_files = imported_data.get("saved_zip_files", [])
+                        st.session_state.saved_api_keys = imported_data.get("saved_api_keys", [])
+                        st.session_state.saved_user_credentials = imported_data.get("saved_user_credentials", [])
+                        
+                        # Restauration de l'agenda avec conversion des dates
+                        restored_events = []
+                        for ev in imported_data.get("agenda_events", []):
+                            restored_events.append({
+                                "title": ev["title"],
+                                "date": datetime.strptime(ev["date"], "%Y-%m-%d").date(),
+                                "time": datetime.strptime(ev["time"], "%H:%M").time(),
+                                "category": ev["category"],
+                                "desc": ev["desc"],
+                                "ringtone": ev["ringtone"]
+                            })
+                        st.session_state.agenda_events = restored_events
+                        st.toast("✅ Restauration du Workspace réussie !", icon="🎉")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Erreur lors de l'importation du fichier : {e}")
+
     else:
         current = st.session_state.current_view
         if st.button("← Retour au Tableau de Bord", key="back_to_home_universal"):
@@ -417,6 +494,7 @@ else:
                     if st.form_submit_button("Enregistrer"):
                         if name:
                             st.session_state.saved_current_projects.append({"name": name, "client": client, "priority": priority, "next": next_step, "deadline": str(deadline), "desc": project_desc})
+                            st.toast("🚀 Projet en cours enregistré avec succès !", icon="✅")
                             st.rerun()
                 for cp in st.session_state.saved_current_projects:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{cp["name"]}</h3><p style="color:{desc_color};">Client: {cp["client"]} | Échéance: {cp["deadline"]}</p></div>', unsafe_allow_html=True)
@@ -430,6 +508,7 @@ else:
                     if st.form_submit_button("Ajouter"):
                         if name:
                             st.session_state.saved_future_projects.append({"name": name, "horizon": horizon, "resources": resources, "goal": goal})
+                            st.toast("🔮 Projet futur ajouté avec succès !", icon="✨")
                             st.rerun()
                 for fp in st.session_state.saved_future_projects:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{fp["name"]}</h3><p style="color:{desc_color};">Objectif: {fp["goal"]}</p></div>', unsafe_allow_html=True)
@@ -443,6 +522,7 @@ else:
                     if st.form_submit_button("Sauvegarder"):
                         if title:
                             st.session_state.saved_ideas.append({"title": title, "cat": category, "desc": description, "impact": impact})
+                            st.toast("💡 Idée sauvegardée avec succès !", icon="💡")
                             st.rerun()
                 for id_item in st.session_state.saved_ideas:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{id_item["title"]}</h3><p style="color:{desc_color};">{id_item["desc"]}</p></div>', unsafe_allow_html=True)
@@ -454,12 +534,11 @@ else:
             if sub_tab == "🤖 Prompts AI Code":
                 with st.form("form_ai_code"):
                     title = st.text_input("Titre")
-                    selected_lang = st.selectbox("Langage", list(LANG_MAP.keys()))
                     prompt = st.text_area("Contenu du Prompt")
-                    tags = st.text_input("Tags")
                     if st.form_submit_button("Enregistrer"):
                         if title and prompt:
                             st.session_state.saved_ai_prompts.append({"title": title, "lang": "python", "prompt": prompt})
+                            st.toast("🤖 Prompt IA enregistré !", icon="✅")
                             st.rerun()
                 for p in st.session_state.saved_ai_prompts:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{p["title"]}</h3>', unsafe_allow_html=True)
@@ -473,6 +552,7 @@ else:
                     if st.form_submit_button("Sauvegarder"):
                         if title and user_prompt:
                             st.session_state.saved_claude_prompts.append({"title": title, "user": user_prompt})
+                            st.toast("🧠 Prompt Claude sauvegardé !", icon="✅")
                             st.rerun()
                 for c in st.session_state.saved_claude_prompts:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{c["title"]}</h3>', unsafe_allow_html=True)
@@ -486,6 +566,7 @@ else:
                     if st.form_submit_button("Enregistrer"):
                         if title and code_content:
                             st.session_state.saved_code_snippets.append({"title": title, "code": code_content})
+                            st.toast("💻 Snippet de code enregistré !", icon="✅")
                             st.rerun()
                 for cd in st.session_state.saved_code_snippets:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{cd["title"]}</h3>', unsafe_allow_html=True)
@@ -511,7 +592,7 @@ else:
                                 "prompt": prompt_text, 
                                 "ar": aspect_ratio
                             })
-                            st.success("Prompt image enregistré avec succès !")
+                            st.toast("🎨 Prompt image enregistré avec succès !", icon="✅")
                             st.rerun()
                 
                 st.markdown("### 📋 Prompts enregistrés :")
@@ -536,6 +617,7 @@ else:
                     if st.form_submit_button("Enregistrer"):
                         if title and url:
                             st.session_state.saved_links.append({"title": title, "url": url})
+                            st.toast("🔗 Lien utile enregistré !", icon="✅")
                             st.rerun()
                 for lk in st.session_state.saved_links:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{lk["title"]}</h3><a href="{lk["url"]}" target="_blank">{lk["url"]}</a></div>', unsafe_allow_html=True)
@@ -555,7 +637,7 @@ else:
                                 "version": version, 
                                 "contents": contents
                             })
-                            st.success("Fichier ZIP enregistré avec succès !")
+                            st.toast("📦 Fichier ZIP enregistré avec succès !", icon="✅")
                             st.rerun()
                 
                 st.markdown("### 📦 Fichiers ZIP enregistrés :")
@@ -584,6 +666,7 @@ else:
                     if st.form_submit_button("Sauvegarder"):
                         if service_name and api_key_val:
                             st.session_state.saved_api_keys.append({"service": service_name, "key": api_key_val})
+                            st.toast("🔑 Clé API sécurisée et enregistrée.", icon="🔒")
                             st.rerun()
                 for ak in st.session_state.saved_api_keys:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔑 {ak["service"]}</h3>', unsafe_allow_html=True)
@@ -598,6 +681,7 @@ else:
                     if st.form_submit_button("Sauvegarder"):
                         if platform_name:
                             st.session_state.saved_user_credentials.append({"platform": platform_name, "username": username_val, "password": password_val})
+                            st.toast("🔐 Identifiant enregistré dans le coffre-fort.", icon="🔒")
                             st.rerun()
                 for cred in st.session_state.saved_user_credentials:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔐 {cred["platform"]}</h3><p style="color:{desc_color};">User: {cred["username"]}</p>', unsafe_allow_html=True)
