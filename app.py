@@ -25,9 +25,18 @@ try:
 except ImportError:
     pass
 
-# Gestionnaire d'État Global pour le Thème
+# Gestionnaire d'État Global (Thème, Langue, Modaux)
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Sombre Nuit"
+
+if "app_lang" not in st.session_state:
+    st.session_state.app_lang = "FR"
+
+if "show_settings_modal" not in st.session_state:
+    st.session_state.show_settings_modal = False
+
+if "show_help_modal" not in st.session_state:
+    st.session_state.show_help_modal = False
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -77,7 +86,7 @@ if "saved_user_credentials" not in st.session_state:
 if "current_view" not in st.session_state:
     st.session_state.current_view = "home"
 
-# Définition dynamique des couleurs selon le thème choisi (Contraste corrigé)
+# Définition dynamique des couleurs selon le thème choisi
 if st.session_state.theme_mode == "Blanc Épuré":
     bg_app = "#F1F5F9"
     text_color = "#0F172A"
@@ -88,6 +97,8 @@ if st.session_state.theme_mode == "Blanc Épuré":
     header_box_text = "#334155"
     desc_color = "#334155"
     sub_title_color = "#0F172A"
+    top_capsule_bg = "rgba(0, 0, 0, 0.05)"
+    top_capsule_border = "rgba(0, 0, 0, 0.1)"
 else:  # Sombre Nuit
     bg_app = "#0E031C"
     text_color = "#F8FAFC"
@@ -98,8 +109,10 @@ else:  # Sombre Nuit
     header_box_text = "#A78BFA"
     desc_color = "#CBD5E1"
     sub_title_color = "#FFF"
+    top_capsule_bg = "rgba(255, 255, 255, 0.08)"
+    top_capsule_border = "rgba(255, 255, 255, 0.15)"
 
-# INJECTION DES STYLES DYNAMIQUES
+# INJECTION DES STYLES DYNAMIQUES ET DE LA CAPSULE DE CONTRÔLE
 st.markdown(f"""
     <style>
     .stApp {{
@@ -186,6 +199,18 @@ st.markdown(f"""
         flex-direction: column;
         justify-content: center;
         font-weight: 800;
+    }}
+    /* Style de la capsule de contrôle supérieure */
+    .top-control-capsule {{
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        background: {top_capsule_bg};
+        border: 1px solid {top_capsule_border};
+        padding: 6px 14px;
+        border-radius: 40px;
+        backdrop-filter: blur(10px);
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -421,31 +446,70 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # Barre supérieure de navigation avec Sélecteur de Thème
-    col_logo, col_theme, col_actions = st.columns([1.5, 1.2, 1.3])
+    # EN-TÊTE SUPÉRIEUR AVEC LA CAPSULE DE CONTRÔLE (Thème, Paramètres, Aide, Langue)
+    col_logo, col_capsule = st.columns([1.5, 2.5])
+    
     with col_logo:
         st.markdown(f'<h1 style="font-size: 1.6rem; margin: 0; display: flex; align-items: center; gap: 6px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 6px; border-radius: 6px; font-size: 1rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.65rem;">● Online</span></h1>', unsafe_allow_html=True)
     
-    with col_theme:
-        selected_theme = st.selectbox("Thème", ["Sombre Nuit", "Blanc Épuré"], index=0 if st.session_state.theme_mode == "Sombre Nuit" else 1, label_visibility="collapsed")
-        if selected_theme != st.session_state.theme_mode:
-            st.session_state.theme_mode = selected_theme
-            st.rerun()
-
-    with col_actions:
-        col_home_btn, col_logout_btn = st.columns(2)
-        with col_home_btn:
-            if st.session_state.current_view != "home":
-                if st.button("🏠 Accueil", use_container_width=True):
-                    st.session_state.current_view = "home"
-                    st.rerun()
-        with col_logout_btn:
-            if st.button("🔒 Quitter", use_container_width=True, type="secondary"):
-                st.session_state.authenticated = False
-                st.session_state.current_view = "home"
+    with col_capsule:
+        # Mini colonnes dans la capsule pour aligner parfaitement les 4 boutons du style Zapiotv
+        c_th, c_set, c_hlp, c_lng = st.columns([1.2, 0.8, 0.8, 0.9])
+        
+        with c_th:
+            # 1. Bouton Thème (☀️ / 🌙)
+            theme_label = "☀️ Clair" if st.session_state.theme_mode == "Sombre Nuit" else "🌙 Sombre"
+            if st.button(theme_label, use_container_width=True, key="btn_toggle_theme"):
+                st.session_state.theme_mode = "Blanc Épuré" if st.session_state.theme_mode == "Sombre Nuit" else "Sombre Nuit"
+                st.rerun()
+                
+        with c_set:
+            # 2. Bouton Paramètres (⚙️)
+            if st.button("⚙️", use_container_width=True, key="btn_settings_toggle"):
+                st.session_state.show_settings_modal = not st.session_state.show_settings_modal
+                st.rerun()
+                
+        with c_hlp:
+            # 3. Bouton Aide (❓)
+            if st.button("❓", use_container_width=True, key="btn_help_toggle"):
+                st.session_state.show_help_modal = not st.session_state.show_help_modal
+                st.rerun()
+                
+        with c_lng:
+            # 4. Bouton Langue (FR / EN)
+            lang_label = "EN" if st.session_state.app_lang == "FR" else "FR"
+            if st.button(lang_label, use_container_width=True, key="btn_toggle_lang"):
+                st.session_state.app_lang = "EN" if st.session_state.app_lang == "FR" else "FR"
                 st.rerun()
 
+    # MODAL / PANNEAU PARAMÈTRES (⚙️)
+    if st.session_state.show_settings_modal:
+        st.markdown(f'<div class="zapio-card" style="border-color: #EC4899; margin-top: 15px;"><h3 style="color:{sub_title_color};">⚙️ Panneau de Paramètres Avancés</h3><p style="color:{desc_color};">Personnalisez votre espace PavelCore selon vos préférences.</p></div>', unsafe_allow_html=True)
+        c_set1, c_set2 = st.columns(2)
+        with c_set1:
+            st.selectbox("Mode d'affichage par défaut", ["Grille de cartes", "Liste compacte"], key="pref_display_mode")
+        with c_set2:
+            st.selectbox("Fréquence de synchro Cloud/Offline", ["Temps réel", "Toutes les heures", "Manuel uniquement"], key="pref_sync_freq")
+        if st.button("Fermer les paramètres", key="close_settings"):
+            st.session_state.show_settings_modal = False
+            st.rerun()
+
+    # MODAL / PANNEAU AIDE (❓)
+    if st.session_state.show_help_modal:
+        st.markdown(f'<div class="zapio-card" style="border-color: #8B5CF6; margin-top: 15px;"><h3 style="color:{sub_title_color};">❓ Centre d\'Aide & Support PavelCore</h3><p style="color:{desc_color};"><b>Mode Hors-Ligne (PWA) :</b> Vos données d\'agenda sont automatiquement enregistrées dans le cache local de votre navigateur.</p><p style="color:{desc_color};"><b>Sécurité :</b> Vos clés API et mots de passe sont stockés localement et chiffrés dans votre session.</p></div>', unsafe_allow_html=True)
+        if st.button("Fermer l'aide", key="close_help"):
+            st.session_state.show_help_modal = False
+            st.rerun()
+
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
+
+    # BARRE D'ACTIONS SECONDAIRE (Accueil & Déconnexion)
+    col_nav_home, col_nav_logout = st.columns([4, 1])
+    with col_nav_logout:
+        if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
+            st.session_state.authenticated = False
+            st.session_state.current_view = "home"
+            st.rerun()
 
     # VUE ACCUEIL : GRILLE DE CARTES PREMIUM
     if st.session_state.current_view == "home":
@@ -480,7 +544,7 @@ else:
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
-    # SOUS-PÔLES DÉTAILLÉS (AVEC BOUTON DE RETOUR UNIFIÉ POUR TOUTES LES SECTIONS Y COMPRIS AGENDA)
+    # SOUS-PÔLES DÉTAILLÉS (AVEC BOUTON DE RETOUR UNIFIÉ)
     else:
         current = st.session_state.current_view
         
