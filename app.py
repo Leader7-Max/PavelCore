@@ -96,6 +96,7 @@ if st.session_state.theme_mode == "Blanc Épuré":
     header_box_text = "#475569"
     desc_color = "#475569"
     sub_title_color = "#0F172A"
+    hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)"
 else:  # Sombre Nuit
     bg_app = "#0E031C"
     text_color = "#F8FAFC"
@@ -106,13 +107,36 @@ else:  # Sombre Nuit
     header_box_text = "#A78BFA"
     desc_color = "#CBD5E1"
     sub_title_color = "#FFF"
+    hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
 
-# INJECTION DES STYLES
+# INJECTION DES STYLES (Design et décors du tableau de bord)
 st.markdown(f"""
     <style>
     .stApp {{
         background-color: {bg_app} !important;
         color: {text_color} !important;
+    }}
+    /* Décor de la bannière principale du Tableau de Bord */
+    .pavel-hero-banner {{
+        background: {hero_bg};
+        border: 1px solid rgba(236, 72, 153, 0.25);
+        border-radius: 18px;
+        padding: 30px 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }}
+    .pavel-hero-banner::before {{
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(236,72,153,0.05) 0%, transparent 60%);
+        pointer-events: none;
     }}
     .pavel-card-grid {{
         background: {card_gradient};
@@ -120,14 +144,14 @@ st.markdown(f"""
         border-radius: 14px;
         padding: 25px;
         text-align: center;
-        transition: all 0.25s ease;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        margin-bottom: 15px;
     }}
     .pavel-card-grid:hover {{
-        transform: translateY(-3px);
+        transform: translateY(-4px);
         border-color: #EC4899;
-        box-shadow: 0 8px 30px rgba(236, 72, 153, 0.12);
+        box-shadow: 0 10px 35px rgba(236, 72, 153, 0.18);
     }}
     .zapio-badge {{
         background: rgba(236, 72, 153, 0.1);
@@ -443,9 +467,16 @@ else:
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
 
-    # VUE ACCUEIL : GRILLE DE CARTES PREMIUM
+    # VUE ACCUEIL : GRILLE DE CARTES PREMIUM AVEC DÉCOR (HERO BANNER)
     if st.session_state.current_view == "home":
-        st.markdown(f'<div style="text-align: center; margin-bottom: 25px;"><h2 style="font-size: 1.8rem; color: {sub_title_color};">Tableau de Bord Principal</h2><p style="color: {desc_color}; font-size: 0.9rem;">Sélectionnez un espace de travail</p></div>', unsafe_allow_html=True)
+        # Nouveau décor visuel (Bannière d'accueil)
+        st.markdown(f'''
+            <div class="pavel-hero-banner">
+                <span class="zapio-badge" style="margin-bottom: 10px; display: inline-block;">🚀 WORKSPACE CENTRALISÉ</span>
+                <h2 style="font-size: 2.2rem; color: {sub_title_color}; margin: 10px 0 5px 0;">Tableau de Bord Principal</h2>
+                <p style="color: {desc_color}; font-size: 1rem; margin: 0;">Sélectionnez ci-dessous l'espace de travail ou l'outil à lancer</p>
+            </div>
+        ''', unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
         
@@ -611,7 +642,6 @@ else:
                 
                 for idx, img in enumerate(st.session_state.saved_image_prompts):
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};"><b>Générateur:</b> {img["gen"]} | <b>Format:</b> {img["ar"]}</p><p style="color:{text_color}; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">{img["prompt"]}</p></div>', unsafe_allow_html=True)
-                    # Bouton pour télécharger le prompt sous forme de fichier texte (.txt)
                     file_content = f"Titre: {img['title']}\nGénérateur: {img['gen']}\nFormat: {img['ar']}\nNégatif: {img['neg']}\n\nPrompt:\n{img['prompt']}"
                     st.download_button(
                         label=f"⬇️ Télécharger le prompt ({img['title']})",
@@ -647,7 +677,6 @@ else:
                 
                 for idx, zp in enumerate(st.session_state.saved_zip_files):
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]} ({zp["version"]})</h3><p style="color:{desc_color};">{zp["contents"]}</p><a href="{zp["link"]}" target="_blank" style="color: #EC4899; font-weight: bold;">🌐 Ouvrir le lien direct</a></div>', unsafe_allow_html=True)
-                    # Bouton de téléchargement d'un fichier récapitulatif ou lien direct simulé en st.download_button
                     zip_meta = f"Fichier ZIP: {zp['title']}\nVersion: {zp['version']}\nLien source: {zp['link']}\nContenu:\n{zp['contents']}"
                     st.download_button(
                         label=f"⬇️ Télécharger la fiche / lien ({zp['title']})",
