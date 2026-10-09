@@ -367,7 +367,7 @@ else:
     col_logo, col_logout = st.columns([3, 1])
     
     with col_logo:
-        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Connecté / Offline Ready</span></h1>', unsafe_allow_html=True)
+        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Mode Carrousel Horizontal</span></h1>', unsafe_allow_html=True)
         
     with col_logout:
         if st.button("Déconnexion", key="top_logout"):
@@ -398,6 +398,10 @@ else:
     )
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
+
+    # Conteneur horizontal fluide activé par vos styles CSS
+    st.markdown('<div class="horizontal-book-container">', unsafe_allow_html=True)
+    st.markdown('<div class="book-page-panel">', unsafe_allow_html=True)
 
     if menu == "📆 Agenda Premium":
         render_agenda_module()
@@ -613,3 +617,6 @@ else:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;"><h3 style="margin:0; color:#EC4899;">🔐 {cred["platform"]}</h3><span class="zapio-badge">{cred["type"]}</span></div><p style="color:#FFFFFF; font-size:0.9rem; margin: 4px 0;"><b>User :</b> {user_txt}</p><p style="color:#CBD5E1; font-size:0.85rem; margin: 4px 0;"><b>Notes / URL :</b> {notes_txt}</p>', unsafe_allow_html=True)
             st.code(cred['password'], language="text")
             st.markdown('</div>', unsafe_allow_html=True)
+
+    # Fermeture propre des conteneurs de style horizontal
+    st.markdown('</div></div>', unsafe_allow_html=True)
