@@ -22,7 +22,7 @@ st.set_page_config(
 from assets.styles import inject_custom_design
 inject_custom_design()
 
-# Script PWA + Synchronisation Hors-Ligne dans le LocalStorage du navigateur
+# Script PWA + Synchronisation Hors-Ligne dans le LocalStorage
 pwa_offline_script = """
 <script>
 if ('serviceWorker' in navigator) {
@@ -46,7 +46,7 @@ function syncAgendaToOfflineStorage(eventsData) {
 """
 components.html(pwa_offline_script, height=0, width=0)
 
-# Détecteur automatique de langage de programmation
+# Détecteur automatique de langage
 def detect_language(code):
     if not code or not isinstance(code, str):
         return "python"
@@ -84,7 +84,7 @@ MONTH_NAMES_FR = [
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
 ]
 
-# Managing Global State
+# State Management Global
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
@@ -142,7 +142,7 @@ def sync_offline():
     js_sync = f"<script>syncAgendaToOfflineStorage({json.dumps(serializable_events)});</script>"
     components.html(js_sync, height=0, width=0)
 
-# Composant de rendu pour le module Agenda
+# Fonction d'affichage du calendrier dynamique
 def render_agenda_module():
     st.markdown('<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
 
@@ -179,7 +179,7 @@ def render_agenda_module():
 
     st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
 
-    # 1. VUE CALENDRIER MENSUEL (2025-2040+)
+    # VUE CALENDRIER MENSUEL MULTI-ANNÉES AUTOMATIQUE
     if st.session_state.agenda_active_tab == "vue":
         today = date.today()
         current_year = today.year
@@ -278,7 +278,7 @@ def render_agenda_module():
         else:
             st.info(f"Aucun événement enregistré pour {MONTH_NAMES_FR[selected_month_idx-1]} {selected_year}.")
 
-    # 2. PROGRAMMER UN ÉVÉNEMENT
+    # PROGRAMMER UN ÉVÉNEMENT
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form"):
             st.subheader("Planifier une nouvelle date")
@@ -310,7 +310,7 @@ def render_agenda_module():
                     st.rerun()
 
 
-# ACCÈS DIRECT À L'AGENDA OU AUTHENTIFICATION
+# CONTROLE D'ACCÈS / NAVIGATION
 query_params = st.query_params
 is_direct_agenda_link = query_params.get("app", None) == "agenda"
 
@@ -354,28 +354,32 @@ else:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # NAVIGATION DEFILABLE HORIZONTALEMENT (CARROUSEL DE PAGES SWIPE)
-    tabs = st.tabs([
-        "📆 Agenda Premium", 
-        "🤖 Prompts AI Code", 
-        "🧠 Prompts Claude", 
-        "💻 Codes (HTML/CSS/JS)", 
-        "🎨 Prompts Images", 
-        "💡 Idées", 
-        "🚀 Projets en cours", 
-        "🔮 Projets futurs", 
-        "🔗 Liens Utiles", 
-        "📦 Fichiers ZIP",
-        "🔑 Mes Clés API",
-        "🔐 Mes Accès"
-    ])
+    menu = st.radio(
+        "Navigation",
+        [
+            "📆 Agenda Premium", 
+            "🤖 Prompts AI Code", 
+            "🧠 Prompts Claude", 
+            "💻 Codes (HTML/CSS/JS)", 
+            "🎨 Prompts Images", 
+            "💡 Idées", 
+            "🚀 Projets en cours", 
+            "🔮 Projets futurs", 
+            "🔗 Liens Utiles", 
+            "📦 Fichiers ZIP",
+            "🔑 Mes Clés API",
+            "🔐 Mes Accès & Mots de passe"
+        ],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
 
-    # PAGE 1 : AGENDA
-    with tabs[0]:
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
+
+    if menu == "📆 Agenda Premium":
         render_agenda_module()
 
-    # PAGE 2 : PROMPTS AI CODE
-    with tabs[1]:
+    elif menu == "🤖 Prompts AI Code":
         st.subheader("🤖 Mes Prompts AI Code")
         with st.form("form_ai_code"):
             title = st.text_input("Titre du Prompt Code")
@@ -398,8 +402,7 @@ else:
             st.code(p['prompt'], language=p['lang'])
             st.markdown(f'<span style="color:#A78BFA; font-size:0.75rem;">Tags: {p["tags"]}</span></div>', unsafe_allow_html=True)
 
-    # PAGE 3 : PROMPTS CLAUDE
-    with tabs[2]:
+    elif menu == "🧠 Prompts Claude":
         st.subheader("🧠 Mes Prompts Spécialisés Claude")
         with st.form("form_claude"):
             title = st.text_input("Titre de la consigne", placeholder="Ex: Refactoring React Component")
@@ -424,8 +427,7 @@ else:
             st.code(c['user'], language=c.get('lang', 'python'))
             st.markdown(f'<span class="zapio-badge-green">Artifact: {c["artifacts"]}</span></div>', unsafe_allow_html=True)
 
-    # PAGE 4 : CODES (HTML/CSS/JS)
-    with tabs[3]:
+    elif menu == "💻 Codes (HTML/CSS/JS)":
         st.subheader("💻 Mes Snippets de Code")
         with st.form("form_code"):
             title = st.text_input("Nom de la fonction / Snippet")
@@ -448,8 +450,7 @@ else:
             st.code(cd['code'], language=cd['type'])
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # PAGE 5 : PROMPTS IMAGES
-    with tabs[4]:
+    elif menu == "🎨 Prompts Images":
         st.subheader("🎨 Mes Prompts d'Images")
         with st.form("form_img_prompt"):
             title = st.text_input("Titre / Concept Visuel")
@@ -469,8 +470,7 @@ else:
             st.code(img['prompt'], language="text")
             st.markdown(f'<div style="font-size:0.8rem; color:#A78BFA;">Format: <b>{img["ar"]}</b> | Exclure: <b>{img["neg"]}</b></div></div>', unsafe_allow_html=True)
 
-    # PAGE 6 : IDÉES
-    with tabs[5]:
+    elif menu == "💡 Idées":
         st.subheader("💡 Boîte à Idées")
         with st.form("form_ideas"):
             title = st.text_input("Titre de l'idée")
@@ -485,8 +485,7 @@ else:
         for id_item in st.session_state.saved_ideas:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{id_item["title"]}</h3><span class="zapio-badge">{id_item["cat"]}</span></div><p style="color:#CBD5E1; margin-top:10px;">{id_item["desc"]}</p><span class="zapio-badge-green">Impact: {id_item["impact"]}</span></div>', unsafe_allow_html=True)
 
-    # PAGE 7 : PROJETS EN COURS
-    with tabs[6]:
+    elif menu == "🚀 Projets en cours":
         st.subheader("🚀 Suivi des Projets Actifs")
         with st.form("form_curr_proj"):
             name = st.text_input("Nom du projet")
@@ -507,8 +506,7 @@ else:
             desc_val = cp.get('desc', '')
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#EC4899;">{cp["name"]}</h3><div><span class="zapio-badge" style="margin-right:8px;">{priority_val}</span><span style="color:#FFF; font-size:0.9rem;">Client: <b>{cp["client"]}</b></span></div></div><p style="margin:12px 0 8px 0; color:#E2E8F0;">{desc_val}</p><div style="font-size:0.85rem; color:#A78BFA; display:flex; gap:20px; margin-top:8px;"><span>🎯 Prochaine étape : <b style="color:#FFF;">{cp["next"]}</b></span><span>⏰ Échéance : <b style="color:#FFF;">{cp["deadline"]}</b></span></div></div>', unsafe_allow_html=True)
 
-    # PAGE 8 : PROJETS FUTURS
-    with tabs[7]:
+    elif menu == "🔮 Projets futurs":
         st.subheader("🔮 Projets Futurs")
         with st.form("form_fut_proj"):
             name = st.text_input("Nom du projet futur")
@@ -523,8 +521,7 @@ else:
         for fp in st.session_state.saved_future_projects:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{fp["name"]}</h3><span class="zapio-badge">{fp["horizon"]}</span></div><p style="color:#CBD5E1; margin-top:10px;"><b>Objectif:</b> {fp["goal"]}</p><p style="color:#A78BFA; font-size:0.85rem;"><b>Ressources:</b> {fp["resources"]}</p></div>', unsafe_allow_html=True)
 
-    # PAGE 9 : LIENS UTILES
-    with tabs[8]:
+    elif menu == "🔗 Liens Utiles":
         st.subheader("🔗 Sauvegarde de Liens Web")
         with st.form("form_links"):
             title = st.text_input("Nom du site / Application")
@@ -539,8 +536,7 @@ else:
         for lk in st.session_state.saved_links:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#EC4899;">{lk["title"]}</h3><span class="zapio-badge">{lk["cat"]}</span></div><a href="{lk["url"]}" target="_blank" style="color:#38BDF8; display:block; margin:8px 0;">{lk["url"]}</a><span style="color:#A78BFA; font-size:0.8rem;">{lk["note"]}</span></div>', unsafe_allow_html=True)
 
-    # PAGE 10 : FICHIERS ZIP
-    with tabs[9]:
+    elif menu == "📦 Fichiers ZIP":
         st.subheader("📦 Banque de Fichiers ZIP")
         with st.form("form_zip"):
             title = st.text_input("Nom du projet / Archive")
@@ -555,8 +551,7 @@ else:
         for zp in st.session_state.saved_zip_files:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{zp["title"]} <span style="font-size:0.8rem; color:#A78BFA;">({zp["version"]})</span></h3><a href="{zp["link"]}" target="_blank" class="zapio-badge-green" style="text-decoration:none;">📥 Télécharger ZIP</a></div><p style="color:#CBD5E1; margin-top:10px; font-size:0.85rem;"><b>Contenu:</b> {zp["contents"]}</p></div>', unsafe_allow_html=True)
 
-    # PAGE 11 : CLÉS API
-    with tabs[10]:
+    elif menu == "🔑 Mes Clés API":
         st.subheader("🔑 Sauvegarde Sécurisée de Clés API")
         with st.form("form_api_key"):
             service_name = st.text_input("Service / Plateforme")
@@ -575,8 +570,7 @@ else:
             st.code(ak['key'], language="text")
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # PAGE 12 : MOTS DE PASSE & PIN
-    with tabs[11]:
+    elif menu == "🔐 Mes Accès & Mots de passe":
         st.subheader("🔐 Coffre-Fort d'Accès, PIN & Mots de Passe")
         with st.form("form_user_cred"):
             platform_name = st.text_input("Plateforme / Site / Application")
