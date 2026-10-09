@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Configuration de la page
 st.set_page_config(
     page_title="PavelCore — Workspace & Agenda Premium",
-    page_icon="🔴",
+    page_icon="🔮",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -107,10 +107,10 @@ if not st.session_state.authenticated:
     st.markdown("""
         <div style="text-align: center; margin-top: 30px; margin-bottom: 25px;">
             <h1 style="font-size: 2.8rem; margin-bottom: 5px;">
-                <span style="color: #FFFFFF;">pavel</span><span style="background: #FF3B30; color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span>
+                <span style="color: #FFFFFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span>
             </h1>
             <div style="margin-top: 15px;">
-                <span class="zapio-badge">🔴 Espace Sécurisé & Workspace</span>
+                <span class="zapio-badge">🔮 Espace Sécurisé & Workspace</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -139,7 +139,7 @@ else:
     with col_logo:
         st.markdown("""
             <h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;">
-                <span style="color: #FFF;">pavel</span><span style="background: #FF3B30; color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span>
+                <span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span>
                 <span class="zapio-badge-green" style="font-size: 0.75rem;">● Connecté</span>
             </h1>
         """, unsafe_allow_html=True)
@@ -171,16 +171,16 @@ else:
         label_visibility="collapsed"
     )
 
-    st.markdown("<hr style='border-color: rgba(255,255,255,0.1); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
 
     # ====================================================
-    # 📆 AGENDA PREMIUM (Design Grille Temporelle Pro)
+    # 📆 AGENDA PREMIUM (Design Violet Néon 3D Calendar)
     # ====================================================
     if menu == "📆 Agenda Premium":
         st.markdown("""
             <div style="margin-bottom: 20px;">
-                <span class="zapio-badge">🔴 Planning Temporel & Rappels Sonores</span>
-                <h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Timetable Interactive</h2>
+                <span class="zapio-badge">📅 DESIGN CALENDAR TEMPLATE</span>
+                <h2 style="margin-top: 10px; font-size: 2rem;">Agenda Ultra Premium</h2>
             </div>
         """, unsafe_allow_html=True)
 
@@ -189,9 +189,9 @@ else:
 
         if today_events:
             st.markdown(f"""
-                <div class="zapio-card" style="border-color: #FF3B30; background: linear-gradient(135deg, rgba(255,59,48,0.2) 0%, #141721 100%);">
+                <div class="zapio-card" style="border-color: #EC4899; background: linear-gradient(135deg, rgba(236,72,153,0.25) 0%, #2D1254 100%);">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="zapio-badge">🔔 ALERTE ÉVÉNEMENT AUJOURD'HUI</span>
+                        <span class="zapio-badge">🔔 ÉVÉNEMENTS AUJOURD'HUI</span>
                         <span style="color:#FFF; font-weight:bold; font-size:0.9rem;">{today.strftime('%d/%m/%Y')}</span>
                     </div>
                     <h3 style="color:#FFF; margin-top:10px;">Vous avez {len(today_events)} rendez-vous prévu(s) aujourd'hui !</h3>
@@ -202,7 +202,6 @@ else:
 
         with tab_view:
             if st.session_state.agenda_events:
-                # Filtre par catégorie
                 filter_cat = st.selectbox(
                     "Filtrer par catégorie", 
                     ["Tous les événements", "Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"]
@@ -212,7 +211,6 @@ else:
                 if filter_cat != "Tous les événements":
                     events_to_show = [e for e in events_to_show if e['category'] == filter_cat]
 
-                # Tri chronologique par date et heure
                 sorted_events = sorted(events_to_show, key=lambda x: (x['date'], x['time']))
 
                 for ev in sorted_events:
@@ -221,22 +219,22 @@ else:
                     formatted_time = ev['time'].strftime('%H:%M')
                     
                     st.markdown(f"""
-                        <div class="timeline-container">
-                            <div class="timeline-badge-time">
+                        <div class="calendar-event-card">
+                            <div class="calendar-date-box">
                                 <span style="font-size: 0.75rem; text-transform: uppercase;">{formatted_month}</span>
-                                <span style="font-size: 1.4rem; line-height: 1;">{formatted_day}</span>
-                                <span style="font-size: 0.8rem; margin-top: 4px; opacity: 0.9;">{formatted_time}</span>
+                                <span style="font-size: 1.5rem; line-height: 1;">{formatted_day}</span>
+                                <span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{formatted_time}</span>
                             </div>
-                            <div class="timeline-content">
+                            <div style="flex-grow: 1;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                    <h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev['title']}</h3>
+                                    <h3 style="margin:0; color:#FFFFFF; font-size: 1.25rem;">{ev['title']}</h3>
                                     <span class="zapio-badge">{ev['category']}</span>
                                 </div>
-                                <p style="color:#94A3B8; margin: 8px 0; font-size: 0.9rem;">
+                                <p style="color:#CBD5E1; margin: 8px 0; font-size: 0.9rem;">
                                     {ev['desc'] if ev['desc'] else '<i>Aucune note fournie</i>'}
                                 </p>
-                                <div style="display:flex; gap: 15px; font-size: 0.8rem; color: #64748B;">
-                                    <span>🔔 Sonnerie : <b style="color:#CBD5E1;">{ev['ringtone']}</b></span>
+                                <div style="font-size: 0.8rem; color: #A78BFA;">
+                                    🔔 Sonnerie : <b style="color:#FFF;">{ev['ringtone']}</b>
                                 </div>
                             </div>
                         </div>
@@ -298,12 +296,12 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <h3 style="margin:0; color:#FF3B30;">{p['title']}</h3>
+                        <h3 style="margin:0; color:#EC4899;">{p['title']}</h3>
                         <span class="zapio-badge">{p.get('lang_label', p['lang'].upper())}</span>
                     </div>
             """, unsafe_allow_html=True)
             st.code(p['prompt'], language=p['lang'])
-            st.markdown(f"""<span style="color:#8E8E93; font-size:0.75rem;">Tags: {p['tags']}</span></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<span style="color:#A78BFA; font-size:0.75rem;">Tags: {p['tags']}</span></div>""", unsafe_allow_html=True)
 
     # ====================================================
     # 🧠 PROMPTS CLAUDE
@@ -334,10 +332,10 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="color:#FF3B30; margin:0;">{c['title']}</h3>
+                        <h3 style="color:#EC4899; margin:0;">{c['title']}</h3>
                         <span class="zapio-badge">{c.get('lang_label', 'Python')}</span>
                     </div>
-                    <p style="color:#8E8E93; font-size:0.85rem; margin-top:5px;"><b>System:</b> {c['sys']}</p>
+                    <p style="color:#CBD5E1; font-size:0.85rem; margin-top:5px;"><b>System:</b> {c['sys']}</p>
             """, unsafe_allow_html=True)
             st.code(c['user'], language=c.get('lang', 'python'))
             st.markdown(f"""<span class="zapio-badge-green">Artifact: {c['artifacts']}</span></div>""", unsafe_allow_html=True)
@@ -371,7 +369,7 @@ else:
                         <h3 style="margin:0; color:#FFF;">{cd['title']}</h3>
                         <span class="zapio-badge">{cd.get('type_label', cd['type'].upper())}</span>
                     </div>
-                    <p style="color:#8E8E93; font-size:0.8rem; margin:2px 0;">{cd['note']}</p>
+                    <p style="color:#CBD5E1; font-size:0.8rem; margin:2px 0;">{cd['note']}</p>
             """, unsafe_allow_html=True)
             st.code(cd['code'], language=cd['type'])
             st.markdown("</div>", unsafe_allow_html=True)
@@ -398,12 +396,12 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="margin:0; color:#FF3B30;">{img['title']}</h3>
+                        <h3 style="margin:0; color:#EC4899;">{img['title']}</h3>
                         <span class="zapio-badge">{img['gen']}</span>
                     </div>
             """, unsafe_allow_html=True)
             st.code(img['prompt'], language="text")
-            st.markdown(f"""<div style="font-size:0.8rem; color:#8E8E93;">Format: <b>{img['ar']}</b> | Exclure: <b>{img['neg']}</b></div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div style="font-size:0.8rem; color:#A78BFA;">Format: <b>{img['ar']}</b> | Exclure: <b>{img['neg']}</b></div></div>""", unsafe_allow_html=True)
 
     # ====================================================
     # 💡 IDÉES
@@ -427,7 +425,7 @@ else:
                         <h3 style="margin:0; color:#FFF;">{id_item['title']}</h3>
                         <span class="zapio-badge">{id_item['cat']}</span>
                     </div>
-                    <p style="color:#A0A0AB; margin-top:10px;">{id_item['desc']}</p>
+                    <p style="color:#CBD5E1; margin-top:10px;">{id_item['desc']}</p>
                     <span class="zapio-badge-green">Impact: {id_item['impact']}</span>
                 </div>
             """, unsafe_allow_html=True)
@@ -456,14 +454,14 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="margin:0; color:#FF3B30;">{cp['name']}</h3>
+                        <h3 style="margin:0; color:#EC4899;">{cp['name']}</h3>
                         <div>
                             <span class="zapio-badge" style="margin-right:8px;">{cp.get('priority', '🔴 Haute')}</span>
                             <span style="color:#FFF; font-size:0.9rem;">Client: <b>{cp['client']}</b></span>
                         </div>
                     </div>
-                    <p style="margin:12px 0 8px 0; color:#E0E6ED;">{cp.get('desc', '')}</p>
-                    <div style="font-size:0.85rem; color:#8E8E93; display:flex; gap:20px; margin-top:8px;">
+                    <p style="margin:12px 0 8px 0; color:#E2E8F0;">{cp.get('desc', '')}</p>
+                    <div style="font-size:0.85rem; color:#A78BFA; display:flex; gap:20px; margin-top:8px;">
                         <span>🎯 Prochaine étape : <b style="color:#FFF;">{cp['next']}</b></span>
                         <span>⏰ Échéance : <b style="color:#FFF;">{cp['deadline']}</b></span>
                     </div>
@@ -492,8 +490,8 @@ else:
                         <h3 style="margin:0; color:#FFF;">{fp['name']}</h3>
                         <span class="zapio-badge">{fp['horizon']}</span>
                     </div>
-                    <p style="color:#A0A0AB; margin-top:10px;"><b>Objectif:</b> {fp['goal']}</p>
-                    <p style="color:#8E8E93; font-size:0.85rem;"><b>Ressources:</b> {fp['resources']}</p>
+                    <p style="color:#CBD5E1; margin-top:10px;"><b>Objectif:</b> {fp['goal']}</p>
+                    <p style="color:#A78BFA; font-size:0.85rem;"><b>Ressources:</b> {fp['resources']}</p>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -528,11 +526,11 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="margin:0; color:#FF3B30;">{lk['title']}</h3>
+                        <h3 style="margin:0; color:#EC4899;">{lk['title']}</h3>
                         <span class="zapio-badge">{lk['cat']}</span>
                     </div>
-                    <a href="{lk['url']}" target="_blank" style="color:#00F2FE; display:block; margin:8px 0;">{lk['url']}</a>
-                    <span style="color:#8E8E93; font-size:0.8rem;">{lk['note']}</span>
+                    <a href="{lk['url']}" target="_blank" style="color:#38BDF8; display:block; margin:8px 0;">{lk['url']}</a>
+                    <span style="color:#A78BFA; font-size:0.8rem;">{lk['note']}</span>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -555,10 +553,10 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="margin:0; color:#FFF;">{zp['title']} <span style="font-size:0.8rem; color:#8E8E93;">({zp['version']})</span></h3>
+                        <h3 style="margin:0; color:#FFF;">{zp['title']} <span style="font-size:0.8rem; color:#A78BFA;">({zp['version']})</span></h3>
                         <a href="{zp['link']}" target="_blank" class="zapio-badge-green" style="text-decoration:none;">📥 Télécharger ZIP</a>
                     </div>
-                    <p style="color:#A0A0AB; margin-top:10px; font-size:0.85rem;"><b>Contenu:</b> {zp['contents']}</p>
+                    <p style="color:#CBD5E1; margin-top:10px; font-size:0.85rem;"><b>Contenu:</b> {zp['contents']}</p>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -589,10 +587,10 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <h3 style="margin:0; color:#FF3B30;">🔑 {ak['service']}</h3>
+                        <h3 style="margin:0; color:#EC4899;">🔑 {ak['service']}</h3>
                         <span class="zapio-badge">{ak['env']}</span>
                     </div>
-                    <p style="color:#8E8E93; font-size:0.85rem; margin: 4px 0;"><b>Notes:</b> {ak['notes'] if ak['notes'] else 'Aucune note'}</p>
+                    <p style="color:#CBD5E1; font-size:0.85rem; margin: 4px 0;"><b>Notes:</b> {ak['notes'] if ak['notes'] else 'Aucune note'}</p>
             """, unsafe_allow_html=True)
             st.code(ak['key'], language="text")
             st.markdown("</div>", unsafe_allow_html=True)
@@ -626,11 +624,11 @@ else:
             st.markdown(f"""
                 <div class="zapio-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <h3 style="margin:0; color:#FF3B30;">🔐 {cred['platform']}</h3>
+                        <h3 style="margin:0; color:#EC4899;">🔐 {cred['platform']}</h3>
                         <span class="zapio-badge">{cred['type']}</span>
                     </div>
                     <p style="color:#FFFFFF; font-size:0.9rem; margin: 4px 0;"><b>Identifiant / User :</b> {cred['username'] if cred['username'] else 'N/A'}</p>
-                    <p style="color:#8E8E93; font-size:0.85rem; margin: 4px 0;"><b>Notes / URL :</b> {cred['notes'] if cred['notes'] else 'Aucune note'}</p>
+                    <p style="color:#CBD5E1; font-size:0.85rem; margin: 4px 0;"><b>Notes / URL :</b> {cred['notes'] if cred['notes'] else 'Aucune note'}</p>
             """, unsafe_allow_html=True)
             st.code(cred['password'], language="text")
             st.markdown("</div>", unsafe_allow_html=True)
