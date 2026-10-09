@@ -1,5 +1,4 @@
-// Cache PWA pour mode hors-ligne PavelCore
-const CACHE_NAME = 'pavelcore-offline-v1';
+const CACHE_NAME = 'pavelcore-agenda-v2';
 const ASSETS_TO_CACHE = [
     '/',
     'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
@@ -31,8 +30,13 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
+        caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            return fetch(event.request).catch(() => {
+                return caches.match('/');
+            });
         })
     );
 });
