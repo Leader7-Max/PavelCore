@@ -1,11 +1,6 @@
-import os
-import sys
-
-# Résolution explicite du chemin système pour éviter les erreurs d'importation sur Streamlit Cloud
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 import streamlit as st
 import sqlite3
+import os
 from assets.styles import inject_custom_design
 
 # =========================================================
@@ -48,7 +43,7 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
-    # Utilisateurs par défaut si la base est neuve
+    # Comptes par défaut si la base est vide
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO users (name, pin, role) VALUES ('Pavel Yonta', '123456', 'Admin')")
@@ -142,7 +137,7 @@ with header_col2:
 st.divider()
 
 # =========================================================
-# 6. ÉCRAN D'AUTHENTIFICATION & CRÉATION DE COMPTE
+# 6. ÉCRAN D'AUTHENTIFICATION & CREATION DE COMPTE
 # =========================================================
 if not st.session_state.authenticated:
     tab_login, tab_register = st.tabs(["🔒 Connexion PIN", "➕ Créer un Compte"])
@@ -178,20 +173,20 @@ if not st.session_state.authenticated:
             if submit_reg:
                 if new_name.strip() and new_pin.strip():
                     if add_user(new_name.strip(), new_pin.strip()):
-                        st.success("Compte créé avec succès ! Vous pouvez vous connecter.")
+                        st.success("Compte créé avec succès ! Connectez-vous avec votre PIN.")
                     else:
-                        st.error("Ce PIN est déjà pris par un autre utilisateur. Choisissez-en un autre.")
+                        st.error("Ce PIN est déjà attribué à un autre utilisateur. Choisissez-en un autre.")
                 else:
                     st.warning("Veuillez remplir tous les champs.")
 
     st.stop()
 
 # =========================================================
-# 7. ESPACE DE TRAVAIL INDIVIDUEL
+# 7. ESPACE DE TRAVAIL INDIVIDUEL (APPRÈS CONNEXION)
 # =========================================================
 user_info = st.session_state.current_user
 
-# Bouton de déconnexion dans le menu latéral
+# Bouton de déconnexion
 if st.sidebar.button("🔴 Déconnexion"):
     st.session_state.authenticated = False
     st.session_state.current_user = None
@@ -228,10 +223,10 @@ with tab_event:
     if st.button("Enregistrer dans mon agenda", key="btn_save_event"):
         if titre.strip():
             save_event(user_info["id"], titre, categorie, date_evt, heure_evt, description)
-            st.success(f"Événement '{titre}' enregistré !")
+            st.success(f"Événement '{titre}' enregistré dans votre calendrier !")
             st.rerun()
         else:
-            st.warning("Veuillez saisir un titre.")
+            st.warning("Veuillez saisir au moins un titre.")
 
 # ---- ONGLET 2 : CALENDRIER PERSONNEL ----
 with tab_calendar:
@@ -246,7 +241,7 @@ with tab_calendar:
                 st.write(f"**Catégorie :** {cat}")
                 st.write(f"**Notes :** {desc if desc else 'Aucune description'}")
     else:
-        st.info("Aucun événement enregistré dans votre espace.")
+        st.info("Vous n'avez aucun événement enregistré dans votre espace.")
 
 # ---- ONGLET 3 : PROMPTS PERSONNELS ----
 with tab_prompts:
