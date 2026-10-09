@@ -12,18 +12,16 @@ def inject_custom_design():
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
-        /* En-tête Streamlit */
         [data-testid="stHeader"] {
             background-color: transparent !important;
         }
 
-        /* Titres & Labels */
         h1, h2, h3, h4, h5, h6, label, label p, .stMarkdown {
             color: #FFFFFF !important;
             font-weight: 700 !important;
         }
 
-        /* Champs de saisie texte (Input & Textarea) */
+        /* Champs de saisie */
         div[data-baseweb="input"] input, 
         div[data-baseweb="textarea"] textarea,
         .stTextInput input, 
@@ -32,63 +30,77 @@ def inject_custom_design():
             background-color: #FFFFFF !important;
             border: 1px solid #CBD5E1 !important;
             border-radius: 8px !important;
-            font-weight: 500 !important;
+            font-weight: 600 !important;
         }
 
-        /* Menus déroulants (Selectbox) */
         div[data-baseweb="select"] > div {
             background-color: #FFFFFF !important;
             color: #0F172A !important;
             border-radius: 8px !important;
+            font-weight: 600 !important;
         }
 
-        li[role="option"], div[role="option"] {
-            color: #0F172A !important;
+        /* Dropdown Options */
+        div[data-baseweb="popover"] ul, div[role="listbox"] {
             background-color: #FFFFFF !important;
+            color: #0F172A !important;
+        }
+        li[role="option"] {
+            color: #0F172A !important;
+            font-weight: 600 !important;
         }
 
-        /* FIX BOUTONS (Soumettre / Connexion / Enregistrer) */
-        .stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background-color: #FF3B30 !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            border: none !important;
-            border-radius: 10px !important;
-            padding: 12px 20px !important;
-            width: 100% !important;
-            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3) !important;
-        }
-
-        /* FIX ONGLETS (Vue Calendrier & Liste, etc.) */
+        /* FIX CRITIQUE : ONGLETS STREAMLIT (Tabs Agenda) */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 8px !important;
-            background-color: #1A1D27 !important;
-            padding: 6px !important;
-            border-radius: 10px !important;
+            gap: 10px !important;
+            background-color: #161922 !important;
+            padding: 8px !important;
+            border-radius: 14px !important;
             border: 1px solid #2A2E3D !important;
         }
 
         .stTabs [data-baseweb="tab"] {
-            border-radius: 6px !important;
-            padding: 8px 16px !important;
-            background-color: transparent !important;
+            background-color: #222736 !important;
+            border-radius: 10px !important;
+            padding: 10px 18px !important;
+            border: 1px solid #32384A !important;
         }
 
-        .stTabs [data-baseweb="tab"] p, .stTabs [data-baseweb="tab"] span {
-            color: #E2E8F0 !important;
-            font-weight: 600 !important;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background-color: #FF3B30 !important;
-        }
-
-        .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
+        /* Forcer la couleur blanche sur le texte de l'onglet inactif */
+        .stTabs [data-baseweb="tab"] p, 
+        .stTabs [data-baseweb="tab"] span, 
+        .stTabs [data-baseweb="tab"] div {
             color: #FFFFFF !important;
             font-weight: 800 !important;
+            font-size: 0.95rem !important;
         }
 
-        /* Cartes & Badges */
+        /* Onglet actif (sélectionné) */
+        .stTabs [aria-selected="true"] {
+            background-color: #FF3B30 !important;
+            border-color: #FF3B30 !important;
+        }
+
+        .stTabs [aria-selected="true"] p, 
+        .stTabs [aria-selected="true"] span {
+            color: #FFFFFF !important;
+        }
+
+        /* Boutons de formulaire */
+        .stButton > button, 
+        div[data-testid="stFormSubmitButton"] > button {
+            background-color: #FF3B30 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            border: none !important;
+            border-radius: 10px !important;
+            padding: 12px 20px !important;
+            width: 100% !important;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4) !important;
+        }
+
+        /* Cartes Workspace */
         .zapio-card {
             background-color: #181B24 !important;
             border: 1px solid #2A2E3D !important;
@@ -97,6 +109,20 @@ def inject_custom_design():
             margin-bottom: 15px;
         }
 
+        /* Carte Style Agenda Pro */
+        .agenda-card {
+            background: linear-gradient(135deg, #1A1E2B 0%, #12141D 100%);
+            border-left: 5px solid #FF3B30;
+            border-top: 1px solid #2A2E3D;
+            border-right: 1px solid #2A2E3D;
+            border-bottom: 1px solid #2A2E3D;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Badges */
         .zapio-badge {
             background-color: #2E3345;
             color: #FF3B30;
