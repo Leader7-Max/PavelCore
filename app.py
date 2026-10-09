@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime, date, time
 import streamlit.components.v1 as components
 
-# Correction du chemin d'importation pour Streamlit Cloud
+# Correctif pour Streamlit Cloud
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Configuration de la page
@@ -44,10 +44,9 @@ def detect_language(code):
     
     return "python"
 
-# MAP avec "Détection Automatique" en premier par défaut
 LANG_MAP = {
-    "Détection Automatique": "auto",
     "Python": "python",
+    "Détection Automatique": "auto",
     "JavaScript / React": "javascript",
     "HTML5": "html",
     "CSS3 / TailWind": "css",
@@ -63,7 +62,7 @@ if "authenticated" not in st.session_state:
 
 if "agenda_events" not in st.session_state:
     st.session_state.agenda_events = [
-        {"title": "Lancement Application PavelCore", "date": date(2026, 10, 25), "time": time(10, 0), "category": "Projet", "desc": "Mise en ligne sur Streamlit", "ringtone": "Alarme Digitale"}
+        {"title": "Lancement Application PavelCore", "date": date(2026, 10, 25), "time": time(10, 0), "category": "Projet", "desc": "Mise en ligne globale sur Streamlit Cloud", "ringtone": "Alarme Digitale"}
     ]
 
 if "saved_ai_prompts" not in st.session_state:
@@ -95,6 +94,9 @@ if "saved_zip_files" not in st.session_state:
 
 if "saved_api_keys" not in st.session_state:
     st.session_state.saved_api_keys = []
+
+if "saved_user_credentials" not in st.session_state:
+    st.session_state.saved_user_credentials = []
 
 
 # ----------------------------------------------------
@@ -161,7 +163,8 @@ else:
             "🔮 Projets futurs", 
             "🔗 Liens Utiles", 
             "📦 Fichiers ZIP",
-            "🔑 Mes Clés API"
+            "🔑 Mes Clés API",
+            "🔐 Mes Accès & Mots de passe"
         ],
         horizontal=True,
         label_visibility="collapsed"
@@ -170,13 +173,13 @@ else:
     st.markdown("<hr style='border-color: rgba(255,255,255,0.1); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
 
     # ====================================================
-    # 📆 AGENDA PREMIUM
+    # 📆 AGENDA PREMIUM (Design Planning Vrai Agenda)
     # ====================================================
     if menu == "📆 Agenda Premium":
         st.markdown("""
             <div style="margin-bottom: 20px;">
-                <span class="zapio-badge">🔴 Gestionnaire Temporel & Rappels Sonores</span>
-                <h2 style="margin-top: 10px;">Agenda Ultra Premium</h2>
+                <span class="zapio-badge">🔴 Planning Interactif & Gestionnaire d'Événements</span>
+                <h2 style="margin-top: 10px;">Agenda & Mon Emploi du Temps</h2>
             </div>
         """, unsafe_allow_html=True)
 
@@ -185,71 +188,87 @@ else:
 
         if today_events:
             st.markdown(f"""
-                <div class="zapio-card" style="border-color: #FF3B30;">
+                <div class="zapio-card" style="border-color: #FF3B30; background: linear-gradient(135deg, rgba(255,59,48,0.2) 0%, #181B24 100%);">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="zapio-badge">🔔 ALERTE ÉVÉNEMENT AUJOURD'HUI</span>
-                        <span style="color:#8E8E93; font-size:0.85rem;">{today.strftime('%d/%m/%Y')}</span>
+                        <span class="zapio-badge">🔔 RAPPELS DU JOUR</span>
+                        <span style="color:#FFF; font-weight:bold; font-size:0.9rem;">{today.strftime('%d/%m/%Y')}</span>
                     </div>
-                    <h3 style="color:#FFF; margin-top:10px;">Vous avez {len(today_events)} événement(s) prévu(s) aujourd'hui !</h3>
+                    <h3 style="color:#FFF; margin-top:10px;">Vous avez {len(today_events)} rendez-vous aujourd'hui !</h3>
                 </div>
             """, unsafe_allow_html=True)
 
-        tab_add, tab_view = st.tabs(["➕ Ajouter un Événement", "📅 Vue Calendrier & Liste"])
+        tab_add, tab_view = st.tabs(["➕ Programmer un Événement", "📅 Mon Planning / Liste"])
 
         with tab_add:
             with st.form("add_event_form"):
-                st.subheader("Planifier un événement")
-                title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Réunion projet Reborn Beauty")
+                st.subheader("Nouvelle Entrée Agenda")
+                title = st.text_input("Intitulé du Rendez-vous / Tâche", placeholder="Ex: Prestation DJ Event ou Réunion Reborn")
                 
                 c_date, c_time = st.columns(2)
                 with c_date:
-                    event_date = st.date_input("Date (Jour / Mois / Année)", value=date.today())
+                    event_date = st.date_input("Date", value=date.today())
                 with c_time:
-                    event_time = st.time_input("Heure de l'événement", value=time(12, 0))
+                    event_time = st.time_input("Heure", value=time(12, 0))
 
                 c_cat, c_ring = st.columns(2)
                 with c_cat:
-                    category = st.selectbox("Catégorie", ["Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Event"])
+                    category = st.selectbox("Type d'événement", ["Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"])
                 with c_ring:
-                    ringtone = st.selectbox("Sonnerie & Notification", ["Alarme Digitale", "Bip Futuriste", "Douce Mélodie", "Silence"])
+                    ringtone = st.selectbox("Notification / Rappel", ["Alarme Digitale", "Bip Futuriste", "Douce Mélodie", "Silence"])
 
-                desc = st.text_area("Description / Notes supplémentaires")
+                desc = st.text_area("Notes complémentaires / Lieu")
 
-                if st.form_submit_button("🔔 Enregistrer dans l'Agenda"):
+                if st.form_submit_button("📅 Ajouter à mon Agenda"):
                     if title:
                         st.session_state.agenda_events.append({
                             "title": title, "date": event_date, "time": event_time,
                             "category": category, "desc": desc, "ringtone": ringtone
                         })
-                        st.success("Événement ajouté avec succès !")
+                        st.success("Événement ajouté au planning !")
                         st.rerun()
 
         with tab_view:
             if st.session_state.agenda_events:
-                for ev in st.session_state.agenda_events:
+                # Tri chronologique par date et heure
+                sorted_events = sorted(st.session_state.agenda_events, key=lambda x: (x['date'], x['time']))
+                
+                for ev in sorted_events:
+                    formatted_date = ev['date'].strftime('%d %B %Y')
+                    formatted_time = ev['time'].strftime('%H:%M')
+                    
                     st.markdown(f"""
-                        <div class="zapio-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <h3 style="margin:0; color:#FF3B30;">{ev['title']}</h3>
+                        <div class="agenda-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="background: #FF3B30; color: #FFF; padding: 8px 14px; border-radius: 8px; text-align: center; font-weight: 800; font-size: 1.1rem;">
+                                        ⏰ {formatted_time}
+                                    </div>
+                                    <div>
+                                        <h3 style="margin: 0; color: #FFF; font-size: 1.2rem;">{ev['title']}</h3>
+                                        <span style="color: #A0A0AB; font-size: 0.85rem;">📅 {formatted_date}</span>
+                                    </div>
+                                </div>
                                 <span class="zapio-badge">{ev['category']}</span>
                             </div>
-                            <p style="color:#A0A0AB; margin:10px 0;">{ev['desc']}</p>
-                            <div style="font-size:0.85rem; color:#FFF; display:flex; gap:20px;">
-                                <span>📅 Date : <b>{ev['date'].strftime('%d/%m/%Y')}</b></span>
-                                <span>⏰ Heure : <b>{ev['time'].strftime('%H:%M')}</b></span>
-                                <span>🔔 Sonnerie : <b>{ev['ringtone']}</b></span>
+                            <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); color: #D1D5DB; font-size: 0.9rem;">
+                                {ev['desc'] if ev['desc'] else '<i>Aucune note ajoutée</i>'}
+                            </div>
+                            <div style="margin-top: 8px; font-size: 0.8rem; color: #8E8E93;">
+                                🔔 Sonnerie paramétrée : <b>{ev['ringtone']}</b>
                             </div>
                         </div>
                     """, unsafe_allow_html=True)
+            else:
+                st.info("Votre agenda est vide pour le moment.")
 
     # ====================================================
-    # 🤖 PROMPTS AI CODES (Correctif Détection Automatique)
+    # 🤖 PROMPTS AI CODES
     # ====================================================
     elif menu == "🤖 Prompts AI Code":
         st.subheader("🤖 Mes Prompts AI Code")
         with st.form("form_ai_code"):
             title = st.text_input("Titre du Prompt Code")
-            selected_lang = st.selectbox("Langage / Framework ciblé", list(LANG_MAP.keys()), index=0)
+            selected_lang = st.selectbox("Langage / Framework ciblé", list(LANG_MAP.keys()))
             prompt = st.text_area("Contenu du Prompt AI / Code", height=160)
             tags = st.text_input("Mots-clés / Tags", placeholder="ex: backend, api, auth")
             
@@ -257,14 +276,10 @@ else:
                 if title and prompt:
                     final_lang = LANG_MAP[selected_lang]
                     if final_lang == "auto":
-                        detected = detect_language(prompt)
-                        final_lang = detected
-                        display_label = f"Auto ({detected.upper()})"
-                    else:
-                        display_label = selected_lang
+                        final_lang = detect_language(prompt)
                     
                     st.session_state.saved_ai_prompts.append({
-                        "title": title, "lang_label": display_label, "lang": final_lang, "prompt": prompt, "tags": tags
+                        "title": title, "lang_label": selected_lang, "lang": final_lang, "prompt": prompt, "tags": tags
                     })
                     st.rerun()
 
@@ -288,7 +303,7 @@ else:
         with st.form("form_claude"):
             title = st.text_input("Titre de la consigne", placeholder="Ex: Refactoring React Component")
             system_prompt = st.text_area("System Prompt / Instructions de rôle", height=100, placeholder="Ex: Tu es un expert Senior Python...")
-            selected_lang = st.selectbox("Langage / Format principal du Code", list(LANG_MAP.keys()), index=0)
+            selected_lang = st.selectbox("Langage / Format principal du Code", list(LANG_MAP.keys()))
             user_prompt = st.text_area("User Prompt / Code collé", height=150, placeholder="Collez le code ou la consigne ici...")
             artifacts = st.text_input("Artifacts attendus", placeholder="ex: Application React, Script Python")
             
@@ -296,14 +311,10 @@ else:
                 if title and user_prompt:
                     final_lang = LANG_MAP[selected_lang]
                     if final_lang == "auto":
-                        detected = detect_language(user_prompt)
-                        final_lang = detected
-                        display_label = f"Auto ({detected.upper()})"
-                    else:
-                        display_label = selected_lang
+                        final_lang = detect_language(user_prompt)
 
                     st.session_state.saved_claude_prompts.append({
-                        "title": title, "sys": system_prompt, "user": user_prompt, "artifacts": artifacts, "lang_label": display_label, "lang": final_lang
+                        "title": title, "sys": system_prompt, "user": user_prompt, "artifacts": artifacts, "lang_label": selected_lang, "lang": final_lang
                     })
                     st.success("Prompt enregistré !")
                     st.rerun()
@@ -327,7 +338,7 @@ else:
         st.subheader("💻 Mes Snippets de Code")
         with st.form("form_code"):
             title = st.text_input("Nom de la fonction / Snippet")
-            selected_lang = st.selectbox("Langage du Snippet", list(LANG_MAP.keys()), index=0)
+            selected_lang = st.selectbox("Langage du Snippet", list(LANG_MAP.keys()))
             code_content = st.text_area("Collez votre code ici", height=180)
             usage_note = st.text_input("Note d'utilisation")
             
@@ -335,14 +346,10 @@ else:
                 if title and code_content:
                     final_lang = LANG_MAP[selected_lang]
                     if final_lang == "auto":
-                        detected = detect_language(code_content)
-                        final_lang = detected
-                        display_label = f"Auto ({detected.upper()})"
-                    else:
-                        display_label = selected_lang
+                        final_lang = detect_language(code_content)
 
                     st.session_state.saved_code_snippets.append({
-                        "title": title, "type_label": display_label, "type": final_lang, "code": code_content, "note": usage_note
+                        "title": title, "type_label": selected_lang, "type": final_lang, "code": code_content, "note": usage_note
                     })
                     st.rerun()
 
@@ -487,14 +494,19 @@ else:
         with st.form("form_links"):
             title = st.text_input("Nom du site / Application")
             url = st.text_input("Lien URL (https://...)")
-            category = st.selectbox("Catégorie", [
-                "Téléchargement d'applications",
-                "Sites Web Utiles",
-                "Doc Tech & API",
-                "Outils Design & AI",
-                "Inspiration / Modèles",
-                "Administration / Finance"
-            ])
+            category = st.selectbox(
+                "Catégorie", 
+                [
+                    "Doc Tech & API", 
+                    "Outils Design & AI", 
+                    "Téléchargement d'Apps & Logiciels",
+                    "Sites Web Utiles & Services",
+                    "Ressources & Banques d'Images",
+                    "E-commerce & Business",
+                    "Inspiration / Modèles", 
+                    "Administration / Finance"
+                ]
+            )
             note = st.text_input("Note")
             if st.form_submit_button("Enregistrer le Lien"):
                 if title and url:
@@ -572,4 +584,42 @@ else:
                     <p style="color:#8E8E93; font-size:0.85rem; margin: 4px 0;"><b>Notes:</b> {ak['notes'] if ak['notes'] else 'Aucune note'}</p>
             """, unsafe_allow_html=True)
             st.code(ak['key'], language="text")
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    # ====================================================
+    # 🔐 MES ACCÈS & MOTS DE PASSE
+    # ====================================================
+    elif menu == "🔐 Mes Accès & Mots de passe":
+        st.subheader("🔐 Coffre-Fort d'Accès, PIN & Mots de Passe")
+        
+        with st.form("form_user_cred"):
+            platform_name = st.text_input("Plateforme / Site / Application", placeholder="Ex: OVH, WordPress Reborn, Serveur VPS...")
+            username_val = st.text_input("Identifiant / Nom d'utilisateur / Email", placeholder="ex: admin_pavel ou contact@domaine.com")
+            password_val = st.text_input("Mot de passe / Code PIN / Secret", type="password", placeholder="••••••••")
+            cred_type = st.selectbox("Type d'accès", ["Compte Web / Service", "Code PIN / Sécurité", "Serveur / SSH / BDD", "Application Mobile"])
+            cred_notes = st.text_input("Notes & URL de connexion", placeholder="Ex: https://admin.site.com, IP du serveur...")
+
+            if st.form_submit_button("🔐 Enregistrer les Identifiants"):
+                if platform_name and (username_val or password_val):
+                    st.session_state.saved_user_credentials.append({
+                        "platform": platform_name,
+                        "username": username_val,
+                        "password": password_val,
+                        "type": cred_type,
+                        "notes": cred_notes
+                    })
+                    st.success("Accès enregistré dans le coffre-fort !")
+                    st.rerun()
+
+        for cred in st.session_state.saved_user_credentials:
+            st.markdown(f"""
+                <div class="zapio-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                        <h3 style="margin:0; color:#FF3B30;">🔐 {cred['platform']}</h3>
+                        <span class="zapio-badge">{cred['type']}</span>
+                    </div>
+                    <p style="color:#FFFFFF; font-size:0.9rem; margin: 4px 0;"><b>Identifiant / User :</b> {cred['username'] if cred['username'] else 'N/A'}</p>
+                    <p style="color:#8E8E93; font-size:0.85rem; margin: 4px 0;"><b>Notes / URL :</b> {cred['notes'] if cred['notes'] else 'Aucune note'}</p>
+            """, unsafe_allow_html=True)
+            st.code(cred['password'], language="text")
             st.markdown("</div>", unsafe_allow_html=True)
