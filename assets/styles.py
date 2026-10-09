@@ -42,62 +42,66 @@ def inject_custom_design():
         }
 
         /* ====================================================
-           🔥 CORRECTION DES ONGLETS (ST.TABS) - DESIGN NÉON 3D
+           🔥 FORÇAGE ABSOLU STYLE DES ONGLETS (ST.TABS)
            ==================================================== */
-        
+
         /* Conteneur de la barre d'onglets */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 12px !important;
-            background-color: rgba(38, 18, 69, 0.6) !important;
-            padding: 8px 12px !important;
+        [data-testid="stTabs"] [data-baseweb="tab-list"] {
+            gap: 10px !important;
+            background-color: #261245 !important;
+            padding: 8px !important;
             border-radius: 16px !important;
-            border: 1px solid rgba(139, 92, 246, 0.3) !important;
-            backdrop-filter: blur(10px) !important;
+            border: 1px solid #5B21B6 !important;
         }
 
-        /* Masquer la ligne rouge par défaut de Streamlit */
-        .stTabs [data-baseweb="tab-highlight-title"] {
+        /* Supprime la barre rouge/orange de soulignement par défaut de Streamlit */
+        [data-testid="stTabs"] [data-baseweb="tab-highlight-title"] {
+            background-color: transparent !important;
             display: none !important;
         }
-        .stTabs [data-baseweb="tab-border"] {
+        [data-testid="stTabs"] [data-baseweb="tab-border"] {
             display: none !important;
         }
 
-        /* Style de BASE pour TOUS les Onglets */
-        .stTabs [data-baseweb="tab"] {
+        /* Boutons d'onglets (Boutons individuels) */
+        [data-testid="stTabs"] button[role="tab"] {
             background: linear-gradient(135deg, #2A134E 0%, #1E0A3C 100%) !important;
             border-radius: 12px !important;
-            padding: 12px 22px !important;
+            padding: 10px 20px !important;
             border: 1px solid #5B21B6 !important;
-            transition: all 0.3s ease-in-out !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            margin-right: 4px !important;
+            transition: all 0.3s ease !important;
         }
 
-        /* FORCER le Texte et Icônes en BLANC PUR sur TOUS les Onglets */
-        .stTabs [data-baseweb="tab"] *,
-        .stTabs [data-baseweb="tab"] p, 
-        .stTabs [data-baseweb="tab"] span, 
-        .stTabs [data-baseweb="tab"] div {
+        /* FORCE LE TEXTE EN BLANC PUR ET GRAS SUR TOUS LES ONGLETS */
+        [data-testid="stTabs"] button[role="tab"] *,
+        [data-testid="stTabs"] button[role="tab"] p,
+        [data-testid="stTabs"] button[role="tab"] div,
+        [data-testid="stTabs"] button[role="tab"] span {
             color: #FFFFFF !important;
             font-weight: 800 !important;
             font-size: 0.95rem !important;
-            letter-spacing: 0.3px !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }
 
-        /* Effet d'affichage / Survol (Hover) sur Onglet Inactif */
-        .stTabs [data-baseweb="tab"]:hover {
+        /* SURVOL (HOVER) sur onglet inactif */
+        [data-testid="stTabs"] button[role="tab"]:hover {
             background: linear-gradient(135deg, #4C1D95 0%, #31105E 100%) !important;
             border-color: #EC4899 !important;
             transform: translateY(-2px) !important;
-            box-shadow: 0 6px 18px rgba(236, 72, 153, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
         }
 
-        /* Style de l'ONGLET ACTIF (Sélectionné) */
-        .stTabs [aria-selected="true"] {
+        /* ONGLET ACTIF (SÉLECTIONNÉ) - NÉON 3D VIOLET / ROSE */
+        [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
             background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
             border: 1px solid #F472B6 !important;
-            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5), 0 0 10px rgba(139, 92, 246, 0.4) !important;
-            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6) !important;
+        }
+
+        [data-testid="stTabs"] button[role="tab"][aria-selected="true"] * {
+            color: #FFFFFF !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
         }
 
         /* ==================================================== */
