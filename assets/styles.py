@@ -45,7 +45,7 @@ def inject_custom_design():
            🔥 FORÇAGE RESPONSIVE MOBILE POUR LA GRILLE 7 JOURS
            ==================================================== */
         
-        /* Conserver les 7 colonnes côte à côte même sur Mobile */
+        /* Garder 7 colonnes en ligne même sur mobile */
         div[data-testid="stHorizontalBlock"]:has(.calendar-day-box),
         div[data-testid="stHorizontalBlock"]:has(.calendar-header-box) {
             display: flex !important;
@@ -62,7 +62,6 @@ def inject_custom_design():
             flex: 1 1 0 !important;
         }
 
-        /* Styles des entêtes et cases du calendrier */
         .calendar-header-box {
             text-align: center;
             font-weight: 800;
