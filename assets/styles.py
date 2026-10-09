@@ -5,7 +5,7 @@ def inject_custom_design():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-        /* Background Violet Deep (Thème Design Calendar) */
+        /* Background Violet Deep */
         html, body, [data-testid="stAppViewContainer"], .stApp {
             background: linear-gradient(135deg, #1A0B2E 0%, #110520 100%) !important;
             color: #F3F4F6 !important;
@@ -41,48 +41,66 @@ def inject_custom_design():
             font-weight: 600 !important;
         }
 
-        div[data-baseweb="popover"] ul, div[role="listbox"] {
-            background-color: #FFFFFF !important;
-            color: #1A0B2E !important;
-        }
-        li[role="option"] {
-            color: #1A0B2E !important;
-            font-weight: 600 !important;
-        }
-
-        /* FIX CRITIQUE : ONGLET INACTIF ULTRA VISIBLE & LISIBLE SUR MOBILE */
+        /* ====================================================
+           🔥 CORRECTION DES ONGLETS (ST.TABS) - DESIGN NÉON 3D
+           ==================================================== */
+        
+        /* Conteneur de la barre d'onglets */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 8px !important;
-            background-color: #261245 !important;
-            padding: 8px !important;
+            gap: 12px !important;
+            background-color: rgba(38, 18, 69, 0.6) !important;
+            padding: 8px 12px !important;
             border-radius: 16px !important;
-            border: 1px solid #5B21B6 !important;
-            overflow-x: auto !important;
-            white-space: nowrap !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            backdrop-filter: blur(10px) !important;
         }
 
+        /* Masquer la ligne rouge par défaut de Streamlit */
+        .stTabs [data-baseweb="tab-highlight-title"] {
+            display: none !important;
+        }
+        .stTabs [data-baseweb="tab-border"] {
+            display: none !important;
+        }
+
+        /* Style de BASE pour TOUS les Onglets */
         .stTabs [data-baseweb="tab"] {
-            background-color: #3B1578 !important;
+            background: linear-gradient(135deg, #2A134E 0%, #1E0A3C 100%) !important;
             border-radius: 12px !important;
-            padding: 10px 16px !important;
-            border: 1px solid #7C3AED !important;
+            padding: 12px 22px !important;
+            border: 1px solid #5B21B6 !important;
+            transition: all 0.3s ease-in-out !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
         }
 
-        /* Texte BLANC Néon forcé sur TOUS les onglets */
+        /* FORCER le Texte et Icônes en BLANC PUR sur TOUS les Onglets */
+        .stTabs [data-baseweb="tab"] *,
         .stTabs [data-baseweb="tab"] p, 
         .stTabs [data-baseweb="tab"] span, 
         .stTabs [data-baseweb="tab"] div {
             color: #FFFFFF !important;
             font-weight: 800 !important;
-            font-size: 0.9rem !important;
+            font-size: 0.95rem !important;
+            letter-spacing: 0.3px !important;
         }
 
-        /* Onglet Actif Violet/Rose Vif */
+        /* Effet d'affichage / Survol (Hover) sur Onglet Inactif */
+        .stTabs [data-baseweb="tab"]:hover {
+            background: linear-gradient(135deg, #4C1D95 0%, #31105E 100%) !important;
+            border-color: #EC4899 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 18px rgba(236, 72, 153, 0.3) !important;
+        }
+
+        /* Style de l'ONGLET ACTIF (Sélectionné) */
         .stTabs [aria-selected="true"] {
             background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-            border-color: #F472B6 !important;
-            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.5) !important;
+            border: 1px solid #F472B6 !important;
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5), 0 0 10px rgba(139, 92, 246, 0.4) !important;
+            transform: translateY(-1px) !important;
         }
+
+        /* ==================================================== */
 
         /* Boutons de Formulaire 3D */
         .stButton > button, 
@@ -96,9 +114,16 @@ def inject_custom_design():
             padding: 14px 24px !important;
             width: 100% !important;
             box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4) !important;
+            transition: all 0.3s ease !important;
         }
 
-        /* Cartes du Workspace Style Purple Glass */
+        .stButton > button:hover, 
+        div[data-testid="stFormSubmitButton"] > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6) !important;
+        }
+
+        /* Cartes du Workspace */
         .zapio-card {
             background: linear-gradient(135deg, rgba(46, 16, 80, 0.8) 0%, rgba(27, 9, 48, 0.9) 100%) !important;
             border: 1px solid #6D28D9 !important;
@@ -108,7 +133,7 @@ def inject_custom_design():
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* CARTE AGENDA : BLOC LISTE SOUS LE CALENDRIER */
+        /* Cartes Événements */
         .calendar-event-card {
             background: linear-gradient(135deg, #2D1254 0%, #1E0A3C 100%);
             border: 1px solid #A855F7;
