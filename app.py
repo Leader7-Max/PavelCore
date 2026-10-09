@@ -3,6 +3,7 @@ import os
 import re
 import calendar
 import json
+import base64
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, time
@@ -394,12 +395,11 @@ else:
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
-        # --- SECTION EXPORT / IMPORT (BACKUP GLOBAL - POINT 5) ---
+        # --- SECTION EXPORT / IMPORT (BACKUP GLOBAL) ---
         st.markdown("<br>", unsafe_allow_html=True)
         with st.expander("⚙️ Gestion & Sauvegarde Globale du Workspace (Backup JSON)"):
-            st.markdown(f"<p style='color:{desc_color}; font-size:0.9rem;'>Exportez l'intégralité de vos données (Agenda, Projets, Prompts, Coffre-Fort) pour ne jamais rien perdre, ou restaurez un ancien fichier de sauvegarde.</p>", unsafe_allow_html=True)
+            st.markdown(f"<p style='color:{desc_color}; font-size:0.9rem;'>Exportez l'intégralité de vos données pour ne jamais rien perdre, ou restaurez un ancien fichier de sauvegarde.</p>", unsafe_allow_html=True)
             
-            # Préparation des données pour l'export JSON
             workspace_data = {
                 "agenda_events": [
                     {
@@ -451,7 +451,6 @@ else:
                         st.session_state.saved_api_keys = imported_data.get("saved_api_keys", [])
                         st.session_state.saved_user_credentials = imported_data.get("saved_user_credentials", [])
                         
-                        # Restauration de l'agenda avec conversion des dates
                         restored_events = []
                         for ev in imported_data.get("agenda_events", []):
                             restored_events.append({
@@ -574,36 +573,62 @@ else:
                     st.markdown('</div>', unsafe_allow_html=True)
 
         elif current == "Ressources":
-            sub_tab = st.radio("Navigation Ressources", ["🎨 Prompts Images", "🔗 Liens Utiles", "📦 Fichiers ZIP"], horizontal=True)
+            sub_tab = st.radio("Navigation Ressources", ["🎨 Prompts & Images", "🔗 Liens Utiles", "📦 Fichiers ZIP"], horizontal=True)
             st.markdown("<hr style='border-color: rgba(236,72,153,0.2);'>", unsafe_allow_html=True)
             
-            if sub_tab == "🎨 Prompts Images":
+            # --- 🎨 1. PROMPTS ET IMAGES (AVEC UPLOAD DE FICHIER IMAGE) ---
+            if sub_tab == "🎨 Prompts & Images":
                 with st.form("form_img_prompt"):
-                    img_title = st.text_input("Titre de l'image / prompt")
-                    generator = st.selectbox("Générateur", ["Midjourney", "DALL-E 3", "Flux.1"])
+                    img_title = st.text_input("Titre de l'image / du prompt")
+                    generator = st.selectbox("Générateur", ["Midjourney", "DALL-E 3", "Flux.1", "Autre"])
                     prompt_text = st.text_area("Prompt exact")
-                    aspect_ratio = st.selectbox("Format", ["1:1", "16:9", "9:16"])
-                    submitted_img = st.form_submit_button("Enregistrer le Prompt Image")
+                    aspect_ratio = st.selectbox("Format", ["1:1", "16:9", "9:16", "Autre"])
+                    
+                    # Widget de téléversement d'image dans le formulaire
+                    uploaded_image_file = st.file_uploader("Importer l'image générée (PNG, JPG, WEBP)", type=["png", "jpg", "jpeg", "webp"])
+                    
+                    submitted_img = st.form_submit_button("Enregistrer l'Image & le Prompt")
                     if submitted_img:
                         if img_title and prompt_text:
+                            img_bytes_data = uploaded_image_file.getvalue() if uploaded_image_file is not None else None
+                            img_file_name = uploaded_image_file.name if uploaded_image_file is not None else None
+                            
                             st.session_state.saved_image_prompts.append({
                                 "title": img_title, 
                                 "gen": generator, 
                                 "prompt": prompt_text, 
-                                "ar": aspect_ratio
+                                "ar": aspect_ratio,
+                                "file_data": base64.b64encode(img_bytes_data).decode('utf-8') if img_bytes_data else None,
+                                "file_name": img_file_name
                             })
-                            st.toast("🎨 Prompt image enregistré avec succès !", icon="✅")
+                            st.toast("🎨 Image et prompt enregistrés avec succès !", icon="✅")
                             st.rerun()
                 
-                st.markdown("### 📋 Prompts enregistrés :")
+                st.markdown("### 🖼️ Galerie & Prompts enregistrés :")
                 if not st.session_state.saved_image_prompts:
-                    st.info("Aucun prompt image enregistré pour le moment.")
+                    st.info("Aucun prompt ou image enregistré pour le moment.")
                 else:
                     for idx, img in enumerate(st.session_state.saved_image_prompts):
-                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};"><b>Générateur:</b> {img["gen"]} | <b>Format:</b> {img["ar"]}</p><p style="color:{text_color}; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">{img["prompt"]}</p></div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};"><b>Générateur:</b> {img["gen"]} | <b>Format:</b> {img["ar"]}</p><p style="color:{text_color}; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;"><b>Prompt:</b> {img["prompt"]}</p></div>', unsafe_allow_html=True)
+                        
+                        # Afficher l'aperçu de l'image si elle a été téléversée
+                        if img.get("file_data"):
+                            try:
+                                decoded_img_bytes = base64.b64decode(img["file_data"].encode('utf-8'))
+                                st.image(decoded_img_bytes, caption=img.get("file_name", "Image importée"), width=300)
+                                st.download_button(
+                                    label=f"⬇️ Télécharger l'image brute ({img.get('file_name', 'image.png')})",
+                                    data=decoded_img_bytes,
+                                    file_name=img.get("file_name", "image.png"),
+                                    mime="image/png",
+                                    key=f"dl_raw_img_{idx}"
+                                )
+                            except Exception:
+                                pass
+                        
                         file_content = f"Titre: {img['title']}\nGénérateur: {img['gen']}\nFormat: {img['ar']}\n\nPrompt:\n{img['prompt']}"
                         st.download_button(
-                            label=f"⬇️ Télécharger le prompt ({img['title']})",
+                            label=f"⬇️ Télécharger la fiche texte ({img['title']})",
                             data=file_content,
                             file_name=f"{img['title'].lower().replace(' ', '_')}_prompt.txt",
                             mime="text/plain",
@@ -622,33 +647,56 @@ else:
                 for lk in st.session_state.saved_links:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{lk["title"]}</h3><a href="{lk["url"]}" target="_blank">{lk["url"]}</a></div>', unsafe_allow_html=True)
 
+            # --- 📦 2. FICHIERS ZIP (AVEC UPLOAD DE VRAIS FICHIERS ZIP) ---
             elif sub_tab == "📦 Fichiers ZIP":
                 with st.form("form_zip"):
-                    zip_title = st.text_input("Nom du fichier ZIP / Projet")
-                    cloud_link = st.text_input("Lien de téléchargement direct")
+                    zip_title = st.text_input("Nom du fichier ZIP / du Projet")
                     version = st.text_input("Version", value="v1.0")
                     contents = st.text_area("Description du contenu")
-                    submitted_zip = st.form_submit_button("Enregistrer le fichier ZIP")
+                    
+                    # Widget de téléversement de fichier ZIP
+                    uploaded_zip_file = st.file_uploader("Importer le fichier ZIP (.zip)", type=["zip"])
+                    
+                    submitted_zip = st.form_submit_button("Importer & Enregistrer le fichier ZIP")
                     if submitted_zip:
-                        if zip_title and cloud_link:
+                        if zip_title:
+                            zip_bytes_data = uploaded_zip_file.getvalue() if uploaded_zip_file is not None else None
+                            zip_file_name = uploaded_zip_file.name if uploaded_zip_file is not None else f"{zip_title}.zip"
+                            
                             st.session_state.saved_zip_files.append({
                                 "title": zip_title, 
-                                "link": cloud_link, 
                                 "version": version, 
-                                "contents": contents
+                                "contents": contents,
+                                "file_data": base64.b64encode(zip_bytes_data).decode('utf-8') if zip_bytes_data else None,
+                                "file_name": zip_file_name
                             })
-                            st.toast("📦 Fichier ZIP enregistré avec succès !", icon="✅")
+                            st.toast("📦 Fichier ZIP importé et enregistré avec succès !", icon="✅")
                             st.rerun()
                 
-                st.markdown("### 📦 Fichiers ZIP enregistrés :")
+                st.markdown("### 📦 Fichiers ZIP enregistrés & importés :")
                 if not st.session_state.saved_zip_files:
                     st.info("Aucun fichier ZIP enregistré pour le moment.")
                 else:
                     for idx, zp in enumerate(st.session_state.saved_zip_files):
-                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]} ({zp["version"]})</h3><p style="color:{desc_color};">{zp["contents"]}</p><a href="{zp["link"]}" target="_blank" style="color: #EC4899; font-weight: bold;">🌐 Ouvrir le lien direct</a></div>', unsafe_allow_html=True)
-                        zip_meta = f"Fichier ZIP: {zp['title']}\nVersion: {zp['version']}\nLien source: {zp['link']}\nContenu:\n{zp['contents']}"
+                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]} ({zp["version"]})</h3><p style="color:{desc_color};">{zp["contents"]}</p></div>', unsafe_allow_html=True)
+                        
+                        # Si un fichier ZIP réel a été téléversé, proposer son téléchargement direct
+                        if zp.get("file_data"):
+                            try:
+                                decoded_zip_bytes = base64.b64decode(zp["file_data"].encode('utf-8'))
+                                st.download_button(
+                                    label=f"⬇️ Télécharger le fichier ZIP ({zp.get('file_name', 'archive.zip')})",
+                                    data=decoded_zip_bytes,
+                                    file_name=zp.get('file_name', 'archive.zip'),
+                                    mime="application/zip",
+                                    key=f"dl_real_zip_{idx}"
+                                )
+                            except Exception:
+                                pass
+                        
+                        zip_meta = f"Fichier ZIP: {zp['title']}\nVersion: {zp['version']}\nContenu:\n{zp['contents']}"
                         st.download_button(
-                            label=f"⬇️ Télécharger la fiche / lien ({zp['title']})",
+                            label=f"⬇️ Télécharger la fiche récapitulative ({zp['title']})",
                             data=zip_meta,
                             file_name=f"{zp['title'].lower().replace(' ', '_')}_{zp['version']}.txt",
                             mime="text/plain",
