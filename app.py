@@ -209,7 +209,14 @@ MONTH_NAMES_FR = [
 ]
 
 def render_agenda_module():
-    st.markdown(f'<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
+    # Bouton de retour si l'agenda est ouvert en mode direct ou depuis l'accueil
+    if st.session_state.get("direct_agenda", False) or query_params.get("app", None) == "agenda":
+        if st.button("← Retour / Quitter l'Agenda", key="back_from_direct_agenda", type="secondary"):
+            st.session_state.direct_agenda = False
+            # Nettoyer les query params si possible ou réinitialiser la vue
+            st.rerun()
+
+    st.markdown(f'<div style="margin-top: 10px; margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
     col_btn1, col_btn2, col_clear = st.columns([2.3, 2.5, 2])
     
     with col_btn1:
@@ -477,7 +484,6 @@ else:
             render_agenda_module()
 
         elif current == "Projets":
-            # Remplacement par st.pills pour le mobile
             sub_tab = st.pills(
                 "Navigation Projets",
                 options=["🚀 Projets en cours", "🔮 Projets futurs", "💡 Idées"],
@@ -485,7 +491,6 @@ else:
                 label_visibility="collapsed"
             )
             
-            # --- GRAND TITRE D'ACCROCHE POUR PROJETS ---
             if sub_tab == "🚀 Projets en cours":
                 st.markdown(f'''
                     <div class="sub-section-header">
@@ -553,7 +558,6 @@ else:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{id_item["title"]}</h3><p style="color:{desc_color};">{id_item["desc"]}</p></div>', unsafe_allow_html=True)
 
         elif current == "Dev & IA":
-            # Remplacement par st.pills pour le mobile
             sub_tab = st.pills(
                 "Navigation Dev",
                 options=["🤖 Prompts AI Code", "🧠 Prompts Claude", "💻 Snippets Code"],
@@ -561,7 +565,6 @@ else:
                 label_visibility="collapsed"
             )
             
-            # --- GRAND TITRE D'ACCROCHE POUR DEV & IA ---
             if sub_tab == "🤖 Prompts AI Code":
                 st.markdown(f'''
                     <div class="sub-section-header">
