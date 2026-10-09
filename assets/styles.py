@@ -3,97 +3,116 @@ import streamlit as st
 def inject_custom_design():
     st.markdown("""
         <style>
-        .stApp {
-            background-color: #0E031C !important;
-            color: #F8FAFC !important;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        /* Structure générale */
+        html, body, [data-testid="stAppViewContainer"], .stApp {
+            background-color: #0F1117 !important;
+            color: #F0F2F6 !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
-        .pavel-hero-banner {
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border: 1px solid rgba(236, 72, 153, 0.25);
-            border-radius: 18px;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+        /* En-tête Streamlit */
+        [data-testid="stHeader"] {
+            background-color: transparent !important;
         }
-        .sub-section-header {
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border-left: 5px solid #EC4899;
-            padding: 15px 20px;
-            border-radius: 0 12px 12px 0;
-            margin-bottom: 25px;
-            margin-top: 10px;
+
+        /* Titres & Labels */
+        h1, h2, h3, h4, h5, h6, label, label p, .stMarkdown {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
         }
-        .pavel-card-grid {
-            background: linear-gradient(135deg, #1A0B36 0%, #120524 100%);
-            border: 1px solid #2B1552;
-            border-radius: 14px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-            margin-bottom: 15px;
-        }
-        .pavel-card-grid:hover {
-            transform: translateY(-4px);
-            border-color: #EC4899;
-            box-shadow: 0 10px 35px rgba(236, 72, 153, 0.18);
-        }
-        .zapio-badge {
-            background: rgba(236, 72, 153, 0.1);
-            color: #DB2777;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: 1px solid rgba(236, 72, 153, 0.2);
-        }
-        .zapio-badge-green {
-            background: rgba(16, 185, 129, 0.1);
-            color: #059669;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        .zapio-card {
-            background: #170A2E;
-            border: 1px solid #2B1552;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-        }
-        .calendar-header-box {
-            background: #1E0A3C;
-            color: #A78BFA;
-            text-align: center;
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            border: 1px solid #2B1552;
-        }
-        .calendar-day-box {
-            min-height: 90px;
-            border-radius: 8px;
-            padding: 6px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-        }
-        div[data-testid="stPills"] button {
-            background-color: #170A2E !important;
-            border: 1px solid #2B1552 !important;
-            color: #F8FAFC !important;
+
+        /* Champs de saisie texte (Input & Textarea) */
+        div[data-baseweb="input"] input, 
+        div[data-baseweb="textarea"] textarea,
+        .stTextInput input, 
+        .stTextArea textarea {
+            color: #0F172A !important;
+            background-color: #FFFFFF !important;
+            border: 1px solid #CBD5E1 !important;
             border-radius: 8px !important;
-            font-weight: 500;
+            font-weight: 500 !important;
         }
-        div[data-testid="stPills"] button[aria-selected="true"] {
-            background-color: #EC4899 !important;
-            border-color: #EC4899 !important;
-            color: #FFF !important;
+
+        /* Menus déroulants (Selectbox) */
+        div[data-baseweb="select"] > div {
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            border-radius: 8px !important;
+        }
+
+        li[role="option"], div[role="option"] {
+            color: #0F172A !important;
+            background-color: #FFFFFF !important;
+        }
+
+        /* FIX BOUTONS (Soumettre / Connexion / Enregistrer) */
+        .stButton > button, div[data-testid="stFormSubmitButton"] > button {
+            background-color: #FF3B30 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            border: none !important;
+            border-radius: 10px !important;
+            padding: 12px 20px !important;
+            width: 100% !important;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3) !important;
+        }
+
+        /* FIX ONGLETS (Vue Calendrier & Liste, etc.) */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px !important;
+            background-color: #1A1D27 !important;
+            padding: 6px !important;
+            border-radius: 10px !important;
+            border: 1px solid #2A2E3D !important;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            border-radius: 6px !important;
+            padding: 8px 16px !important;
+            background-color: transparent !important;
+        }
+
+        .stTabs [data-baseweb="tab"] p, .stTabs [data-baseweb="tab"] span {
+            color: #E2E8F0 !important;
+            font-weight: 600 !important;
+        }
+
+        .stTabs [aria-selected="true"] {
+            background-color: #FF3B30 !important;
+        }
+
+        .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+        }
+
+        /* Cartes & Badges */
+        .zapio-card {
+            background-color: #181B24 !important;
+            border: 1px solid #2A2E3D !important;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+
+        .zapio-badge {
+            background-color: #2E3345;
+            color: #FF3B30;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .zapio-badge-green {
+            background-color: rgba(52, 199, 89, 0.15);
+            color: #34C759;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
         }
         </style>
     """, unsafe_allow_html=True)
