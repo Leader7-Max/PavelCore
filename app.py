@@ -84,22 +84,6 @@ MONTH_NAMES_FR = [
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
 ]
 
-# Liste exacte des pages du livre
-BOOK_PAGES = [
-    ("📆 Agenda Premium", "Agenda & Calendrier Interactif"),
-    ("🤖 Prompts AI Code", "Mes Prompts AI Code"),
-    ("🧠 Prompts Claude", "Mes Prompts Spécialisés Claude"),
-    ("💻 Codes (HTML/CSS/JS)", "Mes Snippets de Code"),
-    ("🎨 Prompts Images", "Mes Prompts d'Images"),
-    ("💡 Idées", "Boîte à Idées"),
-    ("🚀 Projets en cours", "Suivi des Projets Actifs"),
-    ("🔮 Projets futurs", "Projets Futurs"),
-    ("🔗 Liens Utiles", "Sauvegarde de Liens Web"),
-    ("📦 Fichiers ZIP", "Banque de Fichiers ZIP"),
-    ("🔑 Mes Clés API", "Sauvegarde Sécurisée de Clés API"),
-    ("🔐 Mes Accès & Mots de passe", "Coffre-Fort d'Accès, PIN & Mots de Passe")
-]
-
 # State Management Global
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -109,9 +93,6 @@ if "direct_agenda" not in st.session_state:
 
 if "agenda_active_tab" not in st.session_state:
     st.session_state.agenda_active_tab = "vue"
-
-if "book_page_index" not in st.session_state:
-    st.session_state.book_page_index = 0
 
 if "agenda_events" not in st.session_state:
     st.session_state.agenda_events = []
@@ -166,6 +147,7 @@ def sync_offline():
 
 # Fonction d'affichage du calendrier dynamique
 def render_agenda_module():
+    # Barre supérieure avec bouton de retour
     col_header, col_back = st.columns([3, 1])
     with col_header:
         st.markdown(
@@ -385,7 +367,7 @@ else:
     col_logo, col_logout = st.columns([3, 1])
     
     with col_logo:
-        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Mode Livre Interactif</span></h1>', unsafe_allow_html=True)
+        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Connecté / Offline Ready</span></h1>', unsafe_allow_html=True)
         
     with col_logout:
         if st.button("Déconnexion", key="top_logout"):
@@ -395,55 +377,32 @@ else:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # BARRE DE NAVIGATION LIVRE (TOURNE-PAGE / FLIPBOOK)
-    curr_idx = st.session_state.book_page_index
-    total_pages = len(BOOK_PAGES)
-    current_page_title, current_page_header = BOOK_PAGES[curr_idx]
-
-    col_prev, col_sel, col_next = st.columns([1.5, 3.5, 1.5])
-
-    with col_prev:
-        if st.button("◀️ Précédent", use_container_width=True):
-            if st.session_state.book_page_index > 0:
-                st.session_state.book_page_index -= 1
-            else:
-                st.session_state.book_page_index = total_pages - 1
-            st.rerun()
-
-    with col_sel:
-        selected_book_page = st.selectbox(
-            "Navigation Livre",
-            options=range(total_pages),
-            format_func=lambda i: f"📖 Page {i+1}/{total_pages} : {BOOK_PAGES[i][0]}",
-            index=curr_idx,
-            label_visibility="collapsed"
-        )
-        if selected_book_page != curr_idx:
-            st.session_state.book_page_index = selected_book_page
-            st.rerun()
-
-    with col_next:
-        if st.button("Suivant ▶️", use_container_width=True):
-            if st.session_state.book_page_index < total_pages - 1:
-                st.session_state.book_page_index += 1
-            else:
-                st.session_state.book_page_index = 0
-            st.rerun()
-
-    st.markdown(
-        f'<div style="text-align: center; margin: 15px 0; padding: 8px; background: rgba(45,20,82,0.6); border: 1px solid #7C3AED; border-radius: 12px;">'
-        f'<span style="color: #F472B6; font-weight: 800; font-size: 0.95rem;">📖 Page {curr_idx + 1} sur {total_pages} — {current_page_title}</span>'
-        f'</div>',
-        unsafe_allow_html=True
+    menu = st.radio(
+        "Navigation",
+        [
+            "📆 Agenda Premium", 
+            "🤖 Prompts AI Code", 
+            "🧠 Prompts Claude", 
+            "💻 Codes (HTML/CSS/JS)", 
+            "🎨 Prompts Images", 
+            "💡 Idées", 
+            "🚀 Projets en cours", 
+            "🔮 Projets futurs", 
+            "🔗 Liens Utiles", 
+            "📦 Fichiers ZIP",
+            "🔑 Mes Clés API",
+            "🔐 Mes Accès & Mots de passe"
+        ],
+        horizontal=True,
+        label_visibility="collapsed"
     )
 
-    st.markdown("<hr style='border-color: rgba(236,72,153,0.3); margin: 10px 0 20px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
 
-    # AFFICHAGE DE LA PAGE ACTIVE DU LIVRE
-    if curr_idx == 0:
+    if menu == "📆 Agenda Premium":
         render_agenda_module()
 
-    elif curr_idx == 1:
+    elif menu == "🤖 Prompts AI Code":
         st.subheader("🤖 Mes Prompts AI Code")
         with st.form("form_ai_code"):
             title = st.text_input("Titre du Prompt Code")
@@ -466,7 +425,7 @@ else:
             st.code(p['prompt'], language=p['lang'])
             st.markdown(f'<span style="color:#A78BFA; font-size:0.75rem;">Tags: {p["tags"]}</span></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 2:
+    elif menu == "🧠 Prompts Claude":
         st.subheader("🧠 Mes Prompts Spécialisés Claude")
         with st.form("form_claude"):
             title = st.text_input("Titre de la consigne", placeholder="Ex: Refactoring React Component")
@@ -491,7 +450,7 @@ else:
             st.code(c['user'], language=c.get('lang', 'python'))
             st.markdown(f'<span class="zapio-badge-green">Artifact: {c["artifacts"]}</span></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 3:
+    elif menu == "💻 Codes (HTML/CSS/JS)":
         st.subheader("💻 Mes Snippets de Code")
         with st.form("form_code"):
             title = st.text_input("Nom de la fonction / Snippet")
@@ -514,7 +473,7 @@ else:
             st.code(cd['code'], language=cd['type'])
             st.markdown('</div>', unsafe_allow_html=True)
 
-    elif curr_idx == 4:
+    elif menu == "🎨 Prompts Images":
         st.subheader("🎨 Mes Prompts d'Images")
         with st.form("form_img_prompt"):
             title = st.text_input("Titre / Concept Visuel")
@@ -534,7 +493,7 @@ else:
             st.code(img['prompt'], language="text")
             st.markdown(f'<div style="font-size:0.8rem; color:#A78BFA;">Format: <b>{img["ar"]}</b> | Exclure: <b>{img["neg"]}</b></div></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 5:
+    elif menu == "💡 Idées":
         st.subheader("💡 Boîte à Idées")
         with st.form("form_ideas"):
             title = st.text_input("Titre de l'idée")
@@ -549,7 +508,7 @@ else:
         for id_item in st.session_state.saved_ideas:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{id_item["title"]}</h3><span class="zapio-badge">{id_item["cat"]}</span></div><p style="color:#CBD5E1; margin-top:10px;">{id_item["desc"]}</p><span class="zapio-badge-green">Impact: {id_item["impact"]}</span></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 6:
+    elif menu == "🚀 Projets en cours":
         st.subheader("🚀 Suivi des Projets Actifs")
         with st.form("form_curr_proj"):
             name = st.text_input("Nom du projet")
@@ -570,7 +529,7 @@ else:
             desc_val = cp.get('desc', '')
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#EC4899;">{cp["name"]}</h3><div><span class="zapio-badge" style="margin-right:8px;">{priority_val}</span><span style="color:#FFF; font-size:0.9rem;">Client: <b>{cp["client"]}</b></span></div></div><p style="margin:12px 0 8px 0; color:#E2E8F0;">{desc_val}</p><div style="font-size:0.85rem; color:#A78BFA; display:flex; gap:20px; margin-top:8px;"><span>🎯 Prochaine étape : <b style="color:#FFF;">{cp["next"]}</b></span><span>⏰ Échéance : <b style="color:#FFF;">{cp["deadline"]}</b></span></div></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 7:
+    elif menu == "🔮 Projets futurs":
         st.subheader("🔮 Projets Futurs")
         with st.form("form_fut_proj"):
             name = st.text_input("Nom du projet futur")
@@ -585,7 +544,7 @@ else:
         for fp in st.session_state.saved_future_projects:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{fp["name"]}</h3><span class="zapio-badge">{fp["horizon"]}</span></div><p style="color:#CBD5E1; margin-top:10px;"><b>Objectif:</b> {fp["goal"]}</p><p style="color:#A78BFA; font-size:0.85rem;"><b>Ressources:</b> {fp["resources"]}</p></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 8:
+    elif menu == "🔗 Liens Utiles":
         st.subheader("🔗 Sauvegarde de Liens Web")
         with st.form("form_links"):
             title = st.text_input("Nom du site / Application")
@@ -600,7 +559,7 @@ else:
         for lk in st.session_state.saved_links:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#EC4899;">{lk["title"]}</h3><span class="zapio-badge">{lk["cat"]}</span></div><a href="{lk["url"]}" target="_blank" style="color:#38BDF8; display:block; margin:8px 0;">{lk["url"]}</a><span style="color:#A78BFA; font-size:0.8rem;">{lk["note"]}</span></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 9:
+    elif menu == "📦 Fichiers ZIP":
         st.subheader("📦 Banque de Fichiers ZIP")
         with st.form("form_zip"):
             title = st.text_input("Nom du projet / Archive")
@@ -615,7 +574,7 @@ else:
         for zp in st.session_state.saved_zip_files:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; color:#FFF;">{zp["title"]} <span style="font-size:0.8rem; color:#A78BFA;">({zp["version"]})</span></h3><a href="{zp["link"]}" target="_blank" class="zapio-badge-green" style="text-decoration:none;">📥 Télécharger ZIP</a></div><p style="color:#CBD5E1; margin-top:10px; font-size:0.85rem;"><b>Contenu:</b> {zp["contents"]}</p></div>', unsafe_allow_html=True)
 
-    elif curr_idx == 10:
+    elif menu == "🔑 Mes Clés API":
         st.subheader("🔑 Sauvegarde Sécurisée de Clés API")
         with st.form("form_api_key"):
             service_name = st.text_input("Service / Plateforme")
@@ -634,7 +593,7 @@ else:
             st.code(ak['key'], language="text")
             st.markdown('</div>', unsafe_allow_html=True)
 
-    elif curr_idx == 11:
+    elif menu == "🔐 Mes Accès & Mots de passe":
         st.subheader("🔐 Coffre-Fort d'Accès, PIN & Mots de Passe")
         with st.form("form_user_cred"):
             platform_name = st.text_input("Plateforme / Site / Application")
