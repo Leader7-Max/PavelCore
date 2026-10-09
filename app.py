@@ -187,28 +187,18 @@ st.markdown(f"""
         flex-direction: column;
         justify-content: flex-start;
     }}
-    .calendar-event-card {{
-        background: {card_bg};
-        border: 1px solid {card_border};
-        border-radius: 10px;
-        padding: 12px;
-        display: flex;
-        gap: 15px;
-        margin-bottom: 10px;
-        align-items: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    /* Style personnalisé pour les st.pills sur mobile */
+    div[data-testid="stPills"] button {{
+        background-color: {card_bg} !important;
+        border: 1px solid {card_border} !important;
+        color: {text_color} !important;
+        border-radius: 8px !important;
+        font-weight: 500;
     }}
-    .calendar-date-box {{
-        background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
-        color: #FFF;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-        min-width: 65px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        font-weight: 800;
+    div[data-testid="stPills"] button[aria-selected="true"] {{
+        background-color: #EC4899 !important;
+        border-color: #EC4899 !important;
+        color: #FFF !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -487,7 +477,13 @@ else:
             render_agenda_module()
 
         elif current == "Projets":
-            sub_tab = st.radio("Navigation Projets", ["🚀 Projets en cours", "🔮 Projets futurs", "💡 Idées"], horizontal=True)
+            # Remplacement par st.pills pour le mobile
+            sub_tab = st.pills(
+                "Navigation Projets",
+                options=["🚀 Projets en cours", "🔮 Projets futurs", "💡 Idées"],
+                default="🚀 Projets en cours",
+                label_visibility="collapsed"
+            )
             
             # --- GRAND TITRE D'ACCROCHE POUR PROJETS ---
             if sub_tab == "🚀 Projets en cours":
@@ -557,7 +553,13 @@ else:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{id_item["title"]}</h3><p style="color:{desc_color};">{id_item["desc"]}</p></div>', unsafe_allow_html=True)
 
         elif current == "Dev & IA":
-            sub_tab = st.radio("Navigation Dev", ["🤖 Prompts AI Code", "🧠 Prompts Claude", "💻 Snippets Code"], horizontal=True)
+            # Remplacement par st.pills pour le mobile
+            sub_tab = st.pills(
+                "Navigation Dev",
+                options=["🤖 Prompts AI Code", "🧠 Prompts Claude", "💻 Snippets Code"],
+                default="🤖 Prompts AI Code",
+                label_visibility="collapsed"
+            )
             
             # --- GRAND TITRE D'ACCROCHE POUR DEV & IA ---
             if sub_tab == "🤖 Prompts AI Code":
@@ -622,199 +624,4 @@ else:
                 for cd in st.session_state.saved_code_snippets:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{cd["title"]}</h3>', unsafe_allow_html=True)
                     st.code(cd['code'], language='python')
-                    st.markdown('</div>', unsafe_allow_html=True)
-
-        elif current == "Ressources":
-            sub_tab = st.radio("Navigation Ressources", ["🎨 Prompts & Images", "🔗 Liens Utiles", "📦 Fichiers ZIP"], horizontal=True)
-            
-            # --- GRAND TITRE D'ACCROCHE POUR RESSOURCES ---
-            if sub_tab == "🎨 Prompts & Images":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">CRÉATION VISIBLE & GÉNÉRATION</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🎨 Prompts & Images</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-            elif sub_tab == "🔗 Liens Utiles":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">ACCÈS RAPIDE & FAVORIS</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔗 Liens Utiles</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-            elif sub_tab == "📦 Fichiers ZIP":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">ARCHIVES & RESSOURCES BINAIRES</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">📦 Fichiers ZIP & Archives</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-            
-            if sub_tab == "🎨 Prompts & Images":
-                with st.form("form_img_prompt"):
-                    img_title = st.text_input("Titre de l'image / du prompt")
-                    generator = st.selectbox("Générateur", ["Midjourney", "DALL-E 3", "Flux.1", "Autre"])
-                    prompt_text = st.text_area("Prompt exact")
-                    aspect_ratio = st.selectbox("Format", ["1:1", "16:9", "9:16", "Autre"])
-                    
-                    uploaded_image_file = st.file_uploader("Importer l'image générée (PNG, JPG, WEBP)", type=["png", "jpg", "jpeg", "webp"])
-                    
-                    submitted_img = st.form_submit_button("Enregistrer l'Image & le Prompt")
-                    if submitted_img:
-                        if img_title and prompt_text:
-                            img_bytes_data = uploaded_image_file.getvalue() if uploaded_image_file is not None else None
-                            img_file_name = uploaded_image_file.name if uploaded_image_file is not None else None
-                            
-                            st.session_state.saved_image_prompts.append({
-                                "title": img_title, 
-                                "gen": generator, 
-                                "prompt": prompt_text, 
-                                "ar": aspect_ratio,
-                                "file_data": base64.b64encode(img_bytes_data).decode('utf-8') if img_bytes_data else None,
-                                "file_name": img_file_name
-                            })
-                            st.toast("🎨 Image et prompt enregistrés avec succès !", icon="✅")
-                            st.rerun()
-                
-                st.markdown("### 🖼️ Galerie & Prompts enregistrés :")
-                if not st.session_state.saved_image_prompts:
-                    st.info("Aucun prompt ou image enregistré pour le moment.")
-                else:
-                    for idx, img in enumerate(st.session_state.saved_image_prompts):
-                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};"><b>Générateur:</b> {img["gen"]} | <b>Format:</b> {img["ar"]}</p><p style="color:{text_color}; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;"><b>Prompt:</b> {img["prompt"]}</p></div>', unsafe_allow_html=True)
-                        
-                        if img.get("file_data"):
-                            try:
-                                decoded_img_bytes = base64.b64decode(img["file_data"].encode('utf-8'))
-                                st.image(decoded_img_bytes, caption=img.get("file_name", "Image importée"), width=300)
-                                st.download_button(
-                                    label=f"⬇️ Télécharger l'image brute ({img.get('file_name', 'image.png')})",
-                                    data=decoded_img_bytes,
-                                    file_name=img.get("file_name", "image.png"),
-                                    mime="image/png",
-                                    key=f"dl_raw_img_{idx}"
-                                )
-                            except Exception:
-                                pass
-                        
-                        file_content = f"Titre: {img['title']}\nGénérateur: {img['gen']}\nFormat: {img['ar']}\n\nPrompt:\n{img['prompt']}"
-                        st.download_button(
-                            label=f"⬇️ Télécharger la fiche texte ({img['title']})",
-                            data=file_content,
-                            file_name=f"{img['title'].lower().replace(' ', '_')}_prompt.txt",
-                            mime="text/plain",
-                            key=f"dl_img_{idx}"
-                        )
-
-            elif sub_tab == "🔗 Liens Utiles":
-                with st.form("form_links"):
-                    title = st.text_input("Nom")
-                    url = st.text_input("URL")
-                    if st.form_submit_button("Enregistrer"):
-                        if title and url:
-                            st.session_state.saved_links.append({"title": title, "url": url})
-                            st.toast("🔗 Lien utile enregistré !", icon="✅")
-                            st.rerun()
-                for lk in st.session_state.saved_links:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{lk["title"]}</h3><a href="{lk["url"]}" target="_blank">{lk["url"]}</a></div>', unsafe_allow_html=True)
-
-            elif sub_tab == "📦 Fichiers ZIP":
-                with st.form("form_zip"):
-                    zip_title = st.text_input("Nom du fichier ZIP / du Projet")
-                    version = st.text_input("Version", value="v1.0")
-                    contents = st.text_area("Description du contenu")
-                    
-                    uploaded_zip_file = st.file_uploader("Importer le fichier ZIP (.zip)", type=["zip"])
-                    
-                    submitted_zip = st.form_submit_button("Importer & Enregistrer le fichier ZIP")
-                    if submitted_zip:
-                        if zip_title:
-                            zip_bytes_data = uploaded_zip_file.getvalue() if uploaded_zip_file is not None else None
-                            zip_file_name = uploaded_zip_file.name if uploaded_zip_file is not None else f"{zip_title}.zip"
-                            
-                            st.session_state.saved_zip_files.append({
-                                "title": zip_title, 
-                                "version": version, 
-                                "contents": contents,
-                                "file_data": base64.b64encode(zip_bytes_data).decode('utf-8') if zip_bytes_data else None,
-                                "file_name": zip_file_name
-                            })
-                            st.toast("📦 Fichier ZIP importé et enregistré avec succès !", icon="✅")
-                            st.rerun()
-                
-                st.markdown("### 📦 Fichiers ZIP enregistrés & importés :")
-                if not st.session_state.saved_zip_files:
-                    st.info("Aucun fichier ZIP enregistré pour le moment.")
-                else:
-                    for idx, zp in enumerate(st.session_state.saved_zip_files):
-                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]} ({zp["version"]})</h3><p style="color:{desc_color};">{zp["contents"]}</p></div>', unsafe_allow_html=True)
-                        
-                        if zp.get("file_data"):
-                            try:
-                                decoded_zip_bytes = base64.b64decode(zp["file_data"].encode('utf-8'))
-                                st.download_button(
-                                    label=f"⬇️ Télécharger le fichier ZIP ({zp.get('file_name', 'archive.zip')})",
-                                    data=decoded_zip_bytes,
-                                    file_name=zp.get('file_name', 'archive.zip'),
-                                    mime="application/zip",
-                                    key=f"dl_real_zip_{idx}"
-                                )
-                            except Exception:
-                                pass
-                        
-                        zip_meta = f"Fichier ZIP: {zp['title']}\nVersion: {zp['version']}\nContenu:\n{zp['contents']}"
-                        st.download_button(
-                            label=f"⬇️ Télécharger la fiche récapitulative ({zp['title']})",
-                            data=zip_meta,
-                            file_name=f"{zp['title'].lower().replace(' ', '_')}_{zp['version']}.txt",
-                            mime="text/plain",
-                            key=f"dl_zip_{idx}"
-                        )
-
-        elif current == "Coffre-Fort":
-            sub_tab = st.radio("Navigation Sécurité", ["🔑 Clés API", "🔐 Mots de passe"], horizontal=True)
-            
-            # --- GRAND TITRE D'ACCROCHE POUR COFFRE-FORT ---
-            if sub_tab == "🔑 Clés API":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">SÉCURITÉ & CREDENTIALS API</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔑 Clés API</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-            elif sub_tab == "🔐 Mots de passe":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">ACCÈS COMPTES & CODES PIN</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔐 Mots de passe & Comptes</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-
-            if sub_tab == "🔑 Clés API":
-                with st.form("form_api_key"):
-                    service_name = st.text_input("Service")
-                    api_key_val = st.text_input("Clé API", type="password")
-                    if st.form_submit_button("Sauvegarder"):
-                        if service_name and api_key_val:
-                            st.session_state.saved_api_keys.append({"service": service_name, "key": api_key_val})
-                            st.toast("🔑 Clé API sécurisée et enregistrée.", icon="🔒")
-                            st.rerun()
-                for ak in st.session_state.saved_api_keys:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔑 {ak["service"]}</h3>', unsafe_allow_html=True)
-                    st.code(ak['key'], language="text")
-                    st.markdown('</div>', unsafe_allow_html=True)
-
-            elif sub_tab == "🔐 Mots de passe":
-                with st.form("form_user_cred"):
-                    platform_name = st.text_input("Plateforme")
-                    username_val = st.text_input("Identifiant")
-                    password_val = st.text_input("Mot de passe / PIN", type="password")
-                    if st.form_submit_button("Sauvegarder"):
-                        if platform_name:
-                            st.session_state.saved_user_credentials.append({"platform": platform_name, "username": username_val, "password": password_val})
-                            st.toast("🔐 Identifiant enregistré dans le coffre-fort.", icon="🔒")
-                            st.rerun()
-                for cred in st.session_state.saved_user_credentials:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔐 {cred["platform"]}</h3><p style="color:{desc_color};">User: {cred["username"]}</p>', unsafe_allow_html=True)
-                    st.code(cred['password'], language="text")
                     st.markdown('</div>', unsafe_allow_html=True)
