@@ -112,7 +112,7 @@ else:  # Sombre Nuit
     top_capsule_bg = "rgba(255, 255, 255, 0.08)"
     top_capsule_border = "rgba(255, 255, 255, 0.15)"
 
-# INJECTION DES STYLES DYNAMIQUES ET DE LA CAPSULE DE CONTRÔLE
+# INJECTION DES STYLES DYNAMIQUES (Correction de la taille des boutons de la capsule)
 st.markdown(f"""
     <style>
     .stApp {{
@@ -200,17 +200,11 @@ st.markdown(f"""
         justify-content: center;
         font-weight: 800;
     }}
-    /* Style de la capsule de contrôle supérieure */
-    .top-control-capsule {{
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px;
-        background: {top_capsule_bg};
-        border: 1px solid {top_capsule_border};
-        padding: 6px 14px;
-        border-radius: 40px;
-        backdrop-filter: blur(10px);
+    /* Style ultra-compact pour forcer la capsule sur une seule ligne sur mobile */
+    div[data-testid="column"] button {{
+        padding: 4px 8px !important;
+        font-size: 0.8rem !important;
+        min-height: 32px !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -446,37 +440,33 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # EN-TÊTE SUPÉRIEUR AVEC LA CAPSULE DE CONTRÔLE (Thème, Paramètres, Aide, Langue)
-    col_logo, col_capsule = st.columns([1.5, 2.5])
+    # EN-TÊTE SUPÉRIEUR : Disposition optimisée mobile (Logo à gauche, Capsule compacte à droite)
+    col_logo, col_capsule = st.columns([1.2, 1.8])
     
     with col_logo:
-        st.markdown(f'<h1 style="font-size: 1.6rem; margin: 0; display: flex; align-items: center; gap: 6px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 6px; border-radius: 6px; font-size: 1rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.65rem;">● Online</span></h1>', unsafe_allow_html=True)
+        st.markdown(f'<h1 style="font-size: 1.4rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.9rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.6rem;">● Live</span></h1>', unsafe_allow_html=True)
     
     with col_capsule:
-        # Mini colonnes dans la capsule pour aligner parfaitement les 4 boutons du style Zapiotv
-        c_th, c_set, c_hlp, c_lng = st.columns([1.2, 0.8, 0.8, 0.9])
+        # Capsule ultra-compacte en 4 mini-colonnes collées
+        c_th, c_set, c_hlp, c_lng = st.columns(4)
         
         with c_th:
-            # 1. Bouton Thème (☀️ / 🌙)
-            theme_label = "☀️ Clair" if st.session_state.theme_mode == "Sombre Nuit" else "🌙 Sombre"
-            if st.button(theme_label, use_container_width=True, key="btn_toggle_theme"):
+            theme_icon = "☀️" if st.session_state.theme_mode == "Sombre Nuit" else "🌙"
+            if st.button(theme_icon, use_container_width=True, key="btn_toggle_theme"):
                 st.session_state.theme_mode = "Blanc Épuré" if st.session_state.theme_mode == "Sombre Nuit" else "Sombre Nuit"
                 st.rerun()
                 
         with c_set:
-            # 2. Bouton Paramètres (⚙️)
             if st.button("⚙️", use_container_width=True, key="btn_settings_toggle"):
                 st.session_state.show_settings_modal = not st.session_state.show_settings_modal
                 st.rerun()
                 
         with c_hlp:
-            # 3. Bouton Aide (❓)
             if st.button("❓", use_container_width=True, key="btn_help_toggle"):
                 st.session_state.show_help_modal = not st.session_state.show_help_modal
                 st.rerun()
                 
         with c_lng:
-            # 4. Bouton Langue (FR / EN)
             lang_label = "EN" if st.session_state.app_lang == "FR" else "FR"
             if st.button(lang_label, use_container_width=True, key="btn_toggle_lang"):
                 st.session_state.app_lang = "EN" if st.session_state.app_lang == "FR" else "FR"
@@ -503,43 +493,43 @@ else:
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
 
-    # BARRE D'ACTIONS SECONDAIRE (Accueil & Déconnexion)
-    col_nav_home, col_nav_logout = st.columns([4, 1])
+    # BOUTON DE DÉCONNEXION DISCRET EN HAUT DE PAGE
+    col_empty_space, col_nav_logout = st.columns([3, 1])
     with col_nav_logout:
-        if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
+        if st.button("🔒 Quitter", use_container_width=True, type="secondary"):
             st.session_state.authenticated = False
             st.session_state.current_view = "home"
             st.rerun()
 
     # VUE ACCUEIL : GRILLE DE CARTES PREMIUM
     if st.session_state.current_view == "home":
-        st.markdown(f'<div style="text-align: center; margin-bottom: 30px;"><h2 style="font-size: 2.2rem; color: {sub_title_color};">Tableau de Bord Principal</h2><p style="color: {desc_color};">Sélectionnez un espace de travail pour commencer</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align: center; margin-bottom: 25px;"><h2 style="font-size: 1.8rem; color: {sub_title_color};">Tableau de Bord Principal</h2><p style="color: {desc_color}; font-size: 0.9rem;">Sélectionnez un espace de travail</p></div>', unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
         
         with c1:
-            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color};">📅 Agenda & Planning</h3><p style="color: {desc_color}; font-size: 0.9rem;">Calendrier interactif, gestion d\'événements et synchronisation hors-ligne.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📅 Agenda & Planning</h3><p style="color: {desc_color}; font-size: 0.8rem;">Calendrier et mode hors-ligne.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir l'Agenda", use_container_width=True, type="primary"):
                 st.session_state.current_view = "Agenda"
                 st.rerun()
 
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 25px;"><h3 style="color:{sub_title_color};">💻 Code & IA</h3><p style="color: {desc_color}; font-size: 0.9rem;">Prompts IA, consignes Claude et snippets HTML/CSS/JS.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">💻 Code & IA</h3><p style="color: {desc_color}; font-size: 0.8rem;">Prompts IA et snippets.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Dev & IA", use_container_width=True):
                 st.session_state.current_view = "Dev & IA"
                 st.rerun()
 
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 25px;"><h3 style="color:{sub_title_color};">🎨 Médias & Ressources</h3><p style="color: {desc_color}; font-size: 0.9rem;">Prompts d\'images, liens utiles et archives ZIP.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🎨 Médias & Ressources</h3><p style="color: {desc_color}; font-size: 0.8rem;">Images, liens et ZIP.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Ressources", use_container_width=True):
                 st.session_state.current_view = "Ressources"
                 st.rerun()
 
         with c2:
-            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color};">🚀 Projets & Idées</h3><p style="color: {desc_color}; font-size: 0.9rem;">Suivi des projets actifs, vision future et boîte à idées.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🚀 Projets & Idées</h3><p style="color: {desc_color}; font-size: 0.8rem;">Projets actifs et idées.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Projets", use_container_width=True):
                 st.session_state.current_view = "Projets"
                 st.rerun()
 
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 25px;"><h3 style="color:{sub_title_color};">🔐 Coffre-Fort Sécurisé</h3><p style="color: {desc_color}; font-size: 0.9rem;">Clés API, mots de passe et accès confidentiels.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🔐 Coffre-Fort Sécurisé</h3><p style="color: {desc_color}; font-size: 0.8rem;">Clés API et mots de passe.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir le Coffre-Fort", use_container_width=True):
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
