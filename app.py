@@ -174,100 +174,152 @@ else:
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
 
     # ====================================================
-    # 📆 AGENDA PREMIUM (Design Violet Néon 3D Calendar)
+    # 📆 AGENDA PREMIUM (Grille Mensuelle Interactive Pro)
     # ====================================================
     if menu == "📆 Agenda Premium":
         st.markdown("""
             <div style="margin-bottom: 20px;">
                 <span class="zapio-badge">📅 DESIGN CALENDAR TEMPLATE</span>
-                <h2 style="margin-top: 10px; font-size: 2rem;">Agenda Ultra Premium</h2>
+                <h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2>
             </div>
         """, unsafe_allow_html=True)
 
-        today = date.today()
-        today_events = [e for e in st.session_state.agenda_events if e['date'] == today]
+        tab_cal, tab_add = st.tabs(["📅 Vue Calendrier Mensuel", "➕ Programmer un Événement"])
 
-        if today_events:
-            st.markdown(f"""
-                <div class="zapio-card" style="border-color: #EC4899; background: linear-gradient(135deg, rgba(236,72,153,0.25) 0%, #2D1254 100%);">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="zapio-badge">🔔 ÉVÉNEMENTS AUJOURD'HUI</span>
-                        <span style="color:#FFF; font-weight:bold; font-size:0.9rem;">{today.strftime('%d/%m/%Y')}</span>
-                    </div>
-                    <h3 style="color:#FFF; margin-top:10px;">Vous avez {len(today_events)} rendez-vous prévu(s) aujourd'hui !</h3>
-                </div>
-            """, unsafe_allow_html=True)
-
-        tab_view, tab_add = st.tabs(["📅 Mon Planning & Chronologie", "➕ Programmer un Événement"])
-
-        with tab_view:
-            if st.session_state.agenda_events:
-                filter_cat = st.selectbox(
-                    "Filtrer par catégorie", 
-                    ["Tous les événements", "Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"]
+        with tab_cal:
+            col_m1, col_m2, col_m3 = st.columns([1, 2, 1])
+            with col_m2:
+                selected_month = st.selectbox(
+                    "Mois",
+                    ["Octobre 2026", "Novembre 2026", "Décembre 2026"],
+                    index=0,
+                    label_visibility="collapsed"
                 )
-                
-                events_to_show = st.session_state.agenda_events
-                if filter_cat != "Tous les événements":
-                    events_to_show = [e for e in events_to_show if e['category'] == filter_cat]
 
-                sorted_events = sorted(events_to_show, key=lambda x: (x['date'], x['time']))
+            # Entête des jours
+            days_header = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+            cols_h = st.columns(7)
+            for idx, h in enumerate(days_header):
+                cols_h[idx].markdown(f"""
+                    <div style="text-align:center; font-weight:800; color:#EC4899; padding:8px; background:#261245; border-radius:8px; border:1px solid #5B21B6;">
+                        {h}
+                    </div>
+                """, unsafe_allow_html=True)
 
+            st.markdown("<div style='margin-bottom:8px;'></div>", unsafe_allow_html=True)
+
+            # Événements du mois (Octobre 2026)
+            events_by_day = {}
+            for ev in st.session_state.agenda_events:
+                if ev['date'].month == 10 and ev['date'].year == 2026:
+                    day_num = ev['date'].day
+                    if day_num not in events_by_day:
+                        events_by_day[day_num] = []
+                    events_by_day[day_num].append(ev)
+
+            # Octobre 2026 commence un Jeudi (offset = 3)
+            start_day_offset = 3 
+            total_days = 31
+            current_day = 1
+
+            for week in range(5):
+                cols_w = st.columns(7)
+                for day_idx in range(7):
+                    if week == 0 and day_idx < start_day_offset:
+                        cols_w[day_idx].markdown("""
+                            <div style="background:rgba(20,9,35,0.4); border:1px solid #261245; border-radius:12px; min-height:85px; padding:6px; opacity:0.3;">
+                            </div>
+                        """, unsafe_allow_html=True)
+                    elif current_day > total_days:
+                        cols_w[day_idx].markdown("""
+                            <div style="background:rgba(20,9,35,0.4); border:1px solid #261245; border-radius:12px; min-height:85px; padding:6px; opacity:0.3;">
+                            </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        is_today = (current_day == 9)
+                        day_events = events_by_day.get(current_day, [])
+                        
+                        border_color = "#EC4899" if is_today else "#5B21B6"
+                        bg_color = "linear-gradient(135deg, #3B1578 0%, #261245 100%)" if is_today else "#1E0A3C"
+                        
+                        event_html = ""
+                        for ev_item in day_events:
+                            event_html += f"""
+                                <div style="background:#F43F5E; color:#FFF; font-size:0.65rem; font-weight:800; border-radius:4px; padding:2px 4px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ⏰ {ev_item['time'].strftime('%H:%M')} - {ev_item['title']}
+                                </div>
+                            """
+
+                        cols_w[day_idx].markdown(f"""
+                            <div style="background:{bg_color}; border:1px solid {border_color}; border-radius:12px; min-height:85px; padding:6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-weight:800; font-size:0.85rem; color:{'#EC4899' if is_today else '#FFF'};">
+                                        {current_day} {'📌' if is_today else ''}
+                                    </span>
+                                </div>
+                                {event_html}
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        current_day += 1
+
+            st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0 15px 0;'>", unsafe_allow_html=True)
+
+            # Liste sous calendrier
+            st.subheader("📋 Liste chronologique des événements")
+            if st.session_state.agenda_events:
+                sorted_events = sorted(st.session_state.agenda_events, key=lambda x: (x['date'], x['time']))
                 for ev in sorted_events:
-                    formatted_day = ev['date'].strftime('%d')
-                    formatted_month = ev['date'].strftime('%b').upper()
-                    formatted_time = ev['time'].strftime('%H:%M')
-                    
                     st.markdown(f"""
                         <div class="calendar-event-card">
                             <div class="calendar-date-box">
-                                <span style="font-size: 0.75rem; text-transform: uppercase;">{formatted_month}</span>
-                                <span style="font-size: 1.5rem; line-height: 1;">{formatted_day}</span>
-                                <span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{formatted_time}</span>
+                                <span style="font-size: 0.75rem; text-transform: uppercase;">{ev['date'].strftime('%b').upper()}</span>
+                                <span style="font-size: 1.5rem; line-height: 1;">{ev['date'].strftime('%d')}</span>
+                                <span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev['time'].strftime('%H:%M')}</span>
                             </div>
                             <div style="flex-grow: 1;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                    <h3 style="margin:0; color:#FFFFFF; font-size: 1.25rem;">{ev['title']}</h3>
+                                    <h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev['title']}</h3>
                                     <span class="zapio-badge">{ev['category']}</span>
                                 </div>
-                                <p style="color:#CBD5E1; margin: 8px 0; font-size: 0.9rem;">
+                                <p style="color:#CBD5E1; margin: 6px 0; font-size: 0.85rem;">
                                     {ev['desc'] if ev['desc'] else '<i>Aucune note fournie</i>'}
                                 </p>
                                 <div style="font-size: 0.8rem; color: #A78BFA;">
-                                    🔔 Sonnerie : <b style="color:#FFF;">{ev['ringtone']}</b>
+                                    🔔 Notification : <b style="color:#FFF;">{ev['ringtone']}</b>
                                 </div>
                             </div>
                         </div>
                     """, unsafe_allow_html=True)
             else:
-                st.info("Aucun événement programmé.")
+                st.info("Aucun événement dans l'agenda.")
 
         with tab_add:
             with st.form("add_event_form"):
-                st.subheader("Planifier une nouvelle entrée")
-                title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Session Code PavelCore ou Réunion Client")
+                st.subheader("Planifier une nouvelle date")
+                title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Concert / Réunion PavelCore")
                 
                 c_date, c_time = st.columns(2)
                 with c_date:
                     event_date = st.date_input("Date", value=date.today())
                 with c_time:
-                    event_time = st.time_input("Heure exact", value=time(12, 0))
+                    event_time = st.time_input("Heure exacte", value=time(12, 0))
 
                 c_cat, c_ring = st.columns(2)
                 with c_cat:
-                    category = st.selectbox("Catégorie d'événement", ["Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"])
+                    category = st.selectbox("Catégorie", ["Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"])
                 with c_ring:
-                    ringtone = st.selectbox("Sonnerie de rappel", ["Alarme Digitale", "Bip Futuriste", "Douce Mélodie", "Silence"])
+                    ringtone = st.selectbox("Sonnerie", ["Alarme Digitale", "Bip Futuriste", "Douce Mélodie", "Silence"])
 
-                desc = st.text_area("Notes complémentaires / Détails")
+                desc = st.text_area("Notes complémentaires")
 
-                if st.form_submit_button("🔔 Valider et Ajouter au Planning"):
+                if st.form_submit_button("🔔 Ajouter au Calendrier"):
                     if title:
                         st.session_state.agenda_events.append({
                             "title": title, "date": event_date, "time": event_time,
                             "category": category, "desc": desc, "ringtone": ringtone
                         })
-                        st.success("Événement ajouté avec succès !")
+                        st.success("Événement ajouté sur le calendrier !")
                         st.rerun()
 
     # ====================================================
@@ -618,17 +670,4 @@ else:
                         "notes": cred_notes
                     })
                     st.success("Accès enregistré dans le coffre-fort !")
-                    st.rerun()
-
-        for cred in st.session_state.saved_user_credentials:
-            st.markdown(f"""
-                <div class="zapio-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <h3 style="margin:0; color:#EC4899;">🔐 {cred['platform']}</h3>
-                        <span class="zapio-badge">{cred['type']}</span>
-                    </div>
-                    <p style="color:#FFFFFF; font-size:0.9rem; margin: 4px 0;"><b>Identifiant / User :</b> {cred['username'] if cred['username'] else 'N/A'}</p>
-                    <p style="color:#CBD5E1; font-size:0.85rem; margin: 4px 0;"><b>Notes / URL :</b> {cred['notes'] if cred['notes'] else 'Aucune note'}</p>
-            """, unsafe_allow_html=True)
-            st.code(cred['password'], language="text")
-            st.markdown("</div>", unsafe_allow_html=True)
+                    st
