@@ -5,10 +5,10 @@ def inject_custom_design():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-        /* Structure générale */
+        /* Structure Globale Dark Premium */
         html, body, [data-testid="stAppViewContainer"], .stApp {
-            background-color: #0F1117 !important;
-            color: #F0F2F6 !important;
+            background-color: #0B0D12 !important;
+            color: #F3F4F6 !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
@@ -21,26 +21,26 @@ def inject_custom_design():
             font-weight: 700 !important;
         }
 
-        /* Champs de saisie */
+        /* Champs de Saisie Ultra Lisibles */
         div[data-baseweb="input"] input, 
         div[data-baseweb="textarea"] textarea,
         .stTextInput input, 
         .stTextArea textarea {
             color: #0F172A !important;
             background-color: #FFFFFF !important;
-            border: 1px solid #CBD5E1 !important;
-            border-radius: 8px !important;
+            border: 2px solid #E2E8F0 !important;
+            border-radius: 10px !important;
             font-weight: 600 !important;
+            font-size: 0.95rem !important;
         }
 
         div[data-baseweb="select"] > div {
             background-color: #FFFFFF !important;
             color: #0F172A !important;
-            border-radius: 8px !important;
+            border-radius: 10px !important;
             font-weight: 600 !important;
         }
 
-        /* Dropdown Options */
         div[data-baseweb="popover"] ul, div[role="listbox"] {
             background-color: #FFFFFF !important;
             color: #0F172A !important;
@@ -50,84 +50,95 @@ def inject_custom_design():
             font-weight: 600 !important;
         }
 
-        /* FIX CRITIQUE : ONGLETS STREAMLIT (Tabs Agenda) */
+        /* ONGLETS STREAMLIT (Tabs Agenda) - Haute Visibilité */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 10px !important;
-            background-color: #161922 !important;
+            gap: 12px !important;
+            background-color: #141721 !important;
             padding: 8px !important;
-            border-radius: 14px !important;
-            border: 1px solid #2A2E3D !important;
+            border-radius: 16px !important;
+            border: 1px solid #232838 !important;
         }
 
         .stTabs [data-baseweb="tab"] {
-            background-color: #222736 !important;
-            border-radius: 10px !important;
-            padding: 10px 18px !important;
-            border: 1px solid #32384A !important;
+            background-color: #1E2333 !important;
+            border-radius: 12px !important;
+            padding: 12px 24px !important;
+            border: 1px solid #2D3448 !important;
         }
 
-        /* Forcer la couleur blanche sur le texte de l'onglet inactif */
         .stTabs [data-baseweb="tab"] p, 
         .stTabs [data-baseweb="tab"] span, 
         .stTabs [data-baseweb="tab"] div {
             color: #FFFFFF !important;
             font-weight: 800 !important;
-            font-size: 0.95rem !important;
+            font-size: 1rem !important;
         }
 
-        /* Onglet actif (sélectionné) */
         .stTabs [aria-selected="true"] {
             background-color: #FF3B30 !important;
             border-color: #FF3B30 !important;
+            box-shadow: 0 4px 14px rgba(255, 59, 48, 0.4) !important;
         }
 
-        .stTabs [aria-selected="true"] p, 
-        .stTabs [aria-selected="true"] span {
-            color: #FFFFFF !important;
-        }
-
-        /* Boutons de formulaire */
+        /* Boutons de Formulaire */
         .stButton > button, 
         div[data-testid="stFormSubmitButton"] > button {
-            background-color: #FF3B30 !important;
+            background: linear-gradient(135deg, #FF3B30 0%, #D7261C 100%) !important;
             color: #FFFFFF !important;
             font-weight: 800 !important;
-            font-size: 0.95rem !important;
+            font-size: 1rem !important;
             border: none !important;
-            border-radius: 10px !important;
-            padding: 12px 20px !important;
+            border-radius: 12px !important;
+            padding: 14px 24px !important;
             width: 100% !important;
-            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4) !important;
+            box-shadow: 0 6px 18px rgba(255, 59, 48, 0.35) !important;
         }
 
-        /* Cartes Workspace */
+        /* Cartes du Workspace */
         .zapio-card {
-            background-color: #181B24 !important;
-            border: 1px solid #2A2E3D !important;
-            border-radius: 14px;
+            background-color: #141721 !important;
+            border: 1px solid #232838 !important;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        /* NOUVEAU DESIGN : Bloc Agenda Style Event Card */
+        .timeline-container {
+            display: flex;
+            gap: 16px;
+            background: #141721;
+            border: 1px solid #232838;
+            border-radius: 16px;
             padding: 18px;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Carte Style Agenda Pro */
-        .agenda-card {
-            background: linear-gradient(135deg, #1A1E2B 0%, #12141D 100%);
-            border-left: 5px solid #FF3B30;
-            border-top: 1px solid #2A2E3D;
-            border-right: 1px solid #2A2E3D;
-            border-bottom: 1px solid #2A2E3D;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        .timeline-badge-time {
+            background: linear-gradient(135deg, #FF3B30 0%, #C0261D 100%);
+            color: #FFFFFF;
+            min-width: 90px;
+            height: 90px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            box-shadow: 0 4px 14px rgba(255, 59, 48, 0.3);
         }
 
-        /* Badges */
+        .timeline-content {
+            flex-grow: 1;
+        }
+
         .zapio-badge {
-            background-color: #2E3345;
+            background-color: #232838;
             color: #FF3B30;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 4px 12px;
+            border-radius: 8px;
             font-size: 0.8rem;
             font-weight: 700;
         }
@@ -135,8 +146,8 @@ def inject_custom_design():
         .zapio-badge-green {
             background-color: rgba(52, 199, 89, 0.15);
             color: #34C759;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 4px 12px;
+            border-radius: 8px;
             font-size: 0.8rem;
             font-weight: 700;
         }
