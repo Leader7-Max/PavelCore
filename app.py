@@ -44,7 +44,9 @@ def detect_language(code):
     
     return "python"
 
+# MAP avec "Détection Automatique" en premier par défaut
 LANG_MAP = {
+    "Détection Automatique": "auto",
     "Python": "python",
     "JavaScript / React": "javascript",
     "HTML5": "html",
@@ -52,8 +54,7 @@ LANG_MAP = {
     "SQL": "sql",
     "PHP / WordPress": "php",
     "Flutter / Flet": "python",
-    "JSON / Config": "json",
-    "Détection Automatique": "auto"
+    "JSON / Config": "json"
 }
 
 # Global State
@@ -242,13 +243,13 @@ else:
                     """, unsafe_allow_html=True)
 
     # ====================================================
-    # 🤖 PROMPTS AI CODES
+    # 🤖 PROMPTS AI CODES (Correctif Détection Automatique)
     # ====================================================
     elif menu == "🤖 Prompts AI Code":
         st.subheader("🤖 Mes Prompts AI Code")
         with st.form("form_ai_code"):
             title = st.text_input("Titre du Prompt Code")
-            selected_lang = st.selectbox("Langage / Framework ciblé", list(LANG_MAP.keys()))
+            selected_lang = st.selectbox("Langage / Framework ciblé", list(LANG_MAP.keys()), index=0)
             prompt = st.text_area("Contenu du Prompt AI / Code", height=160)
             tags = st.text_input("Mots-clés / Tags", placeholder="ex: backend, api, auth")
             
@@ -256,10 +257,14 @@ else:
                 if title and prompt:
                     final_lang = LANG_MAP[selected_lang]
                     if final_lang == "auto":
-                        final_lang = detect_language(prompt)
+                        detected = detect_language(prompt)
+                        final_lang = detected
+                        display_label = f"Auto ({detected.upper()})"
+                    else:
+                        display_label = selected_lang
                     
                     st.session_state.saved_ai_prompts.append({
-                        "title": title, "lang_label": selected_lang, "lang": final_lang, "prompt": prompt, "tags": tags
+                        "title": title, "lang_label": display_label, "lang": final_lang, "prompt": prompt, "tags": tags
                     })
                     st.rerun()
 
@@ -283,7 +288,7 @@ else:
         with st.form("form_claude"):
             title = st.text_input("Titre de la consigne", placeholder="Ex: Refactoring React Component")
             system_prompt = st.text_area("System Prompt / Instructions de rôle", height=100, placeholder="Ex: Tu es un expert Senior Python...")
-            selected_lang = st.selectbox("Langage / Format principal du Code", list(LANG_MAP.keys()))
+            selected_lang = st.selectbox("Langage / Format principal du Code", list(LANG_MAP.keys()), index=0)
             user_prompt = st.text_area("User Prompt / Code collé", height=150, placeholder="Collez le code ou la consigne ici...")
             artifacts = st.text_input("Artifacts attendus", placeholder="ex: Application React, Script Python")
             
@@ -291,10 +296,14 @@ else:
                 if title and user_prompt:
                     final_lang = LANG_MAP[selected_lang]
                     if final_lang == "auto":
-                        final_lang = detect_language(user_prompt)
+                        detected = detect_language(user_prompt)
+                        final_lang = detected
+                        display_label = f"Auto ({detected.upper()})"
+                    else:
+                        display_label = selected_lang
 
                     st.session_state.saved_claude_prompts.append({
-                        "title": title, "sys": system_prompt, "user": user_prompt, "artifacts": artifacts, "lang_label": selected_lang, "lang": final_lang
+                        "title": title, "sys": system_prompt, "user": user_prompt, "artifacts": artifacts, "lang_label": display_label, "lang": final_lang
                     })
                     st.success("Prompt enregistré !")
                     st.rerun()
@@ -318,7 +327,7 @@ else:
         st.subheader("💻 Mes Snippets de Code")
         with st.form("form_code"):
             title = st.text_input("Nom de la fonction / Snippet")
-            selected_lang = st.selectbox("Langage du Snippet", list(LANG_MAP.keys()))
+            selected_lang = st.selectbox("Langage du Snippet", list(LANG_MAP.keys()), index=0)
             code_content = st.text_area("Collez votre code ici", height=180)
             usage_note = st.text_input("Note d'utilisation")
             
@@ -326,10 +335,14 @@ else:
                 if title and code_content:
                     final_lang = LANG_MAP[selected_lang]
                     if final_lang == "auto":
-                        final_lang = detect_language(code_content)
+                        detected = detect_language(code_content)
+                        final_lang = detected
+                        display_label = f"Auto ({detected.upper()})"
+                    else:
+                        display_label = selected_lang
 
                     st.session_state.saved_code_snippets.append({
-                        "title": title, "type_label": selected_lang, "type": final_lang, "code": code_content, "note": usage_note
+                        "title": title, "type_label": display_label, "type": final_lang, "code": code_content, "note": usage_note
                     })
                     st.rerun()
 
