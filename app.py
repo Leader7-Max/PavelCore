@@ -608,8 +608,18 @@ else:
                         if title and prompt_text:
                             st.session_state.saved_image_prompts.append({"title": title, "gen": generator, "prompt": prompt_text, "ar": aspect_ratio, "neg": negative_prompt})
                             st.rerun()
-                for img in st.session_state.saved_image_prompts:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};">{img["prompt"]}</p></div>', unsafe_allow_html=True)
+                
+                for idx, img in enumerate(st.session_state.saved_image_prompts):
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};"><b>Générateur:</b> {img["gen"]} | <b>Format:</b> {img["ar"]}</p><p style="color:{text_color}; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">{img["prompt"]}</p></div>', unsafe_allow_html=True)
+                    # Bouton pour télécharger le prompt sous forme de fichier texte (.txt)
+                    file_content = f"Titre: {img['title']}\nGénérateur: {img['gen']}\nFormat: {img['ar']}\nNégatif: {img['neg']}\n\nPrompt:\n{img['prompt']}"
+                    st.download_button(
+                        label=f"⬇️ Télécharger le prompt ({img['title']})",
+                        data=file_content,
+                        file_name=f"{img['title'].lower().replace(' ', '_')}_prompt.txt",
+                        mime="text/plain",
+                        key=f"dl_img_{idx}"
+                    )
 
             elif sub_tab == "🔗 Liens Utiles":
                 with st.form("form_links"):
@@ -627,15 +637,25 @@ else:
             elif sub_tab == "📦 Fichiers ZIP":
                 with st.form("form_zip"):
                     title = st.text_input("Nom")
-                    cloud_link = st.text_input("Lien")
+                    cloud_link = st.text_input("Lien de téléchargement direct / Stockage")
                     version = st.text_input("Version", value="v1.0")
-                    contents = st.text_area("Contenu")
+                    contents = st.text_area("Contenu du fichier")
                     if st.form_submit_button("Enregistrer"):
                         if title and cloud_link:
                             st.session_state.saved_zip_files.append({"title": title, "link": cloud_link, "version": version, "contents": contents})
                             st.rerun()
-                for zp in st.session_state.saved_zip_files:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]}</h3><a href="{zp["link"]}" target="_blank">Télécharger ZIP</a></div>', unsafe_allow_html=True)
+                
+                for idx, zp in enumerate(st.session_state.saved_zip_files):
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]} ({zp["version"]})</h3><p style="color:{desc_color};">{zp["contents"]}</p><a href="{zp["link"]}" target="_blank" style="color: #EC4899; font-weight: bold;">🌐 Ouvrir le lien direct</a></div>', unsafe_allow_html=True)
+                    # Bouton de téléchargement d'un fichier récapitulatif ou lien direct simulé en st.download_button
+                    zip_meta = f"Fichier ZIP: {zp['title']}\nVersion: {zp['version']}\nLien source: {zp['link']}\nContenu:\n{zp['contents']}"
+                    st.download_button(
+                        label=f"⬇️ Télécharger la fiche / lien ({zp['title']})",
+                        data=zip_meta,
+                        file_name=f"{zp['title'].lower().replace(' ', '_')}_{zp['version']}.txt",
+                        mime="text/plain",
+                        key=f"dl_zip_{idx}"
+                    )
 
         elif current == "Coffre-Fort":
             sub_tab = st.radio("Navigation Sécurité", ["🔑 Clés API", "🔐 Mots de passe"], horizontal=True)
