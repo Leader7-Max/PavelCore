@@ -5,7 +5,7 @@ def inject_custom_design():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-        /* Background Violet Deep (Thème Design Calendar Template) */
+        /* Background Violet Deep (Thème Design Calendar) */
         html, body, [data-testid="stAppViewContainer"], .stApp {
             background: linear-gradient(135deg, #1A0B2E 0%, #110520 100%) !important;
             color: #F3F4F6 !important;
@@ -21,7 +21,7 @@ def inject_custom_design():
             font-weight: 700 !important;
         }
 
-        /* Champs de Saisie Lisibles Blanc / Violet */
+        /* Champs de Saisie Lisibles */
         div[data-baseweb="input"] input, 
         div[data-baseweb="textarea"] textarea,
         .stTextInput input, 
@@ -50,7 +50,7 @@ def inject_custom_design():
             font-weight: 600 !important;
         }
 
-        /* FIX CORRIGÉ : ONGLET INACTIF ULTRA VISIBLE & SCROLLABLE MOBILE */
+        /* FIX CRITIQUE : ONGLET INACTIF ULTRA VISIBLE & LISIBLE SUR MOBILE */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px !important;
             background-color: #261245 !important;
@@ -84,7 +84,7 @@ def inject_custom_design():
             box-shadow: 0 4px 15px rgba(236, 72, 153, 0.5) !important;
         }
 
-        /* Boutons de Formulaire Rose Vif 3D */
+        /* Boutons de Formulaire 3D */
         .stButton > button, 
         div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%) !important;
@@ -108,7 +108,7 @@ def inject_custom_design():
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* CARTE AGENDA : BLOC CHRONO STYLE "DESIGN CALENDAR" */
+        /* CARTE AGENDA : BLOC LISTE SOUS LE CALENDRIER */
         .calendar-event-card {
             background: linear-gradient(135deg, #2D1254 0%, #1E0A3C 100%);
             border: 1px solid #A855F7;
