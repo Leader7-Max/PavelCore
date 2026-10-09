@@ -19,111 +19,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# INJECTION DIRECTE DES STYLES (Plus besoin du dossier assets/styles.py)
-st.markdown("""
-    <style>
-    /* Design global & Thème Sombre/Néon PavelCore */
-    .stApp {
-        background-color: #0E031C;
-        color: #F8FAFC;
-    }
-    
-    /* Conteneur global de défilement horizontal type livre / carrousel */
-    .horizontal-book-container {
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 20px;
-        padding-bottom: 20px;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .horizontal-book-container::-webkit-scrollbar {
-        height: 6px;
-    }
-    .horizontal-book-container::-webkit-scrollbar-thumb {
-        background: #EC4899;
-        border-radius: 10px;
-    }
-
-    /* Chaque page/option s'aligne comme une page de livre */
-    .book-page-panel {
-        min-width: 100%;
-        scroll-snap-align: start;
-        flex-shrink: 0;
-        transition: transform 0.3s ease;
-    }
-
-    /* Badges & Cartes */
-    .zapio-badge {
-        background: rgba(236, 72, 153, 0.15);
-        color: #EC4899;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        border: 1px solid rgba(236, 72, 153, 0.3);
-    }
-    .zapio-badge-green {
-        background: rgba(16, 185, 129, 0.15);
-        color: #34D399;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    .zapio-card {
-        background: #170A2E;
-        border: 1px solid #2B1552;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .calendar-header-box {
-        background: #1E0A3C;
-        color: #A78BFA;
-        text-align: center;
-        padding: 8px;
-        border-radius: 6px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        border: 1px solid #2E1259;
-    }
-    .calendar-day-box {
-        min-height: 90px;
-        border-radius: 8px;
-        padding: 6px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-    }
-    .calendar-event-card {
-        background: #170A2E;
-        border: 1px solid #3B1578;
-        border-radius: 10px;
-        padding: 12px;
-        display: flex;
-        gap: 15px;
-        margin-bottom: 10px;
-        align-items: center;
-    }
-    .calendar-date-box {
-        background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
-        color: #FFF;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-        min-width: 65px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        font-weight: 800;
-    }
-    </style>
-""", unsafe_allow_html=True)
+from assets.styles import inject_custom_design
+inject_custom_design()
 
 # Script PWA + Synchronisation Hors-Ligne dans le LocalStorage
 pwa_offline_script = """
@@ -250,6 +147,7 @@ def sync_offline():
 
 # Fonction d'affichage du calendrier dynamique
 def render_agenda_module():
+    # Barre supérieure avec bouton de retour
     col_header, col_back = st.columns([3, 1])
     with col_header:
         st.markdown(
@@ -304,6 +202,7 @@ def render_agenda_module():
 
     st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
 
+    # VUE CALENDRIER MENSUEL MULTI-ANNÉES AUTOMATIQUE
     if st.session_state.agenda_active_tab == "vue":
         today = date.today()
         current_year = today.year
@@ -381,6 +280,7 @@ def render_agenda_module():
                     )
 
         st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0 15px 0;'>", unsafe_allow_html=True)
+
         st.subheader(f"📋 Liste chronologique des événements ({MONTH_NAMES_FR[selected_month_idx-1]} {selected_year})")
         
         month_events = [ev for ev in st.session_state.agenda_events if ev['date'].month == selected_month_idx and ev['date'].year == selected_year]
@@ -401,6 +301,7 @@ def render_agenda_module():
         else:
             st.info(f"Aucun événement enregistré pour {MONTH_NAMES_FR[selected_month_idx-1]} {selected_year}.")
 
+    # PROGRAMMER UN ÉVÉNEMENT
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form"):
             st.subheader("Planifier une nouvelle date")
@@ -430,6 +331,7 @@ def render_agenda_module():
                     st.session_state.agenda_active_tab = "vue"
                     st.success("Événement enregistré et sauvegardé hors-ligne !")
                     st.rerun()
+
 
 # CONTROLE D'ACCÈS / NAVIGATION
 query_params = st.query_params
@@ -465,7 +367,7 @@ else:
     col_logo, col_logout = st.columns([3, 1])
     
     with col_logo:
-        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Mode Carrousel Horizontal</span></h1>', unsafe_allow_html=True)
+        st.markdown('<h1 style="font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.4rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Connecté / Offline Ready</span></h1>', unsafe_allow_html=True)
         
     with col_logout:
         if st.button("Déconnexion", key="top_logout"):
@@ -496,10 +398,6 @@ else:
     )
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
-
-    # Conteneur horizontal fluide activé par le CSS intégré
-    st.markdown('<div class="horizontal-book-container">', unsafe_allow_html=True)
-    st.markdown('<div class="book-page-panel">', unsafe_allow_html=True)
 
     if menu == "📆 Agenda Premium":
         render_agenda_module()
@@ -715,6 +613,3 @@ else:
             st.markdown(f'<div class="zapio-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;"><h3 style="margin:0; color:#EC4899;">🔐 {cred["platform"]}</h3><span class="zapio-badge">{cred["type"]}</span></div><p style="color:#FFFFFF; font-size:0.9rem; margin: 4px 0;"><b>User :</b> {user_txt}</p><p style="color:#CBD5E1; font-size:0.85rem; margin: 4px 0;"><b>Notes / URL :</b> {notes_txt}</p>', unsafe_allow_html=True)
             st.code(cred['password'], language="text")
             st.markdown('</div>', unsafe_allow_html=True)
-
-    # Fermeture propre des conteneurs
-    st.markdown('</div></div>', unsafe_allow_html=True)
