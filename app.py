@@ -335,7 +335,7 @@ else:
     # ====================================================
     # 💻 CODES (HTML/CSS/JS)
     # ====================================================
-    elif menu == "💻Codes (HTML/CSS/JS)":
+    elif menu == "💻 Codes (HTML/CSS/JS)":
         st.subheader("💻 Mes Snippets de Code")
         with st.form("form_code"):
             title = st.text_input("Nom de la fonction / Snippet")
