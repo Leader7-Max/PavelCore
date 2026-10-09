@@ -62,7 +62,8 @@ if "authenticated" not in st.session_state:
 
 if "agenda_events" not in st.session_state:
     st.session_state.agenda_events = [
-        {"title": "Lancement Application PavelCore", "date": date(2026, 10, 25), "time": time(10, 0), "category": "Projet", "desc": "Mise en ligne globale sur Streamlit Cloud", "ringtone": "Alarme Digitale"}
+        {"title": "Lancement Application PavelCore", "date": date(2026, 10, 25), "time": time(10, 0), "category": "Dev & Tech", "desc": "Mise en ligne globale sur Streamlit Cloud", "ringtone": "Alarme Digitale"},
+        {"title": "Session DJ & Mixing Event", "date": date(2026, 10, 28), "time": time(21, 30), "category": "Événement DJ / Prestation", "desc": "Préparation set Afrobeat & Zouglou", "ringtone": "Bip Futuriste"}
     ]
 
 if "saved_ai_prompts" not in st.session_state:
@@ -173,13 +174,13 @@ else:
     st.markdown("<hr style='border-color: rgba(255,255,255,0.1); margin: 15px 0 20px 0;'>", unsafe_allow_html=True)
 
     # ====================================================
-    # 📆 AGENDA PREMIUM (Design Planning Vrai Agenda)
+    # 📆 AGENDA PREMIUM (Design Grille Temporelle Pro)
     # ====================================================
     if menu == "📆 Agenda Premium":
         st.markdown("""
             <div style="margin-bottom: 20px;">
-                <span class="zapio-badge">🔴 Planning Interactif & Gestionnaire d'Événements</span>
-                <h2 style="margin-top: 10px;">Agenda & Mon Emploi du Temps</h2>
+                <span class="zapio-badge">🔴 Planning Temporel & Rappels Sonores</span>
+                <h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Timetable Interactive</h2>
             </div>
         """, unsafe_allow_html=True)
 
@@ -188,78 +189,88 @@ else:
 
         if today_events:
             st.markdown(f"""
-                <div class="zapio-card" style="border-color: #FF3B30; background: linear-gradient(135deg, rgba(255,59,48,0.2) 0%, #181B24 100%);">
+                <div class="zapio-card" style="border-color: #FF3B30; background: linear-gradient(135deg, rgba(255,59,48,0.2) 0%, #141721 100%);">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="zapio-badge">🔔 RAPPELS DU JOUR</span>
+                        <span class="zapio-badge">🔔 ALERTE ÉVÉNEMENT AUJOURD'HUI</span>
                         <span style="color:#FFF; font-weight:bold; font-size:0.9rem;">{today.strftime('%d/%m/%Y')}</span>
                     </div>
-                    <h3 style="color:#FFF; margin-top:10px;">Vous avez {len(today_events)} rendez-vous aujourd'hui !</h3>
+                    <h3 style="color:#FFF; margin-top:10px;">Vous avez {len(today_events)} rendez-vous prévu(s) aujourd'hui !</h3>
                 </div>
             """, unsafe_allow_html=True)
 
-        tab_add, tab_view = st.tabs(["➕ Programmer un Événement", "📅 Mon Planning / Liste"])
+        tab_view, tab_add = st.tabs(["📅 Mon Planning & Chronologie", "➕ Programmer un Événement"])
+
+        with tab_view:
+            if st.session_state.agenda_events:
+                # Filtre par catégorie
+                filter_cat = st.selectbox(
+                    "Filtrer par catégorie", 
+                    ["Tous les événements", "Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"]
+                )
+                
+                events_to_show = st.session_state.agenda_events
+                if filter_cat != "Tous les événements":
+                    events_to_show = [e for e in events_to_show if e['category'] == filter_cat]
+
+                # Tri chronologique par date et heure
+                sorted_events = sorted(events_to_show, key=lambda x: (x['date'], x['time']))
+
+                for ev in sorted_events:
+                    formatted_day = ev['date'].strftime('%d')
+                    formatted_month = ev['date'].strftime('%b').upper()
+                    formatted_time = ev['time'].strftime('%H:%M')
+                    
+                    st.markdown(f"""
+                        <div class="timeline-container">
+                            <div class="timeline-badge-time">
+                                <span style="font-size: 0.75rem; text-transform: uppercase;">{formatted_month}</span>
+                                <span style="font-size: 1.4rem; line-height: 1;">{formatted_day}</span>
+                                <span style="font-size: 0.8rem; margin-top: 4px; opacity: 0.9;">{formatted_time}</span>
+                            </div>
+                            <div class="timeline-content">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                    <h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev['title']}</h3>
+                                    <span class="zapio-badge">{ev['category']}</span>
+                                </div>
+                                <p style="color:#94A3B8; margin: 8px 0; font-size: 0.9rem;">
+                                    {ev['desc'] if ev['desc'] else '<i>Aucune note fournie</i>'}
+                                </p>
+                                <div style="display:flex; gap: 15px; font-size: 0.8rem; color: #64748B;">
+                                    <span>🔔 Sonnerie : <b style="color:#CBD5E1;">{ev['ringtone']}</b></span>
+                                </div>
+                            </div>
+                        </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("Aucun événement programmé.")
 
         with tab_add:
             with st.form("add_event_form"):
-                st.subheader("Nouvelle Entrée Agenda")
-                title = st.text_input("Intitulé du Rendez-vous / Tâche", placeholder="Ex: Prestation DJ Event ou Réunion Reborn")
+                st.subheader("Planifier une nouvelle entrée")
+                title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Session Code PavelCore ou Réunion Client")
                 
                 c_date, c_time = st.columns(2)
                 with c_date:
                     event_date = st.date_input("Date", value=date.today())
                 with c_time:
-                    event_time = st.time_input("Heure", value=time(12, 0))
+                    event_time = st.time_input("Heure exact", value=time(12, 0))
 
                 c_cat, c_ring = st.columns(2)
                 with c_cat:
-                    category = st.selectbox("Type d'événement", ["Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"])
+                    category = st.selectbox("Catégorie d'événement", ["Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"])
                 with c_ring:
-                    ringtone = st.selectbox("Notification / Rappel", ["Alarme Digitale", "Bip Futuriste", "Douce Mélodie", "Silence"])
+                    ringtone = st.selectbox("Sonnerie de rappel", ["Alarme Digitale", "Bip Futuriste", "Douce Mélodie", "Silence"])
 
-                desc = st.text_area("Notes complémentaires / Lieu")
+                desc = st.text_area("Notes complémentaires / Détails")
 
-                if st.form_submit_button("📅 Ajouter à mon Agenda"):
+                if st.form_submit_button("🔔 Valider et Ajouter au Planning"):
                     if title:
                         st.session_state.agenda_events.append({
                             "title": title, "date": event_date, "time": event_time,
                             "category": category, "desc": desc, "ringtone": ringtone
                         })
-                        st.success("Événement ajouté au planning !")
+                        st.success("Événement ajouté avec succès !")
                         st.rerun()
-
-        with tab_view:
-            if st.session_state.agenda_events:
-                # Tri chronologique par date et heure
-                sorted_events = sorted(st.session_state.agenda_events, key=lambda x: (x['date'], x['time']))
-                
-                for ev in sorted_events:
-                    formatted_date = ev['date'].strftime('%d %B %Y')
-                    formatted_time = ev['time'].strftime('%H:%M')
-                    
-                    st.markdown(f"""
-                        <div class="agenda-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 15px;">
-                                    <div style="background: #FF3B30; color: #FFF; padding: 8px 14px; border-radius: 8px; text-align: center; font-weight: 800; font-size: 1.1rem;">
-                                        ⏰ {formatted_time}
-                                    </div>
-                                    <div>
-                                        <h3 style="margin: 0; color: #FFF; font-size: 1.2rem;">{ev['title']}</h3>
-                                        <span style="color: #A0A0AB; font-size: 0.85rem;">📅 {formatted_date}</span>
-                                    </div>
-                                </div>
-                                <span class="zapio-badge">{ev['category']}</span>
-                            </div>
-                            <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); color: #D1D5DB; font-size: 0.9rem;">
-                                {ev['desc'] if ev['desc'] else '<i>Aucune note ajoutée</i>'}
-                            </div>
-                            <div style="margin-top: 8px; font-size: 0.8rem; color: #8E8E93;">
-                                🔔 Sonnerie paramétrée : <b>{ev['ringtone']}</b>
-                            </div>
-                        </div>
-                    """, unsafe_allow_html=True)
-            else:
-                st.info("Votre agenda est vide pour le moment.")
 
     # ====================================================
     # 🤖 PROMPTS AI CODES
