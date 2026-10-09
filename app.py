@@ -25,29 +25,103 @@ try:
 except ImportError:
     pass
 
-# INJECTION DES STYLES PREMIUM (Effets Néons & Grille de Cartes)
-st.markdown("""
+# Gestionnaire d'État Global pour le Thème
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "Sombre Nuit"
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if "direct_agenda" not in st.session_state:
+    st.session_state.direct_agenda = False
+
+if "agenda_active_tab" not in st.session_state:
+    st.session_state.agenda_active_tab = "vue"
+
+if "agenda_events" not in st.session_state:
+    st.session_state.agenda_events = []
+
+if "saved_ai_prompts" not in st.session_state:
+    st.session_state.saved_ai_prompts = []
+
+if "saved_claude_prompts" not in st.session_state:
+    st.session_state.saved_claude_prompts = []
+
+if "saved_code_snippets" not in st.session_state:
+    st.session_state.saved_code_snippets = []
+
+if "saved_image_prompts" not in st.session_state:
+    st.session_state.saved_image_prompts = []
+
+if "saved_ideas" not in st.session_state:
+    st.session_state.saved_ideas = []
+
+if "saved_current_projects" not in st.session_state:
+    st.session_state.saved_current_projects = []
+
+if "saved_future_projects" not in st.session_state:
+    st.session_state.saved_future_projects = []
+
+if "saved_links" not in st.session_state:
+    st.session_state.saved_links = []
+
+if "saved_zip_files" not in st.session_state:
+    st.session_state.saved_zip_files = []
+
+if "saved_api_keys" not in st.session_state:
+    st.session_state.saved_api_keys = []
+
+if "saved_user_credentials" not in st.session_state:
+    st.session_state.saved_user_credentials = []
+
+if "current_view" not in st.session_state:
+    st.session_state.current_view = "home"
+
+# Définition dynamique des couleurs selon le thème choisi
+if st.session_state.theme_mode == "Blanc Épuré":
+    bg_app = "#F8FAFC"
+    text_color = "#0F172A"
+    card_bg = "#FFFFFF"
+    card_border = "#E2E8F0"
+    card_gradient = "linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%)"
+    header_box_bg = "#F1F5F9"
+    header_box_text = "#64748B"
+    desc_color = "#475569"
+    sub_title_color = "#0F172A"
+else:  # Sombre Nuit (Défaut PavelCore)
+    bg_app = "#0E031C"
+    text_color = "#F8FAFC"
+    card_bg = "#170A2E"
+    card_border = "#2B1552"
+    card_gradient = "linear-gradient(135deg, #1A0B36 0%, #120524 100%)"
+    header_box_bg = "#1E0A3C"
+    header_box_text = "#A78BFA"
+    desc_color = "#CBD5E1"
+    sub_title_color = "#FFF"
+
+# INJECTION DES STYLES DYNAMIQUES
+st.markdown(f"""
     <style>
-    .stApp {
-        background-color: #0E031C;
-        color: #F8FAFC;
-    }
-    .pavel-card-grid {
-        background: linear-gradient(135deg, #1A0B36 0%, #120524 100%);
+    .stApp {{
+        background-color: {bg_app};
+        color: {text_color};
+    }}
+    .pavel-card-grid {{
+        background: {card_gradient};
         border: 1px solid rgba(236, 72, 153, 0.3);
         border-radius: 16px;
         padding: 25px;
         text-align: center;
         transition: all 0.3s ease;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         margin-bottom: 20px;
-    }
-    .pavel-card-grid:hover {
+    }}
+    .pavel-card-grid:hover {{
         transform: translateY(-5px);
         border-color: #EC4899;
         box-shadow: 0 12px 40px rgba(236, 72, 153, 0.25);
-    }
-    .zapio-badge {
+    }}
+    .zapio-badge {{
         background: rgba(236, 72, 153, 0.15);
         color: #EC4899;
         padding: 4px 10px;
@@ -55,53 +129,53 @@ st.markdown("""
         font-size: 0.8rem;
         font-weight: 600;
         border: 1px solid rgba(236, 72, 153, 0.3);
-    }
-    .zapio-badge-green {
+    }}
+    .zapio-badge-green {{
         background: rgba(16, 185, 129, 0.15);
-        color: #34D399;
+        color: #10B981;
         padding: 4px 10px;
         border-radius: 6px;
         font-size: 0.8rem;
         font-weight: 600;
         border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    .zapio-card {
-        background: #170A2E;
-        border: 1px solid #2B1552;
+    }}
+    .zapio-card {{
+        background: {card_bg};
+        border: 1px solid {card_border};
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .calendar-header-box {
-        background: #1E0A3C;
-        color: #A78BFA;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }}
+    .calendar-header-box {{
+        background: {header_box_bg};
+        color: {header_box_text};
         text-align: center;
         padding: 8px;
         border-radius: 6px;
         font-weight: 700;
         font-size: 0.85rem;
-        border: 1px solid #2E1259;
-    }
-    .calendar-day-box {
+        border: 1px solid {card_border};
+    }}
+    .calendar-day-box {{
         min-height: 90px;
         border-radius: 8px;
         padding: 6px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-    }
-    .calendar-event-card {
-        background: #170A2E;
-        border: 1px solid #3B1578;
+    }}
+    .calendar-event-card {{
+        background: {card_bg};
+        border: 1px solid {card_border};
         border-radius: 10px;
         padding: 12px;
         display: flex;
         gap: 15px;
         margin-bottom: 10px;
         align-items: center;
-    }
-    .calendar-date-box {
+    }}
+    .calendar-date-box {{
         background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
         color: #FFF;
         border-radius: 8px;
@@ -112,7 +186,7 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
         font-weight: 800;
-    }
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -177,56 +251,6 @@ MONTH_NAMES_FR = [
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
 ]
 
-# State Management Global
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-
-if "direct_agenda" not in st.session_state:
-    st.session_state.direct_agenda = False
-
-if "agenda_active_tab" not in st.session_state:
-    st.session_state.agenda_active_tab = "vue"
-
-if "agenda_events" not in st.session_state:
-    st.session_state.agenda_events = []
-
-if "saved_ai_prompts" not in st.session_state:
-    st.session_state.saved_ai_prompts = []
-
-if "saved_claude_prompts" not in st.session_state:
-    st.session_state.saved_claude_prompts = []
-
-if "saved_code_snippets" not in st.session_state:
-    st.session_state.saved_code_snippets = []
-
-if "saved_image_prompts" not in st.session_state:
-    st.session_state.saved_image_prompts = []
-
-if "saved_ideas" not in st.session_state:
-    st.session_state.saved_ideas = []
-
-if "saved_current_projects" not in st.session_state:
-    st.session_state.saved_current_projects = []
-
-if "saved_future_projects" not in st.session_state:
-    st.session_state.saved_future_projects = []
-
-if "saved_links" not in st.session_state:
-    st.session_state.saved_links = []
-
-if "saved_zip_files" not in st.session_state:
-    st.session_state.saved_zip_files = []
-
-if "saved_api_keys" not in st.session_state:
-    st.session_state.saved_api_keys = []
-
-if "saved_user_credentials" not in st.session_state:
-    st.session_state.saved_user_credentials = []
-
-if "current_view" not in st.session_state:
-    st.session_state.current_view = "home"
-
-# Synchronisation JS pour stockage hors-ligne
 def sync_offline():
     serializable_events = [
         {
@@ -241,9 +265,8 @@ def sync_offline():
     js_sync = f"<script>syncAgendaToOfflineStorage({json.dumps(serializable_events)});</script>"
     components.html(js_sync, height=0, width=0)
 
-# Fonction d'affichage du calendrier dynamique
 def render_agenda_module():
-    st.markdown('<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem;">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
 
     col_btn1, col_btn2, col_clear = st.columns([2.3, 2.5, 2])
     
@@ -300,12 +323,12 @@ def render_agenda_module():
             cols_w = st.columns(7)
             for day_idx, day_num in enumerate(week):
                 if day_num == 0:
-                    cols_w[day_idx].markdown('<div class="calendar-day-box" style="background:rgba(20,9,35,0.4); border:1px solid #261245; opacity:0.3;"></div>', unsafe_allow_html=True)
+                    cols_w[day_idx].markdown('<div class="calendar-day-box" style="background:rgba(100,100,100,0.1); border:1px solid rgba(100,100,100,0.2); opacity:0.3;"></div>', unsafe_allow_html=True)
                 else:
                     is_today = (day_num == today.day and selected_month_idx == today.month and selected_year == today.year)
                     day_events = events_by_day.get(day_num, [])
-                    border_color = "#EC4899" if is_today else "#5B21B6"
-                    bg_color = "linear-gradient(135deg, #3B1578 0%, #261245 100%)" if is_today else "#1E0A3C"
+                    border_color = "#EC4899" if is_today else "#8B5CF6"
+                    bg_color = "linear-gradient(135deg, #3B1578 0%, #261245 100%)" if is_today else card_bg
                     
                     max_visible_events = 2
                     visible_events = day_events[:max_visible_events]
@@ -319,7 +342,7 @@ def render_agenda_module():
                         event_html += f'<div style="background:#A78BFA; color:#1E0A3C; font-size:0.55rem; font-weight:800; border-radius:3px; padding:1px 2px; margin-top:2px; text-align:center;">+{hidden_count}</div>'
 
                     day_marker = '📌' if is_today else ''
-                    day_color = '#EC4899' if is_today else '#FFF'
+                    day_color = '#EC4899' if is_today else text_color
                     
                     cols_w[day_idx].markdown(
                         f'<div class="calendar-day-box" style="background:{bg_color}; border:1px solid {border_color};">'
@@ -330,7 +353,7 @@ def render_agenda_module():
                     )
 
         st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0 15px 0;'>", unsafe_allow_html=True)
-        st.subheader(f"📋 Liste chronologique ({MONTH_NAMES_FR[selected_month_idx-1]} {selected_year})")
+        st.markdown(f"<h3 style='color: {sub_title_color};'>📋 Liste chronologique ({MONTH_NAMES_FR[selected_month_idx-1]} {selected_year})</h3>", unsafe_allow_html=True)
         
         month_events = [ev for ev in st.session_state.agenda_events if ev['date'].month == selected_month_idx and ev['date'].year == selected_year]
         if month_events:
@@ -339,7 +362,7 @@ def render_agenda_module():
                 desc_text = ev['desc'] if ev['desc'] else '<i>Aucune note</i>'
                 c_card, c_del = st.columns([5, 1])
                 with c_card:
-                    st.markdown(f'<div class="calendar-event-card"><div class="calendar-date-box"><span style="font-size: 0.75rem; text-transform: uppercase;">{MONTH_NAMES_FR[ev["date"].month-1][:3].upper()}</span><span style="font-size: 1.5rem; line-height: 1;">{ev["date"].strftime("%d")}</span><span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev["time"].strftime("%H:%M")}</span></div><div style="flex-grow: 1;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><h3 style="margin:0; color:#FFFFFF; font-size: 1.2rem;">{ev["title"]}</h3><span class="zapio-badge">{ev["category"]}</span></div><p style="color:#CBD5E1; margin: 6px 0; font-size: 0.85rem;">{desc_text}</p><div style="font-size: 0.8rem; color: #A78BFA;">🔔 Notification : <b style="color:#FFF;">{ev["ringtone"]}</b></div></div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="calendar-event-card"><div class="calendar-date-box"><span style="font-size: 0.75rem; text-transform: uppercase;">{MONTH_NAMES_FR[ev["date"].month-1][:3].upper()}</span><span style="font-size: 1.5rem; line-height: 1;">{ev["date"].strftime("%d")}</span><span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev["time"].strftime("%H:%M")}</span></div><div style="flex-grow: 1;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><h3 style="margin:0; color:{sub_title_color}; font-size: 1.2rem;">{ev["title"]}</h3><span class="zapio-badge">{ev["category"]}</span></div><p style="color:{desc_color}; margin: 6px 0; font-size: 0.85rem;">{desc_text}</p><div style="font-size: 0.8rem; color: #A78BFA;">🔔 Notification : <b style="color:{text_color};">{ev["ringtone"]}</b></div></div></div>', unsafe_allow_html=True)
                 with c_del:
                     if st.button("🗑️ Supprimer", key=f"del_ev_{idx}"):
                         st.session_state.agenda_events.remove(ev)
@@ -350,7 +373,7 @@ def render_agenda_module():
 
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form"):
-            st.subheader("Planifier une nouvelle date")
+            st.markdown(f"<h3 style='color: {sub_title_color};'>Planifier une nouvelle date</h3>", unsafe_allow_html=True)
             title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Prestation DJ / Réunion")
             c_date, c_time = st.columns(2)
             with c_date:
@@ -379,7 +402,7 @@ if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
     render_agenda_module()
 
 elif not st.session_state.authenticated:
-    st.markdown('<div style="text-align: center; margin-top: 30px; margin-bottom: 25px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: #FFFFFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 15px;"><span class="zapio-badge">🔮 Espace Sécurisé & Workspace</span></div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="text-align: center; margin-top: 30px; margin-bottom: 25px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 15px;"><span class="zapio-badge">🔮 Espace Sécurisé & Workspace</span></div></div>', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         with st.form("login_form"):
@@ -398,10 +421,17 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # Barre supérieure de navigation
-    col_logo, col_actions = st.columns([2, 2])
+    # Barre supérieure de navigation avec Sélecteur de Thème
+    col_logo, col_theme, col_actions = st.columns([1.5, 1.2, 1.3])
     with col_logo:
-        st.markdown('<h1 style="font-size: 1.8rem; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #FFF;">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 8px; border-radius: 6px; font-size: 1.2rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.75rem;">● Online</span></h1>', unsafe_allow_html=True)
+        st.markdown(f'<h1 style="font-size: 1.6rem; margin: 0; display: flex; align-items: center; gap: 6px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 6px; border-radius: 6px; font-size: 1rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.65rem;">● Online</span></h1>', unsafe_allow_html=True)
+    
+    with col_theme:
+        selected_theme = st.selectbox("Thème", ["Sombre Nuit", "Blanc Épuré"], index=0 if st.session_state.theme_mode == "Sombre Nuit" else 1, label_visibility="collapsed")
+        if selected_theme != st.session_state.theme_mode:
+            st.session_state.theme_mode = selected_theme
+            st.rerun()
+
     with col_actions:
         col_home_btn, col_logout_btn = st.columns(2)
         with col_home_btn:
@@ -419,42 +449,41 @@ else:
 
     # VUE ACCUEIL : GRILLE DE CARTES PREMIUM
     if st.session_state.current_view == "home":
-        st.markdown('<div style="text-align: center; margin-bottom: 30px;"><h2 style="font-size: 2.2rem; color: #FFF;">Tableau de Bord Principal</h2><p style="color: #A78BFA;">Sélectionnez un espace de travail pour commencer</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align: center; margin-bottom: 30px;"><h2 style="font-size: 2.2rem; color: {sub_title_color};">Tableau de Bord Principal</h2><p style="color: #A78BFA;">Sélectionnez un espace de travail pour commencer</p></div>', unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
         
         with c1:
-            st.markdown('<div class="pavel-card-grid"><h3>📅 Agenda & Planning</h3><p style="color: #CBD5E1; font-size: 0.9rem;">Calendrier interactif, gestion d\'événements et synchronisation hors-ligne.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color};">📅 Agenda & Planning</h3><p style="color: {desc_color}; font-size: 0.9rem;">Calendrier interactif, gestion d\'événements et synchronisation hors-ligne.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir l'Agenda", use_container_width=True, type="primary"):
                 st.session_state.current_view = "Agenda"
                 st.rerun()
 
-            st.markdown('<div class="pavel-card-grid" style="margin-top: 25px;"><h3>💻 Code & IA</h3><p style="color: #CBD5E1; font-size: 0.9rem;">Prompts IA, consignes Claude et snippets HTML/CSS/JS.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 25px;"><h3 style="color:{sub_title_color};">💻 Code & IA</h3><p style="color: {desc_color}; font-size: 0.9rem;">Prompts IA, consignes Claude et snippets HTML/CSS/JS.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Dev & IA", use_container_width=True):
                 st.session_state.current_view = "Dev & IA"
                 st.rerun()
 
-            st.markdown('<div class="pavel-card-grid" style="margin-top: 25px;"><h3>🎨 Médias & Ressources</h3><p style="color: #CBD5E1; font-size: 0.9rem;">Prompts d\'images, liens utiles et archives ZIP.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 25px;"><h3 style="color:{sub_title_color};">🎨 Médias & Ressources</h3><p style="color: {desc_color}; font-size: 0.9rem;">Prompts d\'images, liens utiles et archives ZIP.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Ressources", use_container_width=True):
                 st.session_state.current_view = "Ressources"
                 st.rerun()
 
         with c2:
-            st.markdown('<div class="pavel-card-grid"><h3>🚀 Projets & Idées</h3><p style="color: #CBD5E1; font-size: 0.9rem;">Suivi des projets actifs, vision future et boîte à idées.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color};">🚀 Projets & Idées</h3><p style="color: {desc_color}; font-size: 0.9rem;">Suivi des projets actifs, vision future et boîte à idées.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Projets", use_container_width=True):
                 st.session_state.current_view = "Projets"
                 st.rerun()
 
-            st.markdown('<div class="pavel-card-grid" style="margin-top: 25px;"><h3>🔐 Coffre-Fort Sécurisé</h3><p style="color: #CBD5E1; font-size: 0.9rem;">Clés API, mots de passe et accès confidentiels.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 25px;"><h3 style="color:{sub_title_color};">🔐 Coffre-Fort Sécurisé</h3><p style="color: {desc_color}; font-size: 0.9rem;">Clés API, mots de passe et accès confidentiels.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir le Coffre-Fort", use_container_width=True):
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
-    # SOUS-PÔLES DÉTAILLÉS (AFFICHÉS LORSQU'ON CLIQUE SUR UNE CARTE)
+    # SOUS-PÔLES DÉTAILLÉS
     else:
         current = st.session_state.current_view
         
-        # Bouton de retour rapide vers l'accueil
         if st.button("← Retour au Tableau de Bord"):
             st.session_state.current_view = "home"
             st.rerun()
@@ -481,7 +510,7 @@ else:
                             st.session_state.saved_current_projects.append({"name": name, "client": client, "priority": priority, "next": next_step, "deadline": str(deadline), "desc": project_desc})
                             st.rerun()
                 for cp in st.session_state.saved_current_projects:
-                    st.markdown(f'<div class="zapio-card"><h3>{cp["name"]}</h3><p>Client: {cp["client"]} | Échéance: {cp["deadline"]}</p></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{cp["name"]}</h3><p style="color:{desc_color};">Client: {cp["client"]} | Échéance: {cp["deadline"]}</p></div>', unsafe_allow_html=True)
 
             elif sub_tab == "🔮 Projets futurs":
                 with st.form("form_fut_proj"):
@@ -494,7 +523,7 @@ else:
                             st.session_state.saved_future_projects.append({"name": name, "horizon": horizon, "resources": resources, "goal": goal})
                             st.rerun()
                 for fp in st.session_state.saved_future_projects:
-                    st.markdown(f'<div class="zapio-card"><h3>{fp["name"]}</h3><p>Objectif: {fp["goal"]}</p></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{fp["name"]}</h3><p style="color:{desc_color};">Objectif: {fp["goal"]}</p></div>', unsafe_allow_html=True)
 
             elif sub_tab == "💡 Idées":
                 with st.form("form_ideas"):
@@ -507,7 +536,7 @@ else:
                             st.session_state.saved_ideas.append({"title": title, "cat": category, "desc": description, "impact": impact})
                             st.rerun()
                 for id_item in st.session_state.saved_ideas:
-                    st.markdown(f'<div class="zapio-card"><h3>{id_item["title"]}</h3><p>{id_item["desc"]}</p></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{id_item["title"]}</h3><p style="color:{desc_color};">{id_item["desc"]}</p></div>', unsafe_allow_html=True)
 
         elif current == "Dev & IA":
             sub_tab = st.radio("Navigation Dev", ["🤖 Prompts AI Code", "🧠 Prompts Claude", "💻 Snippets Code"], horizontal=True)
@@ -527,7 +556,7 @@ else:
                             st.session_state.saved_ai_prompts.append({"title": title, "lang_label": selected_lang, "lang": final_lang, "prompt": prompt, "tags": tags})
                             st.rerun()
                 for p in st.session_state.saved_ai_prompts:
-                    st.markdown(f'<div class="zapio-card"><h3>{p["title"]}</h3>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{p["title"]}</h3>', unsafe_allow_html=True)
                     st.code(p['prompt'], language=p['lang'])
                     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -546,7 +575,7 @@ else:
                             st.session_state.saved_claude_prompts.append({"title": title, "sys": system_prompt, "user": user_prompt, "artifacts": artifacts, "lang_label": selected_lang, "lang": final_lang})
                             st.rerun()
                 for c in st.session_state.saved_claude_prompts:
-                    st.markdown(f'<div class="zapio-card"><h3>{c["title"]}</h3>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{c["title"]}</h3>', unsafe_allow_html=True)
                     st.code(c['user'], language=c.get('lang', 'python'))
                     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -564,7 +593,7 @@ else:
                             st.session_state.saved_code_snippets.append({"title": title, "type_label": selected_lang, "type": final_lang, "code": code_content, "note": usage_note})
                             st.rerun()
                 for cd in st.session_state.saved_code_snippets:
-                    st.markdown(f'<div class="zapio-card"><h3>{cd["title"]}</h3>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{cd["title"]}</h3>', unsafe_allow_html=True)
                     st.code(cd['code'], language=cd['type'])
                     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -584,7 +613,7 @@ else:
                             st.session_state.saved_image_prompts.append({"title": title, "gen": generator, "prompt": prompt_text, "ar": aspect_ratio, "neg": negative_prompt})
                             st.rerun()
                 for img in st.session_state.saved_image_prompts:
-                    st.markdown(f'<div class="zapio-card"><h3>{img["title"]}</h3><p>{img["prompt"]}</p></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};">{img["prompt"]}</p></div>', unsafe_allow_html=True)
 
             elif sub_tab == "🔗 Liens Utiles":
                 with st.form("form_links"):
@@ -597,7 +626,7 @@ else:
                             st.session_state.saved_links.append({"title": title, "url": url, "cat": category, "note": note})
                             st.rerun()
                 for lk in st.session_state.saved_links:
-                    st.markdown(f'<div class="zapio-card"><h3>{lk["title"]}</h3><a href="{lk["url"]}" target="_blank">{lk["url"]}</a></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{lk["title"]}</h3><a href="{lk["url"]}" target="_blank">{lk["url"]}</a></div>', unsafe_allow_html=True)
 
             elif sub_tab == "📦 Fichiers ZIP":
                 with st.form("form_zip"):
@@ -610,7 +639,7 @@ else:
                             st.session_state.saved_zip_files.append({"title": title, "link": cloud_link, "version": version, "contents": contents})
                             st.rerun()
                 for zp in st.session_state.saved_zip_files:
-                    st.markdown(f'<div class="zapio-card"><h3>{zp["title"]}</h3><a href="{zp["link"]}" target="_blank">Télécharger ZIP</a></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]}</h3><a href="{zp["link"]}" target="_blank">Télécharger ZIP</a></div>', unsafe_allow_html=True)
 
         elif current == "Coffre-Fort":
             sub_tab = st.radio("Navigation Sécurité", ["🔑 Clés API", "🔐 Mots de passe"], horizontal=True)
@@ -627,7 +656,7 @@ else:
                             st.session_state.saved_api_keys.append({"service": service_name, "key": api_key_val, "env": provider_env, "notes": notes})
                             st.rerun()
                 for ak in st.session_state.saved_api_keys:
-                    st.markdown(f'<div class="zapio-card"><h3>{ak["service"]}</h3>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔑 {ak["service"]}</h3>', unsafe_allow_html=True)
                     st.code(ak['key'], language="text")
                     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -643,6 +672,6 @@ else:
                             st.session_state.saved_user_credentials.append({"platform": platform_name, "username": username_val, "password": password_val, "type": cred_type, "notes": cred_notes})
                             st.rerun()
                 for cred in st.session_state.saved_user_credentials:
-                    st.markdown(f'<div class="zapio-card"><h3>{cred["platform"]}</h3><p>User: {cred["username"]}</p>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔐 {cred["platform"]}</h3><p style="color:{desc_color};">User: {cred["username"]}</p>', unsafe_allow_html=True)
                     st.code(cred['password'], language="text")
                     st.markdown('</div>', unsafe_allow_html=True)
