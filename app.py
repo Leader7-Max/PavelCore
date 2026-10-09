@@ -202,36 +202,46 @@ st.markdown(f"""
         justify-content: center;
         font-weight: 800;
     }}
-    /* Style de la capsule de contrôle (☀️, ⚙️, ❓, FR) */
+    /* Style de la capsule de contrôle horizontale unifiée */
     .reference-capsule-wrapper {{
         background: {capsule_bg};
         border: 1px solid {capsule_border};
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-radius: 30px;
-        padding: 3px 8px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
+        padding: 3px 6px;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 3px;
         justify-content: flex-end;
         box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        width: 100%;
     }}
-    /* FORÇAGE RESPONSIVE : Empêche les colonnes de la capsule de s'empiler sur mobile */
+    .reference-capsule-wrapper [data-testid="stHorizontalBlock"] {{
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 2px !important;
+    }}
     .reference-capsule-wrapper [data-testid="column"] {{
         width: auto !important;
-        flex: 1 !important;
-        min-width: unset !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
     }}
     .reference-capsule-wrapper button {{
         background: {capsule_btn_bg} !important;
         border: 1px solid {capsule_border} !important;
         color: {text_color} !important;
         border-radius: 20px !important;
-        padding: 2px 4px !important;
+        padding: 2px 6px !important;
         font-size: 0.75rem !important;
         min-height: 24px !important;
         max-height: 28px !important;
         line-height: 1 !important;
+        width: 100% !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     }}
     .reference-capsule-wrapper button:hover {{
@@ -241,7 +251,7 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# Enregistrement du Service Worker PWA via st.markdown au lieu de st.components.v1.html
+# Enregistrement du Service Worker PWA via st.markdown
 pwa_offline_script = """
 <script>
 if ('serviceWorker' in navigator) {
@@ -472,15 +482,15 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Capsule ultra-compacte alignée à droite sur une seule ligne
-    col_logo, col_spacer, col_capsule = st.columns([1.2, 0.4, 2.0])
+    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Capsule intégrale unifiée à droite sur une seule ligne
+    col_logo, col_spacer, col_capsule = st.columns([1.2, 0.2, 3.6])
     
     with col_logo:
         st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
     
     with col_capsule:
         st.markdown('<div class="reference-capsule-wrapper">', unsafe_allow_html=True)
-        c_th, c_set, c_hlp, c_lng = st.columns(4)
+        c_th, c_set, c_hlp, c_lng, c_out = st.columns(5)
         
         with c_th:
             theme_icon = "☀️" if st.session_state.theme_mode == "Sombre Nuit" else "🌙"
@@ -503,6 +513,13 @@ else:
             if st.button(lang_label, use_container_width=True, key="btn_toggle_lang"):
                 st.session_state.app_lang = "EN" if st.session_state.app_lang == "FR" else "FR"
                 st.rerun()
+
+        with c_out:
+            if st.button("🔒", use_container_width=True, key="btn_nav_logout_capsule"):
+                st.session_state.authenticated = False
+                st.session_state.current_view = "home"
+                st.rerun()
+
         st.markdown('</div>', unsafe_allow_html=True)
 
     # MODAL / PANNEAU PARAMÈTRES (⚙️)
@@ -525,14 +542,6 @@ else:
             st.rerun()
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
-
-    # BOUTON DE DÉCONNEXION DISCRET EN HAUT DE PAGE
-    col_empty_space, col_nav_logout = st.columns([3, 1])
-    with col_nav_logout:
-        if st.button("🔒 Quitter", use_container_width=True, type="secondary"):
-            st.session_state.authenticated = False
-            st.session_state.current_view = "home"
-            st.rerun()
 
     # VUE ACCUEIL : GRILLE DE CARTES PREMIUM
     if st.session_state.current_view == "home":
