@@ -42,6 +42,65 @@ def inject_custom_design():
         }
 
         /* ====================================================
+           🔥 FORÇAGE RESPONSIVE MOBILE POUR LA GRILLE 7 JOURS
+           ==================================================== */
+        
+        /* Conserver les 7 colonnes côte à côte même sur Mobile */
+        div[data-testid="stHorizontalBlock"]:has(.calendar-day-box),
+        div[data-testid="stHorizontalBlock"]:has(.calendar-header-box) {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 4px !important;
+            width: 100% !important;
+        }
+
+        div[data-testid="stHorizontalBlock"]:has(.calendar-day-box) > div,
+        div[data-testid="stHorizontalBlock"]:has(.calendar-header-box) > div {
+            width: 14.28% !important;
+            min-width: 0 !important;
+            flex: 1 1 0 !important;
+        }
+
+        /* Styles des entêtes et cases du calendrier */
+        .calendar-header-box {
+            text-align: center;
+            font-weight: 800;
+            color: #EC4899;
+            padding: 6px 2px;
+            background: #261245;
+            border-radius: 8px;
+            border: 1px solid #5B21B6;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .calendar-day-box {
+            border-radius: 10px;
+            min-height: 75px;
+            max-height: 110px;
+            padding: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .calendar-header-box {
+                font-size: 0.65rem !important;
+                padding: 4px 1px !important;
+            }
+            .calendar-day-box {
+                min-height: 60px !important;
+                padding: 3px !important;
+            }
+            .calendar-day-number {
+                font-size: 0.75rem !important;
+            }
+        }
+
+        /* ====================================================
            🔥 STYLES DES BOUTONS DE NAVIGATION EN PILULES 3D
            ==================================================== */
 
