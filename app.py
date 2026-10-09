@@ -85,7 +85,7 @@ if "saved_user_credentials" not in st.session_state:
 if "current_view" not in st.session_state:
     st.session_state.current_view = "home"
 
-# Définition dynamique des couleurs selon le thème choisi (Indépendant de Streamlit)
+# Définition dynamique des couleurs selon le thème choisi
 if st.session_state.theme_mode == "Blanc Épuré":
     bg_app = "#F8FAFC"
     text_color = "#0F172A"
@@ -96,9 +96,6 @@ if st.session_state.theme_mode == "Blanc Épuré":
     header_box_text = "#475569"
     desc_color = "#475569"
     sub_title_color = "#0F172A"
-    capsule_bg = "rgba(15, 23, 42, 0.04)"
-    capsule_border = "rgba(15, 23, 42, 0.1)"
-    capsule_btn_bg = "#FFFFFF"
 else:  # Sombre Nuit
     bg_app = "#0E031C"
     text_color = "#F8FAFC"
@@ -109,11 +106,8 @@ else:  # Sombre Nuit
     header_box_text = "#A78BFA"
     desc_color = "#CBD5E1"
     sub_title_color = "#FFF"
-    capsule_bg = "rgba(0, 0, 0, 0.35)"
-    capsule_border = "rgba(255, 255, 255, 0.12)"
-    capsule_btn_bg = "rgba(25, 10, 45, 0.6)"
 
-# INJECTION DES STYLES POUR LA CAPSULE FLEXBOX PURE
+# INJECTION DES STYLES
 st.markdown(f"""
     <style>
     .stApp {{
@@ -201,29 +195,6 @@ st.markdown(f"""
         flex-direction: column;
         justify-content: center;
         font-weight: 800;
-    }}
-    
-    /* --- CAPSULE FLEXBOX UNIQUE SUR UNE SEULE LIGNE --- */
-    .pavel-top-capsule {{
-        background: {capsule_bg};
-        border: 1px solid {capsule_border};
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-radius: 30px;
-        padding: 4px 8px;
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        justify-content: flex-end !important;
-        gap: 6px !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        margin-left: auto;
-        width: fit-content;
-    }}
-    .pavel-top-capsule div {{
-        margin: 0 !important;
-        padding: 0 !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -458,63 +429,16 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # EN-TÊTE SUPÉRIEUR : Utilisation d'un conteneur HTML Flexbox direct anti-empilement mobile
-    col_logo, col_action = st.columns([1.2, 2.8])
+    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Déconnexion isolée à droite
+    col_logo, col_logout = st.columns([3, 1])
     
     with col_logo:
         st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
     
-    with col_action:
-        st.markdown('<div class="pavel-top-capsule">', unsafe_allow_html=True)
-        c_th, c_set, c_hlp, c_lng, c_out = st.columns(5)
-        
-        with c_th:
-            theme_icon = "☀️" if st.session_state.theme_mode == "Sombre Nuit" else "🌙"
-            if st.button(theme_icon, use_container_width=True, key="btn_toggle_theme"):
-                st.session_state.theme_mode = "Blanc Épuré" if st.session_state.theme_mode == "Sombre Nuit" else "Sombre Nuit"
-                st.rerun()
-                
-        with c_set:
-            if st.button("⚙️", use_container_width=True, key="btn_settings_toggle"):
-                st.session_state.show_settings_modal = not st.session_state.show_settings_modal
-                st.rerun()
-                
-        with c_hlp:
-            if st.button("❓", use_container_width=True, key="btn_help_toggle"):
-                st.session_state.show_help_modal = not st.session_state.show_help_modal
-                st.rerun()
-                
-        with c_lng:
-            lang_label = "EN" if st.session_state.app_lang == "FR" else "FR"
-            if st.button(lang_label, use_container_width=True, key="btn_toggle_lang"):
-                st.session_state.app_lang = "EN" if st.session_state.app_lang == "FR" else "FR"
-                st.rerun()
-
-        with c_out:
-            if st.button("🔒", use_container_width=True, key="btn_nav_logout_capsule"):
-                st.session_state.authenticated = False
-                st.session_state.current_view = "home"
-                st.rerun()
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # MODAL / PANNEAU PARAMÈTRES (⚙️)
-    if st.session_state.show_settings_modal:
-        st.markdown(f'<div class="zapio-card" style="border-color: #EC4899; margin-top: 15px;"><h3 style="color:{sub_title_color};">⚙️ Panneau de Paramètres Avancés</h3><p style="color:{desc_color};">Personnalisez votre espace PavelCore selon vos préférences.</p></div>', unsafe_allow_html=True)
-        c_set1, c_set2 = st.columns(2)
-        with c_set1:
-            st.selectbox("Mode d'affichage par défaut", ["Grille de cartes", "Liste compacte"], key="pref_display_mode")
-        with c_set2:
-            st.selectbox("Fréquence de synchro Cloud/Offline", ["Temps réel", "Toutes les heures", "Manuel uniquement"], key="pref_sync_freq")
-        if st.button("Fermer les paramètres", key="close_settings"):
-            st.session_state.show_settings_modal = False
-            st.rerun()
-
-    # MODAL / PANNEAU AIDE (❓)
-    if st.session_state.show_help_modal:
-        st.markdown(f'<div class="zapio-card" style="border-color: #8B5CF6; margin-top: 15px;"><h3 style="color:{sub_title_color};">❓ Centre d\'Aide & Support PavelCore</h3><p style="color:{desc_color};"><b>Mode Hors-Ligne (PWA) :</b> Vos données d\'agenda sont automatiquement enregistrées dans le cache local de votre navigateur.</p><p style="color:{desc_color};"><b>Sécurité :</b> Vos clés API et mots de passe sont stockés localement et chiffrés dans votre session.</p></div>', unsafe_allow_html=True)
-        if st.button("Fermer l'aide", key="close_help"):
-            st.session_state.show_help_modal = False
+    with col_logout:
+        if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
+            st.session_state.authenticated = False
+            st.session_state.current_view = "home"
             st.rerun()
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
