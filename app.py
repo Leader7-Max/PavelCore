@@ -97,8 +97,9 @@ if st.session_state.theme_mode == "Blanc Épuré":
     header_box_text = "#334155"
     desc_color = "#334155"
     sub_title_color = "#0F172A"
-    capsule_bg = "rgba(0, 0, 0, 0.06)"
-    capsule_border = "rgba(0, 0, 0, 0.12)"
+    capsule_bg = "rgba(15, 23, 42, 0.08)"
+    capsule_border = "rgba(15, 23, 42, 0.15)"
+    capsule_btn_bg = "rgba(255, 255, 255, 0.8)"
 else:  # Sombre Nuit
     bg_app = "#0E031C"
     text_color = "#F8FAFC"
@@ -109,10 +110,11 @@ else:  # Sombre Nuit
     header_box_text = "#A78BFA"
     desc_color = "#CBD5E1"
     sub_title_color = "#FFF"
-    capsule_bg = "rgba(255, 255, 255, 0.08)"
-    capsule_border = "rgba(255, 255, 255, 0.15)"
+    capsule_bg = "rgba(0, 0, 0, 0.35)"
+    capsule_border = "rgba(255, 255, 255, 0.12)"
+    capsule_btn_bg = "rgba(25, 10, 45, 0.6)"
 
-# INJECTION DES STYLES PREMIUM (Capsule ultra-compacte alignée à droite)
+# INJECTION DES STYLES (Capsule de contrôle ultra-minimaliste)
 st.markdown(f"""
     <style>
     .stApp {{
@@ -200,20 +202,33 @@ st.markdown(f"""
         justify-content: center;
         font-weight: 800;
     }}
-    /* Style minimaliste pour transformer les boutons de la capsule en pastilles minuscules sur une seule ligne */
-    .mini-capsule-container button {{
-        background: {capsule_bg} !important;
+    /* Style de la capsule de référence exacte */
+    .reference-capsule-wrapper {{
+        background: {capsule_bg};
+        border: 1px solid {capsule_border};
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 30px;
+        padding: 3px 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        justify-content: flex-end;
+    }}
+    /* Boutons minuscules de la capsule */
+    .reference-capsule-wrapper button {{
+        background: {capsule_btn_bg} !important;
         border: 1px solid {capsule_border} !important;
         color: {text_color} !important;
         border-radius: 20px !important;
         padding: 2px 6px !important;
         font-size: 0.75rem !important;
-        min-height: 26px !important;
-        max-height: 30px !important;
+        min-height: 24px !important;
+        max-height: 28px !important;
         line-height: 1 !important;
         box-shadow: none !important;
     }}
-    .mini-capsule-container button:hover {{
+    .reference-capsule-wrapper button:hover {{
         border-color: #EC4899 !important;
         color: #EC4899 !important;
     }}
@@ -451,15 +466,14 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Capsule ultra-compacte et alignée tout à fait à droite
-    col_logo, col_spacer, col_capsule = st.columns([1.2, 0.5, 1.8])
+    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Capsule ultra-compacte alignée à droite exactement comme sur votre référence
+    col_logo, col_spacer, col_capsule = st.columns([1.2, 0.4, 2.0])
     
     with col_logo:
         st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
     
     with col_capsule:
-        # Mini capsule en ligne avec classe dédiée pour forcer la petite taille
-        st.markdown('<div class="mini-capsule-container">', unsafe_allow_html=True)
+        st.markdown('<div class="reference-capsule-wrapper">', unsafe_allow_html=True)
         c_th, c_set, c_hlp, c_lng = st.columns(4)
         
         with c_th:
