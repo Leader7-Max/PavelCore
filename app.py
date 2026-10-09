@@ -24,18 +24,12 @@ try:
 except ImportError:
     pass
 
-# Gestionnaire d'État Global (Thème, Langue, Modaux)
+# Gestionnaire d'État Global
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Sombre Nuit"
 
 if "app_lang" not in st.session_state:
     st.session_state.app_lang = "FR"
-
-if "show_settings_modal" not in st.session_state:
-    st.session_state.show_settings_modal = False
-
-if "show_help_modal" not in st.session_state:
-    st.session_state.show_help_modal = False
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -85,7 +79,7 @@ if "saved_user_credentials" not in st.session_state:
 if "current_view" not in st.session_state:
     st.session_state.current_view = "home"
 
-# Définition dynamique des couleurs selon le thème choisi
+# Couleurs dynamiques
 if st.session_state.theme_mode == "Blanc Épuré":
     bg_app = "#F8FAFC"
     text_color = "#0F172A"
@@ -97,7 +91,7 @@ if st.session_state.theme_mode == "Blanc Épuré":
     desc_color = "#475569"
     sub_title_color = "#0F172A"
     hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)"
-else:  # Sombre Nuit
+else:
     bg_app = "#0E031C"
     text_color = "#F8FAFC"
     card_bg = "#170A2E"
@@ -109,14 +103,13 @@ else:  # Sombre Nuit
     sub_title_color = "#FFF"
     hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
 
-# INJECTION DES STYLES (Design et décors du tableau de bord)
+# Styles CSS
 st.markdown(f"""
     <style>
     .stApp {{
         background-color: {bg_app} !important;
         color: {text_color} !important;
     }}
-    /* Décor de la bannière principale du Tableau de Bord */
     .pavel-hero-banner {{
         background: {hero_bg};
         border: 1px solid rgba(236, 72, 153, 0.25);
@@ -125,18 +118,6 @@ st.markdown(f"""
         text-align: center;
         margin-bottom: 30px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        position: relative;
-        overflow: hidden;
-    }}
-    .pavel-hero-banner::before {{
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(236,72,153,0.05) 0%, transparent 60%);
-        pointer-events: none;
     }}
     .pavel-card-grid {{
         background: {card_gradient};
@@ -223,83 +204,13 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# Enregistrement du Service Worker PWA via st.markdown
-pwa_offline_script = """
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').then(function(reg) {
-            console.log('PWA ServiceWorker actif:', reg.scope);
-        }).catch(function(err) {
-            console.log('Erreur SW:', err);
-        });
-    });
-}
-function syncAgendaToOfflineStorage(eventsData) {
-    try {
-        localStorage.setItem('pavelcore_offline_agenda', JSON.stringify(eventsData));
-    } catch(e) {
-        console.error('Erreur LocalStorage', e);
-    }
-}
-</script>
-"""
-st.markdown(pwa_offline_script, unsafe_allow_html=True)
-
-def detect_language(code):
-    if not code or not isinstance(code, str):
-        return "python"
-    code_lower = code.lower().strip()
-    if re.search(r'<!doctype html>|<html|<div|<span|<body|<p>|<a href', code_lower):
-        return "html"
-    elif re.search(r'\{\s*color:|margin:|padding:|background-color:|font-family:|border-radius:', code_lower):
-        return "css"
-    elif re.search(r'\b(select|insert into|update|delete from|create table|where|group by|order by|join)\b', code_lower):
-        return "sql"
-    elif re.search(r'\b(const|let|var|function|console\.log|document\.|window\.|export default|import react)\b', code_lower):
-        return "javascript"
-    elif "<?php" in code_lower or re.search(r'\$[a-zA-Z_][a-zA-Z0-9_]*\s*=', code):
-        return "php"
-    elif code_lower.startswith("{") and code_lower.endswith("}") and ":" in code_lower:
-        return "json"
-    elif re.search(r'\b(def |import |from |st\.|print\(|self\.|elif |class )\b', code_lower):
-        return "python"
-    return "python"
-
-LANG_MAP = {
-    "Python": "python",
-    "Détection Automatique": "auto",
-    "JavaScript / React": "javascript",
-    "HTML5": "html",
-    "CSS3 / TailWind": "css",
-    "SQL": "sql",
-    "PHP / WordPress": "php",
-    "Flutter / Flet": "python",
-    "JSON / Config": "json"
-}
-
 MONTH_NAMES_FR = [
     "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
 ]
 
-def sync_offline():
-    serializable_events = [
-        {
-            "title": e["title"],
-            "date": e["date"].strftime("%Y-%m-%d"),
-            "time": e["time"].strftime("%H:%M"),
-            "category": e["category"],
-            "desc": e["desc"],
-            "ringtone": e["ringtone"]
-        } for e in st.session_state.agenda_events
-    ]
-    js_sync = f"<script>if(typeof syncAgendaToOfflineStorage === 'function'){{ syncAgendaToOfflineStorage({json.dumps(serializable_events)}); }}</script>"
-    st.markdown(js_sync, unsafe_allow_html=True)
-
 def render_agenda_module():
     st.markdown(f'<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
-
     col_btn1, col_btn2, col_clear = st.columns([2.3, 2.5, 2])
     
     with col_btn1:
@@ -316,7 +227,6 @@ def render_agenda_module():
         if st.session_state.agenda_events:
             if st.button("🗑️ Vider tout l'agenda", key="clear_all_events"):
                 st.session_state.agenda_events = []
-                sync_offline()
                 st.rerun()
 
     st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
@@ -384,25 +294,6 @@ def render_agenda_module():
                         unsafe_allow_html=True
                     )
 
-        st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0 15px 0;'>", unsafe_allow_html=True)
-        st.markdown(f"<h3 style='color: {sub_title_color};'>📋 Liste chronologique ({MONTH_NAMES_FR[selected_month_idx-1]} {selected_year})</h3>", unsafe_allow_html=True)
-        
-        month_events = [ev for ev in st.session_state.agenda_events if ev['date'].month == selected_month_idx and ev['date'].year == selected_year]
-        if month_events:
-            sorted_events = sorted(month_events, key=lambda x: (x['date'], x['time']))
-            for idx, ev in enumerate(sorted_events):
-                desc_text = ev['desc'] if ev['desc'] else '<i>Aucune note</i>'
-                c_card, c_del = st.columns([5, 1])
-                with c_card:
-                    st.markdown(f'<div class="calendar-event-card"><div class="calendar-date-box"><span style="font-size: 0.75rem; text-transform: uppercase;">{MONTH_NAMES_FR[ev["date"].month-1][:3].upper()}</span><span style="font-size: 1.5rem; line-height: 1;">{ev["date"].strftime("%d")}</span><span style="font-size: 0.8rem; margin-top: 3px; opacity: 0.95;">{ev["time"].strftime("%H:%M")}</span></div><div style="flex-grow: 1;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><h3 style="margin:0; color:{sub_title_color}; font-size: 1.2rem;">{ev["title"]}</h3><span class="zapio-badge">{ev["category"]}</span></div><p style="color:{desc_color}; margin: 6px 0; font-size: 0.85rem;">{desc_text}</p><div style="font-size: 0.8rem; color: #A78BFA;">🔔 Notification : <b style="color:{text_color};">{ev["ringtone"]}</b></div></div></div>', unsafe_allow_html=True)
-                with c_del:
-                    if st.button("🗑️ Supprimer", key=f"del_ev_{idx}"):
-                        st.session_state.agenda_events.remove(ev)
-                        sync_offline()
-                        st.rerun()
-        else:
-            st.info(f"Aucun événement pour {MONTH_NAMES_FR[selected_month_idx-1]} {selected_year}.")
-
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form"):
             st.markdown(f"<h3 style='color: {sub_title_color};'>Planifier une nouvelle date</h3>", unsafe_allow_html=True)
@@ -421,12 +312,11 @@ def render_agenda_module():
             if st.form_submit_button("🔔 Ajouter au Calendrier"):
                 if title:
                     st.session_state.agenda_events.append({"title": title, "date": event_date, "time": event_time, "category": category, "desc": desc, "ringtone": ringtone})
-                    sync_offline()
                     st.session_state.agenda_active_tab = "vue"
                     st.success("Événement enregistré !")
                     st.rerun()
 
-# CONTRÔLE D'ACCÈS ET NAVIGATION
+# AUTH & NAVIGATION
 query_params = st.query_params
 is_direct_agenda_link = query_params.get("app", None) == "agenda"
 
@@ -453,12 +343,9 @@ elif not st.session_state.authenticated:
             st.rerun()
 
 else:
-    # EN-TÊTE SUPÉRIEUR : Logo à gauche, Déconnexion isolée à droite
     col_logo, col_logout = st.columns([3, 1])
-    
     with col_logo:
         st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
-    
     with col_logout:
         if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
             st.session_state.authenticated = False
@@ -467,9 +354,7 @@ else:
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 25px 0;'>", unsafe_allow_html=True)
 
-    # VUE ACCUEIL : GRILLE DE CARTES PREMIUM AVEC DÉCOR (HERO BANNER)
     if st.session_state.current_view == "home":
-        # Nouveau décor visuel (Bannière d'accueil)
         st.markdown(f'''
             <div class="pavel-hero-banner">
                 <span class="zapio-badge" style="margin-bottom: 10px; display: inline-block;">🚀 WORKSPACE CENTRALISÉ</span>
@@ -479,7 +364,6 @@ else:
         ''', unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
-        
         with c1:
             st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📅 Agenda & Planning</h3><p style="color: {desc_color}; font-size: 0.8rem;">Calendrier et mode hors-ligne.</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir l'Agenda", use_container_width=True, type="primary"):
@@ -507,10 +391,8 @@ else:
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
-    # SOUS-PÔLES DÉTAILLÉS (AVEC BOUTON DE RETOUR UNIFIÉ)
     else:
         current = st.session_state.current_view
-        
         if st.button("← Retour au Tableau de Bord", key="back_to_home_universal"):
             st.session_state.current_view = "home"
             st.rerun()
@@ -577,10 +459,7 @@ else:
                     tags = st.text_input("Tags")
                     if st.form_submit_button("Enregistrer"):
                         if title and prompt:
-                            final_lang = LANG_MAP[selected_lang]
-                            if final_lang == "auto":
-                                final_lang = detect_language(prompt)
-                            st.session_state.saved_ai_prompts.append({"title": title, "lang_label": selected_lang, "lang": final_lang, "prompt": prompt, "tags": tags})
+                            st.session_state.saved_ai_prompts.append({"title": title, "lang": "python", "prompt": prompt})
                             st.rerun()
                 for p in st.session_state.saved_ai_prompts:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{p["title"]}</h3>', unsafe_allow_html=True)
@@ -590,38 +469,27 @@ else:
             elif sub_tab == "🧠 Prompts Claude":
                 with st.form("form_claude"):
                     title = st.text_input("Titre")
-                    system_prompt = st.text_area("System Prompt")
-                    selected_lang = st.selectbox("Langage", list(LANG_MAP.keys()))
                     user_prompt = st.text_area("User Prompt")
-                    artifacts = st.text_input("Artifacts")
                     if st.form_submit_button("Sauvegarder"):
                         if title and user_prompt:
-                            final_lang = LANG_MAP[selected_lang]
-                            if final_lang == "auto":
-                                final_lang = detect_language(user_prompt)
-                            st.session_state.saved_claude_prompts.append({"title": title, "sys": system_prompt, "user": user_prompt, "artifacts": artifacts, "lang_label": selected_lang, "lang": final_lang})
+                            st.session_state.saved_claude_prompts.append({"title": title, "user": user_prompt})
                             st.rerun()
                 for c in st.session_state.saved_claude_prompts:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{c["title"]}</h3>', unsafe_allow_html=True)
-                    st.code(c['user'], language=c.get('lang', 'python'))
+                    st.code(c['user'], language='python')
                     st.markdown('</div>', unsafe_allow_html=True)
 
             elif sub_tab == "💻 Snippets Code":
                 with st.form("form_code"):
                     title = st.text_input("Nom")
-                    selected_lang = st.selectbox("Langage", list(LANG_MAP.keys()))
                     code_content = st.text_area("Code")
-                    usage_note = st.text_input("Note")
                     if st.form_submit_button("Enregistrer"):
                         if title and code_content:
-                            final_lang = LANG_MAP[selected_lang]
-                            if final_lang == "auto":
-                                final_lang = detect_language(code_content)
-                            st.session_state.saved_code_snippets.append({"title": title, "type_label": selected_lang, "type": final_lang, "code": code_content, "note": usage_note})
+                            st.session_state.saved_code_snippets.append({"title": title, "code": code_content})
                             st.rerun()
                 for cd in st.session_state.saved_code_snippets:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{cd["title"]}</h3>', unsafe_allow_html=True)
-                    st.code(cd['code'], language=cd['type'])
+                    st.code(cd['code'], language='python')
                     st.markdown('</div>', unsafe_allow_html=True)
 
         elif current == "Ressources":
@@ -630,61 +498,80 @@ else:
             
             if sub_tab == "🎨 Prompts Images":
                 with st.form("form_img_prompt"):
-                    title = st.text_input("Titre")
+                    img_title = st.text_input("Titre de l'image / prompt")
                     generator = st.selectbox("Générateur", ["Midjourney", "DALL-E 3", "Flux.1"])
-                    prompt_text = st.text_area("Prompt")
+                    prompt_text = st.text_area("Prompt exact")
                     aspect_ratio = st.selectbox("Format", ["1:1", "16:9", "9:16"])
-                    negative_prompt = st.text_input("Négatif")
-                    if st.form_submit_button("Enregistrer"):
-                        if title and prompt_text:
-                            st.session_state.saved_image_prompts.append({"title": title, "gen": generator, "prompt": prompt_text, "ar": aspect_ratio, "neg": negative_prompt})
+                    submitted_img = st.form_submit_button("Enregistrer le Prompt Image")
+                    if submitted_img:
+                        if img_title and prompt_text:
+                            st.session_state.saved_image_prompts.append({
+                                "title": img_title, 
+                                "gen": generator, 
+                                "prompt": prompt_text, 
+                                "ar": aspect_ratio
+                            })
+                            st.success("Prompt image enregistré avec succès !")
                             st.rerun()
                 
-                for idx, img in enumerate(st.session_state.saved_image_prompts):
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};"><b>Générateur:</b> {img["gen"]} | <b>Format:</b> {img["ar"]}</p><p style="color:{text_color}; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">{img["prompt"]}</p></div>', unsafe_allow_html=True)
-                    file_content = f"Titre: {img['title']}\nGénérateur: {img['gen']}\nFormat: {img['ar']}\nNégatif: {img['neg']}\n\nPrompt:\n{img['prompt']}"
-                    st.download_button(
-                        label=f"⬇️ Télécharger le prompt ({img['title']})",
-                        data=file_content,
-                        file_name=f"{img['title'].lower().replace(' ', '_')}_prompt.txt",
-                        mime="text/plain",
-                        key=f"dl_img_{idx}"
-                    )
+                st.markdown("### 📋 Prompts enregistrés :")
+                if not st.session_state.saved_image_prompts:
+                    st.info("Aucun prompt image enregistré pour le moment.")
+                else:
+                    for idx, img in enumerate(st.session_state.saved_image_prompts):
+                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{img["title"]}</h3><p style="color:{desc_color};"><b>Générateur:</b> {img["gen"]} | <b>Format:</b> {img["ar"]}</p><p style="color:{text_color}; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px;">{img["prompt"]}</p></div>', unsafe_allow_html=True)
+                        file_content = f"Titre: {img['title']}\nGénérateur: {img['gen']}\nFormat: {img['ar']}\n\nPrompt:\n{img['prompt']}"
+                        st.download_button(
+                            label=f"⬇️ Télécharger le prompt ({img['title']})",
+                            data=file_content,
+                            file_name=f"{img['title'].lower().replace(' ', '_')}_prompt.txt",
+                            mime="text/plain",
+                            key=f"dl_img_{idx}"
+                        )
 
             elif sub_tab == "🔗 Liens Utiles":
                 with st.form("form_links"):
                     title = st.text_input("Nom")
                     url = st.text_input("URL")
-                    category = st.selectbox("Catégorie", ["Doc", "Outils", "Business"])
-                    note = st.text_input("Note")
                     if st.form_submit_button("Enregistrer"):
                         if title and url:
-                            st.session_state.saved_links.append({"title": title, "url": url, "cat": category, "note": note})
+                            st.session_state.saved_links.append({"title": title, "url": url})
                             st.rerun()
                 for lk in st.session_state.saved_links:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{lk["title"]}</h3><a href="{lk["url"]}" target="_blank">{lk["url"]}</a></div>', unsafe_allow_html=True)
 
             elif sub_tab == "📦 Fichiers ZIP":
                 with st.form("form_zip"):
-                    title = st.text_input("Nom")
-                    cloud_link = st.text_input("Lien de téléchargement direct / Stockage")
+                    zip_title = st.text_input("Nom du fichier ZIP / Projet")
+                    cloud_link = st.text_input("Lien de téléchargement direct")
                     version = st.text_input("Version", value="v1.0")
-                    contents = st.text_area("Contenu du fichier")
-                    if st.form_submit_button("Enregistrer"):
-                        if title and cloud_link:
-                            st.session_state.saved_zip_files.append({"title": title, "link": cloud_link, "version": version, "contents": contents})
+                    contents = st.text_area("Description du contenu")
+                    submitted_zip = st.form_submit_button("Enregistrer le fichier ZIP")
+                    if submitted_zip:
+                        if zip_title and cloud_link:
+                            st.session_state.saved_zip_files.append({
+                                "title": zip_title, 
+                                "link": cloud_link, 
+                                "version": version, 
+                                "contents": contents
+                            })
+                            st.success("Fichier ZIP enregistré avec succès !")
                             st.rerun()
                 
-                for idx, zp in enumerate(st.session_state.saved_zip_files):
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]} ({zp["version"]})</h3><p style="color:{desc_color};">{zp["contents"]}</p><a href="{zp["link"]}" target="_blank" style="color: #EC4899; font-weight: bold;">🌐 Ouvrir le lien direct</a></div>', unsafe_allow_html=True)
-                    zip_meta = f"Fichier ZIP: {zp['title']}\nVersion: {zp['version']}\nLien source: {zp['link']}\nContenu:\n{zp['contents']}"
-                    st.download_button(
-                        label=f"⬇️ Télécharger la fiche / lien ({zp['title']})",
-                        data=zip_meta,
-                        file_name=f"{zp['title'].lower().replace(' ', '_')}_{zp['version']}.txt",
-                        mime="text/plain",
-                        key=f"dl_zip_{idx}"
-                    )
+                st.markdown("### 📦 Fichiers ZIP enregistrés :")
+                if not st.session_state.saved_zip_files:
+                    st.info("Aucun fichier ZIP enregistré pour le moment.")
+                else:
+                    for idx, zp in enumerate(st.session_state.saved_zip_files):
+                        st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zp["title"]} ({zp["version"]})</h3><p style="color:{desc_color};">{zp["contents"]}</p><a href="{zp["link"]}" target="_blank" style="color: #EC4899; font-weight: bold;">🌐 Ouvrir le lien direct</a></div>', unsafe_allow_html=True)
+                        zip_meta = f"Fichier ZIP: {zp['title']}\nVersion: {zp['version']}\nLien source: {zp['link']}\nContenu:\n{zp['contents']}"
+                        st.download_button(
+                            label=f"⬇️ Télécharger la fiche / lien ({zp['title']})",
+                            data=zip_meta,
+                            file_name=f"{zp['title'].lower().replace(' ', '_')}_{zp['version']}.txt",
+                            mime="text/plain",
+                            key=f"dl_zip_{idx}"
+                        )
 
         elif current == "Coffre-Fort":
             sub_tab = st.radio("Navigation Sécurité", ["🔑 Clés API", "🔐 Mots de passe"], horizontal=True)
@@ -694,11 +581,9 @@ else:
                 with st.form("form_api_key"):
                     service_name = st.text_input("Service")
                     api_key_val = st.text_input("Clé API", type="password")
-                    provider_env = st.selectbox("Environnement", ["Production", "Test"])
-                    notes = st.text_input("Notes")
                     if st.form_submit_button("Sauvegarder"):
                         if service_name and api_key_val:
-                            st.session_state.saved_api_keys.append({"service": service_name, "key": api_key_val, "env": provider_env, "notes": notes})
+                            st.session_state.saved_api_keys.append({"service": service_name, "key": api_key_val})
                             st.rerun()
                 for ak in st.session_state.saved_api_keys:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔑 {ak["service"]}</h3>', unsafe_allow_html=True)
@@ -710,11 +595,9 @@ else:
                     platform_name = st.text_input("Plateforme")
                     username_val = st.text_input("Identifiant")
                     password_val = st.text_input("Mot de passe / PIN", type="password")
-                    cred_type = st.selectbox("Type", ["Web", "PIN", "Serveur"])
-                    cred_notes = st.text_input("Notes")
                     if st.form_submit_button("Sauvegarder"):
                         if platform_name:
-                            st.session_state.saved_user_credentials.append({"platform": platform_name, "username": username_val, "password": password_val, "type": cred_type, "notes": cred_notes})
+                            st.session_state.saved_user_credentials.append({"platform": platform_name, "username": username_val, "password": password_val})
                             st.rerun()
                 for cred in st.session_state.saved_user_credentials:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">🔐 {cred["platform"]}</h3><p style="color:{desc_color};">User: {cred["username"]}</p>', unsafe_allow_html=True)
