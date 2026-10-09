@@ -77,18 +77,18 @@ if "saved_user_credentials" not in st.session_state:
 if "current_view" not in st.session_state:
     st.session_state.current_view = "home"
 
-# Définition dynamique des couleurs selon le thème choisi
+# Définition dynamique des couleurs selon le thème choisi (Contraste corrigé)
 if st.session_state.theme_mode == "Blanc Épuré":
-    bg_app = "#F8FAFC"
+    bg_app = "#F1F5F9"
     text_color = "#0F172A"
     card_bg = "#FFFFFF"
-    card_border = "#E2E8F0"
-    card_gradient = "linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%)"
-    header_box_bg = "#F1F5F9"
-    header_box_text = "#64748B"
-    desc_color = "#475569"
+    card_border = "#CBD5E1"
+    card_gradient = "linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)"
+    header_box_bg = "#E2E8F0"
+    header_box_text = "#334155"
+    desc_color = "#334155"
     sub_title_color = "#0F172A"
-else:  # Sombre Nuit (Défaut PavelCore)
+else:  # Sombre Nuit
     bg_app = "#0E031C"
     text_color = "#F8FAFC"
     card_bg = "#170A2E"
@@ -108,18 +108,18 @@ st.markdown(f"""
     }}
     .pavel-card-grid {{
         background: {card_gradient};
-        border: 1px solid rgba(236, 72, 153, 0.3);
+        border: 1px solid {card_border};
         border-radius: 16px;
         padding: 25px;
         text-align: center;
         transition: all 0.3s ease;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
     }}
     .pavel-card-grid:hover {{
         transform: translateY(-5px);
         border-color: #EC4899;
-        box-shadow: 0 12px 40px rgba(236, 72, 153, 0.25);
+        box-shadow: 0 12px 40px rgba(236, 72, 153, 0.2);
     }}
     .zapio-badge {{
         background: rgba(236, 72, 153, 0.15);
@@ -145,7 +145,7 @@ st.markdown(f"""
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }}
     .calendar-header-box {{
         background: {header_box_bg};
@@ -449,7 +449,7 @@ else:
 
     # VUE ACCUEIL : GRILLE DE CARTES PREMIUM
     if st.session_state.current_view == "home":
-        st.markdown(f'<div style="text-align: center; margin-bottom: 30px;"><h2 style="font-size: 2.2rem; color: {sub_title_color};">Tableau de Bord Principal</h2><p style="color: #A78BFA;">Sélectionnez un espace de travail pour commencer</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align: center; margin-bottom: 30px;"><h2 style="font-size: 2.2rem; color: {sub_title_color};">Tableau de Bord Principal</h2><p style="color: {desc_color};">Sélectionnez un espace de travail pour commencer</p></div>', unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
         
@@ -480,11 +480,11 @@ else:
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
-    # SOUS-PÔLES DÉTAILLÉS
+    # SOUS-PÔLES DÉTAILLÉS (AVEC BOUTON DE RETOUR UNIFIÉ POUR TOUTES LES SECTIONS Y COMPRIS AGENDA)
     else:
         current = st.session_state.current_view
         
-        if st.button("← Retour au Tableau de Bord"):
+        if st.button("← Retour au Tableau de Bord", key="back_to_home_universal"):
             st.session_state.current_view = "home"
             st.rerun()
             
