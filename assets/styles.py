@@ -45,33 +45,30 @@ def inject_custom_design():
            🔥 STYLES DES BOUTONS DE NAVIGATION EN PILULES 3D
            ==================================================== */
 
-        /* Bouton Sélectionné / Actif (Type Primary) */
         button[kind="primary"] {
             background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
             color: #FFFFFF !important;
             font-weight: 800 !important;
             font-size: 0.95rem !important;
             border: 2px solid #F472B6 !important;
-            border-radius: 50px !important; /* Forme capsule / pilule parfaite */
+            border-radius: 50px !important;
             padding: 12px 24px !important;
             box-shadow: 0 0 20px rgba(236, 72, 153, 0.7), 0 6px 15px rgba(0,0,0,0.4) !important;
             transition: all 0.3s ease !important;
         }
 
-        /* Bouton Inactif (Type Secondary) */
         button[kind="secondary"] {
             background: linear-gradient(135deg, #2D1452 0%, #1E0A3C 100%) !important;
             color: #FFFFFF !important;
             font-weight: 800 !important;
             font-size: 0.95rem !important;
             border: 2px solid #5B21B6 !important;
-            border-radius: 50px !important; /* Forme capsule / pilule parfaite */
+            border-radius: 50px !important;
             padding: 12px 24px !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
             transition: all 0.3s ease !important;
         }
 
-        /* Forçage de la couleur de texte sur les boutons */
         button[kind="primary"] p, button[kind="secondary"] p,
         button[kind="primary"] span, button[kind="secondary"] span {
             color: #FFFFFF !important;
@@ -80,7 +77,6 @@ def inject_custom_design():
             text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
         }
 
-        /* Survol (Hover) */
         button[kind="secondary"]:hover {
             background: linear-gradient(135deg, #4C1D95 0%, #31105E 100%) !important;
             border-color: #EC4899 !important;
@@ -93,7 +89,6 @@ def inject_custom_design():
             box-shadow: 0 0 25px rgba(236, 72, 153, 0.9) !important;
         }
 
-        /* Boutons de Soumission de Formulaire */
         div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%) !important;
             color: #FFFFFF !important;
@@ -112,7 +107,6 @@ def inject_custom_design():
             box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6) !important;
         }
 
-        /* Cartes du Workspace */
         .zapio-card {
             background: linear-gradient(135deg, rgba(46, 16, 80, 0.8) 0%, rgba(27, 9, 48, 0.9) 100%) !important;
             border: 1px solid #6D28D9 !important;
@@ -122,7 +116,6 @@ def inject_custom_design():
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* Cartes Événements */
         .calendar-event-card {
             background: linear-gradient(135deg, #2D1254 0%, #1E0A3C 100%);
             border: 1px solid #A855F7;
@@ -149,7 +142,6 @@ def inject_custom_design():
             box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4);
         }
 
-        /* Badges */
         .zapio-badge {
             background-color: #4C1D95;
             color: #F472B6;
