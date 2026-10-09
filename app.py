@@ -472,11 +472,18 @@ else:
     elif menu == "🔗 Liens Utiles":
         st.subheader("🔗 Sauvegarde de Liens Web")
         with st.form("form_links"):
-            title = st.text_input("Nom du site")
+            title = st.text_input("Nom du site / Application")
             url = st.text_input("Lien URL (https://...)")
-            category = st.selectbox("Catégorie", ["Doc Tech & API", "Outils Design & AI", "Inspiration / Modèles", "Administration / Finance"])
+            category = st.selectbox("Catégorie", [
+                "Téléchargement d'applications",
+                "Sites Web Utiles",
+                "Doc Tech & API",
+                "Outils Design & AI",
+                "Inspiration / Modèles",
+                "Administration / Finance"
+            ])
             note = st.text_input("Note")
-            if st.form_submit_button("Enregistrer"):
+            if st.form_submit_button("Enregistrer le Lien"):
                 if title and url:
                     st.session_state.saved_links.append({"title": title, "url": url, "cat": category, "note": note})
                     st.rerun()
