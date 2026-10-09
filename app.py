@@ -6,7 +6,6 @@ import json
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, time
-import streamlit.components.v1 as components
 
 # Correctif pour Streamlit Cloud
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -242,7 +241,7 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# Script PWA + Synchronisation Hors-Ligne dans le LocalStorage
+# Enregistrement du Service Worker PWA via st.markdown au lieu de st.components.v1.html
 pwa_offline_script = """
 <script>
 if ('serviceWorker' in navigator) {
@@ -263,7 +262,7 @@ function syncAgendaToOfflineStorage(eventsData) {
 }
 </script>
 """
-components.html(pwa_offline_script, height=0, width=0)
+st.markdown(pwa_offline_script, unsafe_allow_html=True)
 
 # Détecteur automatique de langage
 def detect_language(code):
@@ -314,8 +313,8 @@ def sync_offline():
             "ringtone": e["ringtone"]
         } for e in st.session_state.agenda_events
     ]
-    js_sync = f"<script>syncAgendaToOfflineStorage({json.dumps(serializable_events)});</script>"
-    components.html(js_sync, height=0, width=0)
+    js_sync = f"<script>if(typeof syncAgendaToOfflineStorage === 'function'){{ syncAgendaToOfflineStorage({json.dumps(serializable_events)}); }}</script>"
+    st.markdown(js_sync, unsafe_allow_html=True)
 
 def render_agenda_module():
     st.markdown(f'<div style="margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
