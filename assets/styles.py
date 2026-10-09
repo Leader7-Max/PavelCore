@@ -1,222 +1,31 @@
-import streamlit as st
-
-def inject_custom_design():
+# AJOUTER CECI DANS assets/styles.py :
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-        /* Background Violet Deep */
-        html, body, [data-testid="stAppViewContainer"], .stApp {
-            background: linear-gradient(135deg, #1A0B2E 0%, #110520 100%) !important;
-            color: #F3F4F6 !important;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        /* Conteneur global de défilement horizontal type livre / carrousel */
+        .horizontal-book-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 20px;
+            padding-bottom: 20px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
-        [data-testid="stHeader"] {
-            background-color: transparent !important;
+        .horizontal-book-container::-webkit-scrollbar {
+            height: 6px;
         }
-
-        h1, h2, h3, h4, h5, h6, label, label p, .stMarkdown {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-        }
-
-        /* Champs de Saisie Lisibles */
-        div[data-baseweb="input"] input, 
-        div[data-baseweb="textarea"] textarea,
-        .stTextInput input, 
-        .stTextArea textarea {
-            color: #1A0B2E !important;
-            background-color: #FFFFFF !important;
-            border: 2px solid #D8B4FE !important;
-            border-radius: 12px !important;
-            font-weight: 600 !important;
-            font-size: 0.95rem !important;
-        }
-
-        div[data-baseweb="select"] > div {
-            background-color: #FFFFFF !important;
-            color: #1A0B2E !important;
-            border-radius: 12px !important;
-            font-weight: 600 !important;
-        }
-
-        /* ====================================================
-           🔥 FORÇAGE RESPONSIVE MOBILE POUR LA GRILLE 7 JOURS
-           ==================================================== */
-        
-        /* Garder 7 colonnes en ligne même sur mobile */
-        div[data-testid="stHorizontalBlock"]:has(.calendar-day-box),
-        div[data-testid="stHorizontalBlock"]:has(.calendar-header-box) {
-            display: flex !important;
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            gap: 4px !important;
-            width: 100% !important;
-        }
-
-        div[data-testid="stHorizontalBlock"]:has(.calendar-day-box) > div,
-        div[data-testid="stHorizontalBlock"]:has(.calendar-header-box) > div {
-            width: 14.28% !important;
-            min-width: 0 !important;
-            flex: 1 1 0 !important;
-        }
-
-        .calendar-header-box {
-            text-align: center;
-            font-weight: 800;
-            color: #EC4899;
-            padding: 6px 2px;
-            background: #261245;
-            border-radius: 8px;
-            border: 1px solid #5B21B6;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .calendar-day-box {
+        .horizontal-book-container::-webkit-scrollbar-thumb {
+            background: #EC4899;
             border-radius: 10px;
-            min-height: 75px;
-            max-height: 110px;
-            padding: 4px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        @media (max-width: 768px) {
-            .calendar-header-box {
-                font-size: 0.65rem !important;
-                padding: 4px 1px !important;
-            }
-            .calendar-day-box {
-                min-height: 60px !important;
-                padding: 3px !important;
-            }
-            .calendar-day-number {
-                font-size: 0.75rem !important;
-            }
-        }
-
-        /* ====================================================
-           🔥 STYLES DES BOUTONS DE NAVIGATION EN PILULES 3D
-           ==================================================== */
-
-        button[kind="primary"] {
-            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            font-size: 0.95rem !important;
-            border: 2px solid #F472B6 !important;
-            border-radius: 50px !important;
-            padding: 12px 24px !important;
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.7), 0 6px 15px rgba(0,0,0,0.4) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        button[kind="secondary"] {
-            background: linear-gradient(135deg, #2D1452 0%, #1E0A3C 100%) !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            font-size: 0.95rem !important;
-            border: 2px solid #5B21B6 !important;
-            border-radius: 50px !important;
-            padding: 12px 24px !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        button[kind="primary"] p, button[kind="secondary"] p,
-        button[kind="primary"] span, button[kind="secondary"] span {
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
-        }
-
-        button[kind="secondary"]:hover {
-            background: linear-gradient(135deg, #4C1D95 0%, #31105E 100%) !important;
-            border-color: #EC4899 !important;
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 8px 22px rgba(236, 72, 153, 0.45) !important;
-        }
-
-        button[kind="primary"]:hover {
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 0 25px rgba(236, 72, 153, 0.9) !important;
-        }
-
-        div[data-testid="stFormSubmitButton"] > button {
-            background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%) !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            font-size: 1rem !important;
-            border: none !important;
-            border-radius: 14px !important;
-            padding: 14px 24px !important;
-            width: 100% !important;
-            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        div[data-testid="stFormSubmitButton"] > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6) !important;
-        }
-
-        .zapio-card {
-            background: linear-gradient(135deg, rgba(46, 16, 80, 0.8) 0%, rgba(27, 9, 48, 0.9) 100%) !important;
-            border: 1px solid #6D28D9 !important;
-            border-radius: 18px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .calendar-event-card {
-            background: linear-gradient(135deg, #2D1254 0%, #1E0A3C 100%);
-            border: 1px solid #A855F7;
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 16px;
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.25);
-        }
-
-        .calendar-date-box {
-            background: linear-gradient(135deg, #F43F5E 0%, #EC4899 100%);
-            color: #FFFFFF;
-            min-width: 85px;
-            height: 85px;
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4);
-        }
-
-        .zapio-badge {
-            background-color: #4C1D95;
-            color: #F472B6;
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            border: 1px solid #7C3AED;
-        }
-
-        .zapio-badge-green {
-            background-color: rgba(52, 199, 89, 0.15);
-            color: #34C759;
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
+        /* Chaque page/option s'aligne comme une page de livre */
+        .book-page-panel {
+            min-width: 100%;
+            scroll-snap-align: start;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
         }
         </style>
     """, unsafe_allow_html=True)
