@@ -118,22 +118,17 @@ def inject_custom_design():
             color: #FFFFFF !important;
         }}
 
-        /* --- CORRECTION RADICALE DES INPUTS DATE ET HEURE (Fond sombre, texte blanc visible) --- */
-        div[data-baseweb="input"] {{
-            background-color: #1E0A3C !important;
-            border-radius: 8px !important;
-            border: 1px solid #8B5CF6 !important;
-        }}
-        
+        /* --- NETTETÉ PARfaite DES INPUTS DATE ET HEURE (Texte noir bien lisible) --- */
         div[data-baseweb="input"] input {{
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            background-color: transparent !important;
+            color: #000000 !important;
+            font-weight: 800 !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #000000 !important;
         }}
 
         div[data-baseweb="select"] span, div[data-baseweb="select"] div {{
-            color: #FFFFFF !important;
-            font-weight: 600 !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
         }}
 
         div[data-testid="stPills"] button {{
