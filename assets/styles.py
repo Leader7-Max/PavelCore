@@ -118,25 +118,18 @@ def inject_custom_design():
             color: #FFFFFF !important;
         }}
 
-        /* --- CORRECTION ULTRA-NETTE DES INPUTS DATE ET HEURE --- */
-        div[data-baseweb="input"] {{
-            background-color: #1E0A3C !important;
-            border-radius: 8px !important;
-            border: 1px solid #EC4899 !important;
-        }}
-
-        div[data-baseweb="input"] input {{
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
+        /* --- FORÇAGE DU TEXTE EN NOIR FONCÉ POUR TOUS LES CHAMPS DE SAISIE ET TEXT AREAS --- */
+        input, textarea, div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {{
+            color: #0F172A !important;
+            font-weight: 700 !important;
             opacity: 1 !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-            background-color: transparent !important;
+            -webkit-text-fill-color: #0F172A !important;
         }}
 
         div[data-baseweb="select"] span, div[data-baseweb="select"] div {{
-            color: #FFFFFF !important;
+            color: #0F172A !important;
             font-weight: 700 !important;
-            -webkit-text-fill-color: #FFFFFF !important;
+            -webkit-text-fill-color: #0F172A !important;
         }}
 
         div[data-testid="stPills"] button {{
