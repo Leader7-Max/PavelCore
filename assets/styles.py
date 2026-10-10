@@ -118,18 +118,25 @@ def inject_custom_design():
             color: #FFFFFF !important;
         }}
 
-        /* --- TEXTE EN NOIR FONCÉ TRÈS NET POUR LES INPUTS DATE ET HEURE --- */
+        /* --- CORRECTION ULTRA-NETTE DES INPUTS DATE ET HEURE --- */
+        div[data-baseweb="input"] {{
+            background-color: #1E0A3C !important;
+            border-radius: 8px !important;
+            border: 1px solid #EC4899 !important;
+        }}
+
         div[data-baseweb="input"] input {{
-            color: #111827 !important;
-            font-weight: 900 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
             opacity: 1 !important;
-            -webkit-text-fill-color: #111827 !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            background-color: transparent !important;
         }}
 
         div[data-baseweb="select"] span, div[data-baseweb="select"] div {{
-            color: #111827 !important;
-            font-weight: 800 !important;
-            -webkit-text-fill-color: #111827 !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }}
 
         div[data-testid="stPills"] button {{
