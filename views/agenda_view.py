@@ -2,9 +2,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 import calendar
 from datetime import datetime, date, time
+from modules.database import add_event_to_db, delete_event_from_db, clear_all_events_db, load_events_from_db
 
 def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#2B1552", header_box_bg="#1E0A3C", header_box_text="#A78BFA", text_color="#F8FAFC"):
-    """Gère l'affichage complet du module Agenda, Calendrier et Liste des tâches avec des champs de saisie texte ultra-stables."""
+    """Gère l'affichage complet du module Agenda connecté à SQLite."""
     
     MONTH_NAMES_FR = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
@@ -20,7 +21,7 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
             st.session_state.direct_agenda = False
             st.rerun()
 
-    st.markdown(f'<div style="margin-top: 10px; margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="margin-top: 10px; margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA PERSISTANT (SQLite)</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
     
     col_btn1, col_btn2, col_btn3, col_clear = st.columns([2, 2, 2, 2])
     
@@ -42,9 +43,10 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
     with col_clear:
         if st.session_state.agenda_events:
             if st.button("🗑️ Vider tout", key="clear_all_events"):
-                st.session_state.agenda_events = []
+                clear_all_events_db()
+                st.session_state.agenda_events = load_events_from_db()
                 st.session_state.confirm_delete_agenda_idx = None
-                st.toast("🗑️ Agenda vidé avec succès.", icon="ℹ️")
+                st.toast("🗑️ Agenda vidé et base nettoyée.", icon="ℹ️")
                 st.rerun()
 
     st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
@@ -142,7 +144,7 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
         '''
         components.html(calendar_full_html, height=420, scrolling=False)
 
-    # 2. VUE LISTE DES TÂCHES AVEC CONFIRMATION DE SUPPRESSION
+    # 2. VUE LISTE DES TÂCHES AVEC SUPPRESSION VIA ID SQLite
     elif st.session_state.agenda_active_tab == "liste":
         st.markdown(f"<h3 style='color: {sub_title_color};'>📋 Liste de toutes les tâches programmées</h3>", unsafe_allow_html=True)
         
@@ -151,7 +153,8 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
         else:
             sorted_events = sorted(st.session_state.agenda_events, key=lambda x: (x['date'], x['time']))
             
-            for idx, ev in enumerate(sorted_events):
+            for ev in sorted_events:
+                ev_id = ev["id"]
                 st.markdown(f'''
                     <div class="zapio-card" style="border-left: 5px solid #EC4899;">
                         <span class="zapio-badge">{ev["category"]}</span>
@@ -161,24 +164,25 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
                     </div>
                 ''', unsafe_allow_html=True)
                 
-                if st.session_state.confirm_delete_agenda_idx == idx:
+                if st.session_state.confirm_delete_agenda_idx == ev_id:
                     col_conf1, col_conf2 = st.columns(2)
                     with col_conf1:
-                        if st.button("⚠️ Confirmer la suppression", key=f"yes_del_{idx}", type="primary"):
-                            st.session_state.agenda_events.remove(ev)
+                        if st.button("⚠️ Confirmer la suppression", key=f"yes_del_{ev_id}", type="primary"):
+                            delete_event_from_db(ev_id)
+                            st.session_state.agenda_events = load_events_from_db()
                             st.session_state.confirm_delete_agenda_idx = None
-                            st.toast("🗑️ Tâche supprimée avec succès.", icon="ℹ️")
+                            st.toast("🗑️ Tâche supprimée de la base !", icon="ℹ️")
                             st.rerun()
                     with col_conf2:
-                        if st.button("Annuler", key=f"no_del_{idx}", type="secondary"):
+                        if st.button("Annuler", key=f"no_del_{ev_id}", type="secondary"):
                             st.session_state.confirm_delete_agenda_idx = None
                             st.rerun()
                 else:
-                    if st.button(f"🗑️ Supprimer cette tâche", key=f"del_ev_{idx}", type="secondary"):
-                        st.session_state.confirm_delete_agenda_idx = idx
+                    if st.button(f"🗑️ Supprimer cette tâche", key=f"del_ev_{ev_id}", type="secondary"):
+                        st.session_state.confirm_delete_agenda_idx = ev_id
                         st.rerun()
 
-    # 3. ONGLET PROGRAMMER (Champs texte ultra-stables pour éviter les bugs de visibilité)
+    # 3. ONGLET PROGRAMMER
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form", clear_on_submit=True):
             st.markdown(f"<h3 style='color: {sub_title_color};'>Planifier une nouvelle date</h3>", unsafe_allow_html=True)
@@ -200,27 +204,22 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
             if st.form_submit_button("🔔 Ajouter au Calendrier"):
                 if title:
                     try:
-                        # Conversion sécurisée de la date saisie
                         if "-" in date_str:
                             parsed_date = datetime.strptime(date_str.strip(), "%Y-%m-%d").date()
                         else:
                             parsed_date = datetime.strptime(date_str.strip(), "%d/%m/%Y").date()
                             
-                        # Conversion sécurisée de l'heure saisie
                         parsed_time = datetime.strptime(time_str.strip(), "%H:%M").time()
                         
-                        st.session_state.agenda_events.append({
-                            "title": title, 
-                            "date": parsed_date, 
-                            "time": parsed_time, 
-                            "category": category, 
-                            "desc": desc, 
-                            "ringtone": ringtone
-                        })
+                        # Enregistrement direct dans SQLite
+                        add_event_to_db(title, parsed_date, parsed_time, category, desc, ringtone)
+                        # Rechargement des données depuis la base
+                        st.session_state.agenda_events = load_events_from_db()
+                        
                         st.session_state.agenda_active_tab = "liste"
-                        st.toast("✅ Événement ajouté avec succès !", icon="🎉")
+                        st.toast("✅ Événement enregistré dans la base de données !", icon="🎉")
                         st.rerun()
                     except ValueError:
-                        st.error("Erreur de format : Veuillez respecter le format AAAA-MM-JJ (ou JJ/MM/AAAA) pour la date et HH:MM pour l'heure.")
+                        st.error("Erreur de format : Respectez AAAA-MM-JJ pour la date et HH:MM pour l'heure.")
                 else:
                     st.warning("Veuillez saisir un titre pour l'événement.")
