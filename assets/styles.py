@@ -90,7 +90,7 @@ def inject_custom_design():
             margin-bottom: 15px;
         }}
 
-        /* --- STYLING DES BOUTONS --- */
+        /* --- STYLING DES BOUTONS EN ROUGE --- */
         div.stButton > button, 
         button[kind="primary"], 
         button[kind="secondary"],
@@ -118,13 +118,21 @@ def inject_custom_design():
             color: #FFFFFF !important;
         }}
 
-        /* --- CORRECTION DE LA VISIBILITÉ DU TEXTE DANS LES INPUTS DATE / HEURE --- */
-        input[type="text"], input[aria-label*="Date"], input[aria-label*="Heure"], div[data-baseweb="input"] input {{
-            color: #000000 !important;
-            font-weight: 600 !important;
+        /* --- CORRECTION RADICALE DES INPUTS DATE ET HEURE (Fond sombre, texte blanc visible) --- */
+        div[data-baseweb="input"] {{
+            background-color: #1E0A3C !important;
+            border-radius: 8px !important;
+            border: 1px solid #8B5CF6 !important;
         }}
-        div[data-baseweb="select"] span {{
-            color: #000000 !important;
+        
+        div[data-baseweb="input"] input {{
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            background-color: transparent !important;
+        }}
+
+        div[data-baseweb="select"] span, div[data-baseweb="select"] div {{
+            color: #FFFFFF !important;
             font-weight: 600 !important;
         }}
 
