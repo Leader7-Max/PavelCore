@@ -118,17 +118,18 @@ def inject_custom_design():
             color: #FFFFFF !important;
         }}
 
-        /* --- NETTETÉ PARfaite DES INPUTS DATE ET HEURE (Texte noir bien lisible) --- */
+        /* --- TEXTE EN NOIR FONCÉ TRÈS NET POUR LES INPUTS DATE ET HEURE --- */
         div[data-baseweb="input"] input {{
-            color: #000000 !important;
-            font-weight: 800 !important;
+            color: #111827 !important;
+            font-weight: 900 !important;
             opacity: 1 !important;
-            -webkit-text-fill-color: #000000 !important;
+            -webkit-text-fill-color: #111827 !important;
         }}
 
         div[data-baseweb="select"] span, div[data-baseweb="select"] div {{
-            color: #000000 !important;
-            font-weight: 700 !important;
+            color: #111827 !important;
+            font-weight: 800 !important;
+            -webkit-text-fill-color: #111827 !important;
         }}
 
         div[data-testid="stPills"] button {{
