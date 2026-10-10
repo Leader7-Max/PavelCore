@@ -78,6 +78,12 @@ if "saved_api_keys" not in st.session_state:
 if "saved_user_credentials" not in st.session_state:
     st.session_state.saved_user_credentials = []
 
+if "saved_contacts" not in st.session_state:
+    st.session_state.saved_contacts = []
+
+if "saved_email_templates" not in st.session_state:
+    st.session_state.saved_email_templates = []
+
 if "current_view" not in st.session_state:
     st.session_state.current_view = "home"
 
@@ -105,12 +111,17 @@ else:
     sub_title_color = "#FFF"
     hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
 
-# Styles CSS globaux
+# Styles CSS globaux avec effets d'animation et de survol
 st.markdown(f"""
     <style>
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(8px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
     .stApp {{
         background-color: {bg_app} !important;
         color: {text_color} !important;
+        animation: fadeIn 0.4s ease-in-out;
     }}
     .pavel-hero-banner {{
         background: {hero_bg};
@@ -119,7 +130,11 @@ st.markdown(f"""
         padding: 30px 20px;
         text-align: center;
         margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+    }}
+    .pavel-hero-banner:hover {{
+        box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
     }}
     .sub-section-header {{
         background: {hero_bg};
@@ -128,6 +143,7 @@ st.markdown(f"""
         border-radius: 0 12px 12px 0;
         margin-bottom: 25px;
         margin-top: 10px;
+        animation: fadeIn 0.3s ease-in-out;
     }}
     .pavel-card-grid {{
         background: {card_gradient};
@@ -135,14 +151,14 @@ st.markdown(f"""
         border-radius: 14px;
         padding: 25px;
         text-align: center;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         margin-bottom: 15px;
     }}
     .pavel-card-grid:hover {{
-        transform: translateY(-4px);
+        transform: translateY(-6px) scale(1.01);
         border-color: #EC4899;
-        box-shadow: 0 10px 35px rgba(236, 72, 153, 0.18);
+        box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
     }}
     .zapio-badge {{
         background: rgba(236, 72, 153, 0.1);
@@ -169,6 +185,12 @@ st.markdown(f"""
         padding: 20px;
         margin-bottom: 15px;
         box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        transition: all 0.25s ease-in-out;
+    }}
+    .zapio-card:hover {{
+        border-color: #8B5CF6;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
     }}
     div[data-testid="stPills"] button {{
         background-color: {card_bg} !important;
@@ -176,11 +198,17 @@ st.markdown(f"""
         color: {text_color} !important;
         border-radius: 8px !important;
         font-weight: 500;
+        transition: all 0.2s ease-in-out !important;
+    }}
+    div[data-testid="stPills"] button:hover {{
+        border-color: #EC4899 !important;
+        transform: translateY(-1px);
     }}
     div[data-testid="stPills"] button[aria-selected="true"] {{
         background-color: #EC4899 !important;
         border-color: #EC4899 !important;
         color: #FFF !important;
+        box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -281,7 +309,7 @@ def render_agenda_module():
                         </div>
                     '''
 
-        # Rendu blindé via components.html pour empêcher tout saut ou écrasement mobile
+        # Rendu blindé via components.html
         calendar_full_html = f'''
         <!DOCTYPE html>
         <html>
@@ -414,6 +442,11 @@ else:
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🎴 Contacts & Emails</h3><p style="color: {desc_color}; font-size: 0.8rem;">Répertoire et templates d\'emails.</p></div>', unsafe_allow_html=True)
+            if st.button("Ouvrir Contacts & Emails", use_container_width=True):
+                st.session_state.current_view = "Contacts & Emails"
+                st.rerun()
+
         st.markdown("<br>", unsafe_allow_html=True)
         with st.expander("⚙️ Gestion & Sauvegarde Globale du Workspace (Backup JSON)"):
             workspace_data = {
@@ -437,7 +470,9 @@ else:
                 "saved_links": st.session_state.saved_links,
                 "saved_zip_files": st.session_state.saved_zip_files,
                 "saved_api_keys": st.session_state.saved_api_keys,
-                "saved_user_credentials": st.session_state.saved_user_credentials
+                "saved_user_credentials": st.session_state.saved_user_credentials,
+                "saved_contacts": st.session_state.saved_contacts,
+                "saved_email_templates": st.session_state.saved_email_templates
             }
             json_str = json.dumps(workspace_data, indent=4, ensure_ascii=False)
             
@@ -466,6 +501,8 @@ else:
                         st.session_state.saved_zip_files = imported_data.get("saved_zip_files", [])
                         st.session_state.saved_api_keys = imported_data.get("saved_api_keys", [])
                         st.session_state.saved_user_credentials = imported_data.get("saved_user_credentials", [])
+                        st.session_state.saved_contacts = imported_data.get("saved_contacts", [])
+                        st.session_state.saved_email_templates = imported_data.get("saved_email_templates", [])
                         
                         restored_events = []
                         for ev in imported_data.get("agenda_events", []):
@@ -641,4 +678,190 @@ else:
                 for cd in st.session_state.saved_code_snippets:
                     st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{cd["title"]}</h3>', unsafe_allow_html=True)
                     st.code(cd['code'], language='python')
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+        elif current == "Ressources":
+            sub_tab = st.pills(
+                "Navigation Ressources",
+                options=["🎨 Prompts Images", "🔗 Liens Utiles", "📦 Fichiers ZIP"],
+                default="🎨 Prompts Images",
+                label_visibility="collapsed"
+            )
+            if sub_tab == "🎨 Prompts Images":
+                st.markdown(f'''
+                    <div class="sub-section-header">
+                        <span class="zapio-badge">GÉNÉRATION VISUELLE</span>
+                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🎨 Prompts Images AI</h1>
+                    </div>
+                ''', unsafe_allow_html=True)
+                with st.form("form_img_prompt", clear_on_submit=True):
+                    title = st.text_input("Titre du prompt visuel")
+                    img_prompt = st.text_area("Prompt / Description de l'image")
+                    if st.form_submit_button("Enregistrer le Prompt"):
+                        if title and img_prompt:
+                            st.session_state.saved_image_prompts.append({"title": title, "prompt": img_prompt})
+                            st.toast("🎨 Prompt d'image enregistré !", icon="✅")
+                            st.rerun()
+                        else:
+                            st.warning("Veuillez remplir tous les champs.")
+                for ip in st.session_state.saved_image_prompts:
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{ip["title"]}</h3>', unsafe_allow_html=True)
+                    st.code(ip['prompt'], language='markdown')
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+            elif sub_tab == "🔗 Liens Utiles":
+                st.markdown(f'''
+                    <div class="sub-section-header">
+                        <span class="zapio-badge">BOOKMARKS & OUTILS</span>
+                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔗 Liens Utiles</h1>
+                    </div>
+                ''', unsafe_allow_html=True)
+                with st.form("form_saved_links", clear_on_submit=True):
+                    title = st.text_input("Nom du site / outil")
+                    url = st.text_input("URL (ex: https://...)")
+                    desc = st.text_input("Description rapide")
+                    if st.form_submit_button("Ajouter le lien"):
+                        if title and url:
+                            st.session_state.saved_links.append({"title": title, "url": url, "desc": desc})
+                            st.toast("🔗 Lien sauvegardé avec succès !", icon="✅")
+                            st.rerun()
+                        else:
+                            st.warning("Veuillez renseigner le nom et l'URL.")
+                for lk in st.session_state.saved_links:
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{lk["title"]}</h3><p style="color:{desc_color};">{lk["desc"]}</p><a href="{lk["url"]}" target="_blank" style="color:#EC4899; font-weight:600;">🌐 Ouvrir le lien</a></div>', unsafe_allow_html=True)
+
+            elif sub_tab == "📦 Fichiers ZIP":
+                st.markdown(f'''
+                    <div class="sub-section-header">
+                        <span class="zapio-badge">ARCHIVES & ASSETS</span>
+                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">📦 Fichiers & Archives ZIP</h1>
+                    </div>
+                ''', unsafe_allow_html=True)
+                with st.form("form_zip", clear_on_submit=True):
+                    title = st.text_input("Nom du pack / fichier")
+                    file_url = st.text_input("Lien de téléchargement / Drive")
+                    desc = st.text_area("Contenu de l'archive")
+                    if st.form_submit_button("Enregistrer l'archive"):
+                        if title and file_url:
+                            st.session_state.saved_zip_files.append({"title": title, "url": file_url, "desc": desc})
+                            st.toast("📦 Archive ZIP ajoutée !", icon="✅")
+                            st.rerun()
+                        else:
+                            st.warning("Veuillez remplir le titre et le lien.")
+                for zf in st.session_state.saved_zip_files:
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{zf["title"]}</h3><p style="color:{desc_color};">{zf["desc"]}</p><a href="{zf["url"]}" target="_blank" style="color:#8B5CF6; font-weight:600;">📥 Télécharger l\'archive</a></div>', unsafe_allow_html=True)
+
+        elif current == "Coffre-Fort":
+            sub_tab = st.pills(
+                "Navigation Coffre-Fort",
+                options=["🔐 Clés API", "🔑 Identifiants & Mots de passe"],
+                default="🔐 Clés API",
+                label_visibility="collapsed"
+            )
+            if sub_tab == "🔐 Clés API":
+                st.markdown(f'''
+                    <div class="sub-section-header">
+                        <span class="zapio-badge">SÉCURITÉ & CREDENTIALS</span>
+                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔐 Clés d'API & Tokens</h1>
+                    </div>
+                ''', unsafe_allow_html=True)
+                with st.form("form_api_keys", clear_on_submit=True):
+                    service = st.text_input("Nom du Service (ex: OpenAI, GitHub)")
+                    api_key = st.text_input("Clé API / Token Secret", type="password")
+                    if st.form_submit_button("🔒 Sauvegarder la clé"):
+                        if service and api_key:
+                            st.session_state.saved_api_keys.append({"service": service, "key": api_key})
+                            st.toast("🔐 Clé API sauvegardée en toute sécurité !", icon="✅")
+                            st.rerun()
+                        else:
+                            st.warning("Veuillez remplir tous les champs.")
+                for ak in st.session_state.saved_api_keys:
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{ak["service"]}</h3>', unsafe_allow_html=True)
+                    st.code(ak['key'], language='text')
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+            elif sub_tab == "🔑 Identifiants & Mots de passe":
+                st.markdown(f'''
+                    <div class="sub-section-header">
+                        <span class="zapio-badge">GESTIONNAIRE D'ACCÈS</span>
+                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔑 Identifiants & Mots de passe</h1>
+                    </div>
+                ''', unsafe_allow_html=True)
+                with st.form("form_creds", clear_on_submit=True):
+                    site = st.text_input("Plateforme / Site web")
+                    username = st.text_input("Identifiant / Email")
+                    password = st.text_input("Mot de passe", type="password")
+                    if st.form_submit_button("Enregistrer les accès"):
+                        if site and username and password:
+                            st.session_state.saved_user_credentials.append({"site": site, "user": username, "pass": password})
+                            st.toast("🔑 Identifiants enregistrés avec succès !", icon="✅")
+                            st.rerun()
+                        else:
+                            st.warning("Veuillez remplir tous les champs.")
+                for uc in st.session_state.saved_user_credentials:
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{uc["site"]}</h3><p style="color:{desc_color};"><b>Identifiant:</b> {uc["user"]}</p>', unsafe_allow_html=True)
+                    st.code(uc['pass'], language='text')
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+        elif current == "Contacts & Emails":
+            sub_tab = st.pills(
+                "Navigation Contacts",
+                options=["🎴 Carnet de Contacts", "📧 Modèles d'Emails & Scripts"],
+                default="🎴 Carnet de Contacts",
+                label_visibility="collapsed"
+            )
+            if sub_tab == "🎴 Carnet de Contacts":
+                st.markdown(f'''
+                    <div class="sub-section-header">
+                        <span class="zapio-badge">RÉPERTOIRE PROFESSIONNEL</span>
+                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🎴 Carnet de Contacts</h1>
+                    </div>
+                ''', unsafe_allow_html=True)
+                with st.form("form_contacts", clear_on_submit=True):
+                    fullname = st.text_input("Nom & Prénom / Entreprise")
+                    email_contact = st.text_input("Adresse Email")
+                    phone = st.text_input("Numéro de Téléphone")
+                    category = st.selectbox("Catégorie", ["Client", "Partenaire / Prestataire", "VIP", "Personnel"])
+                    notes = st.text_area("Notes / Rôle")
+                    if st.form_submit_button("Ajouter le contact"):
+                        if fullname:
+                            st.session_state.saved_contacts.append({
+                                "name": fullname,
+                                "email": email_contact,
+                                "phone": phone,
+                                "cat": category,
+                                "notes": notes
+                            })
+                            st.toast("🎴 Contact sauvegardé !", icon="✅")
+                            st.rerun()
+                        else:
+                            st.warning("Veuillez renseigner au moins le nom du contact.")
+                for ct in st.session_state.saved_contacts:
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{ct["name"]} <span class="zapio-badge" style="font-size:0.7rem;">{ct["cat"]}</span></h3><p style="color:{desc_color};">📧 {ct["email"]} | 📞 {ct["phone"]}</p><p style="color:{desc_color}; font-size:0.85rem;">{ct["notes"]}</p></div>', unsafe_allow_html=True)
+
+            elif sub_tab == "📧 Modèles d'Emails & Scripts":
+                st.markdown(f'''
+                    <div class="sub-section-header">
+                        <span class="zapio-badge">COMMUNICATION & TEMPLATES</span>
+                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">📧 Modèles d'Emails & Scripts</h1>
+                    </div>
+                ''', unsafe_allow_html=True)
+                with st.form("form_email_tpl", clear_on_submit=True):
+                    title = st.text_input("Titre du modèle (ex: Relance devis DJ, Prospection)")
+                    subject = st.text_input("Objet du mail")
+                    body = st.text_area("Corps du message / Script")
+                    if st.form_submit_button("Sauvegarder le modèle"):
+                        if title and body:
+                            st.session_state.saved_email_templates.append({
+                                "title": title,
+                                "subject": subject,
+                                "body": body
+                            })
+                            st.toast("📧 Modèle d'email sauvegardé !", icon="✅")
+                            st.rerun()
+                        else:
+                            st.warning("Veuillez renseigner le titre et le corps du message.")
+                for et in st.session_state.saved_email_templates:
+                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{et["title"]}</h3><p style="color:{desc_color};"><b>Objet:</b> {et["subject"]}</p>', unsafe_allow_html=True)
+                    st.code(et['body'], language='markdown')
                     st.markdown('</div>', unsafe_allow_html=True)
