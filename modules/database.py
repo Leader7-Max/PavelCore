@@ -169,6 +169,15 @@ def delete_event_from_db(event_id: int):
     conn.commit()
     conn.close()
 
+def clear_all_events_db(user_id: int):
+    """Supprime tous les événements de la base de données pour un utilisateur."""
+    init_db()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM events WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
 # --- GESTION COFFRE-FORT (Filtré par user_id) ---
 def load_api_keys_from_db(user_id: int):
     init_db()
