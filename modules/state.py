@@ -10,6 +10,12 @@ def init_session_state():
     if "active_tab" not in st.session_state:
         st.session_state.active_tab = "Dashboard"
 
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+
+    if "current_view" not in st.session_state:
+        st.session_state.current_view = "home"
+
     # Chargement persistant Agenda
     if "agenda_events" not in st.session_state:
         st.session_state.agenda_events = load_events_from_db()
@@ -27,9 +33,21 @@ def init_session_state():
     # Chargement persistant Contacts
     if "saved_contacts" not in st.session_state:
         st.session_state.saved_contacts = load_contacts_from_db()
-        
-    if "confirm_delete_agenda_idx" not in st.session_state:
-        st.session_state.confirm_delete_agenda_idx = None
-        
-    if "direct_agenda" not in st.session_state:
-        st.session_state.direct_agenda = False
+
+    # Initialisations des autres listes si absentes (pour la recherche globale)
+    if "saved_prompts_library" not in st.session_state:
+        st.session_state.saved_prompts_library = []
+    if "saved_code_snippets" not in st.session_state:
+        st.session_state.saved_code_snippets = []
+    if "saved_ideas" not in st.session_state:
+        st.session_state.saved_ideas = []
+    if "saved_current_projects" not in st.session_state:
+        st.session_state.saved_current_projects = []
+    if "saved_future_projects" not in st.session_state:
+        st.session_state.saved_future_projects = []
+    if "saved_links" not in st.session_state:
+        st.session_state.saved_links = []
+    if "saved_media_files" not in st.session_state:
+        st.session_state.saved_media_files = []
+    if "saved_email_templates" not in st.session_state:
+        st.session_state.saved_email_templates = []
