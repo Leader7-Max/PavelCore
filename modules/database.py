@@ -1,4 +1,6 @@
 import sqlite3
+import hashlib
+import os
 from datetime import datetime, date, time
 
 DB_NAME = "pavelcore_workspace.db"
@@ -7,15 +9,41 @@ def get_connection():
     """Établit la connexion avec la base de données SQLite."""
     return sqlite3.connect(DB_NAME, check_same_thread=False)
 
+def hash_password(password: str, salt: bytes = None) -> tuple[str, str]:
+    """Hache un mot de passe avec SHA-256 et un sel unique."""
+    if salt is None:
+        salt = os.urandom(16)
+    else:
+        salt = bytes.fromhex(salt)
+    pwd_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    return pwd_hash.hex(), salt.hex()
+
+def verify_password(password: str, stored_hash: str, stored_salt: str) -> bool:
+    """Vérifie si un mot de passe correspond au hash stocké."""
+    pwd_hash, _ = hash_password(password, stored_salt)
+    return pwd_hash == stored_hash
+
 def init_db():
     """Initialise la base de données et crée toutes les tables nécessaires."""
     conn = get_connection()
     cursor = conn.cursor()
     
+    # Table Utilisateurs
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            salt TEXT NOT NULL,
+            created_at TEXT
+        )
+    ''')
+    
     # Table Agenda
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             title TEXT NOT NULL,
             event_date TEXT NOT NULL,
             event_time TEXT NOT NULL,
@@ -29,6 +57,7 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS api_keys (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             service TEXT NOT NULL,
             encrypted_key TEXT NOT NULL
         )
@@ -38,6 +67,7 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS credentials (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             site TEXT NOT NULL,
             username TEXT NOT NULL,
             encrypted_password TEXT NOT NULL
@@ -48,6 +78,7 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS contacts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             name TEXT NOT NULL,
             email TEXT,
             phone TEXT,
@@ -58,6 +89,47 @@ def init_db():
     
     conn.commit()
     conn.close()
+
+# --- GESTION UTILISATEURS ---
+def create_user_db(email: str, password: str) -> tuple[bool, str]:
+    """Inscrit un nouvel utilisateur dans la base de données."""
+    init_db()
+    email_clean = email.strip().lower()
+    if not email_clean or not password:
+        return False, "Veuillez remplir tous les champs."
+    
+    pwd_hash, salt = hash_password(password)
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO users (email, password_hash, salt, created_at) VALUES (?, ?, ?, ?)",
+                       (email_clean, pwd_hash, salt, now_str))
+        conn.commit()
+        conn.close()
+        return True, "Compte créé avec succès ! Vous pouvez vous connecter."
+    except sqlite3.IntegrityError:
+        conn.close()
+        return False, "Cet e-mail est déjà utilisé."
+
+def authenticate_user_db(email: str, password: str) -> tuple[bool, dict | str]:
+    """Vérifie la connexion d'un utilisateur."""
+    init_db()
+    email_clean = email.strip().lower()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, email, password_hash, salt FROM users WHERE email = ?", (email_clean,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if not row:
+        return False, "Adresse e-mail ou mot de passe incorrect."
+    
+    user_id, user_email, stored_hash, stored_salt = row
+    if verify_password(password, stored_hash, stored_salt):
+        return True, {"id": user_id, "email": user_email}
+    return False, "Adresse e-mail ou mot de passe incorrect."
 
 # --- GESTION AGENDA ---
 def load_events_from_db():
