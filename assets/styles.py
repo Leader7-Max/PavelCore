@@ -1,124 +1,160 @@
 import streamlit as st
 
 def inject_custom_design():
-    """Injecte un arrière-plan éclairci, lumineux et plus contrasté pour PavelCore."""
-    st.markdown("""
+    """Gère les couleurs dynamiques et injecte le design CSS global de PavelCore."""
+    
+    # Récupération du mode de thème depuis la session
+    theme_mode = st.session_state.get("theme_mode", "Sombre Nuit")
+
+    # Couleurs dynamiques
+    if theme_mode == "Blanc Épuré":
+        bg_app = "#F8FAFC"
+        text_color = "#0F172A"
+        card_bg = "#FFFFFF"
+        card_border = "#E2E8F0"
+        card_gradient = "linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%)"
+        header_box_bg = "#F1F5F9"
+        header_box_text = "#475569"
+        desc_color = "#475569"
+        sub_title_color = "#0F172A"
+        hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)"
+    else:
+        bg_app = "#0E031C"
+        text_color = "#F8FAFC"
+        card_bg = "#170A2E"
+        card_border = "#2B1552"
+        card_gradient = "linear-gradient(135deg, #1A0B36 0%, #120524 100%)"
+        header_box_bg = "#1E0A3C"
+        header_box_text = "#A78BFA"
+        desc_color = "#CBD5E1"
+        sub_title_color = "#FFF"
+        hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
+
+    # Styles CSS globaux avec effets d'animation, de survol et correction des boutons
+    st.markdown(f"""
         <style>
-            /* --- 1. ARRIÈRE-PLAN GLOBAL ÉCLAIRCI & LUMINEUX --- */
-            .stApp {
-                background: radial-gradient(circle at 50% 10%, #1D0F38 0%, #120B24 60%, #0D071B 100%) !important;
-                color: #F8FAFC !important;
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-            }
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(8px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        .stApp {{
+            background-color: {bg_app} !important;
+            color: {text_color} !important;
+            animation: fadeIn 0.4s ease-in-out;
+        }}
+        .pavel-hero-banner {{
+            background: {hero_bg};
+            border: 1px solid rgba(236, 72, 153, 0.25);
+            border-radius: 18px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease-in-out;
+        }}
+        .pavel-hero-banner:hover {{
+            box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
+        }}
+        .sub-section-header {{
+            background: {hero_bg};
+            border-left: 5px solid #EC4899;
+            padding: 15px 20px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 25px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-in-out;
+        }}
+        .pavel-card-grid {{
+            background: {card_gradient};
+            border: 1px solid {card_border};
+            border-radius: 14px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            margin-bottom: 15px;
+        }}
+        .pavel-card-grid:hover {{
+            transform: translateY(-6px) scale(1.01);
+            border-color: #EC4899;
+            box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
+        }}
+        .zapio-badge {{
+            background: rgba(236, 72, 153, 0.1);
+            color: #DB2777;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }}
+        .zapio-badge-green {{
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }}
+        .zapio-card {{
+            background: {card_bg};
+            border: 1px solid {card_border};
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+            transition: all 0.25s ease-in-out;
+        }}
+        .zapio-card:hover {{
+            border-color: #8B5CF6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
+        }}
+        
+        /* Correction globale des boutons Streamlit (principal) */
+        div.stButton > button {{
+            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            transition: all 0.25s ease-in-out !important;
+        }}
+        div.stButton > button:hover {{
+            opacity: 0.9 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+        }}
+        
+        /* Boutons secondaires (contour et fond adaptés au thème) */
+        div.stButton > button[kind="secondary"] {{
+            background: {card_bg} !important;
+            border: 1px solid {card_border} !important;
+            color: {text_color} !important;
+        }}
+        div.stButton > button[kind="secondary"]:hover {{
+            border-color: #EC4899 !important;
+            color: #EC4899 !important;
+        }}
 
-            /* --- 2. CARTES & BLOCS CONTRASTÉS --- */
-            .pavel-card-grid {
-                background-color: rgba(30, 16, 53, 0.85) !important;
-                border: 1px solid rgba(168, 85, 247, 0.3) !important;
-                border-radius: 16px !important;
-                padding: 24px !important;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-                transition: all 0.3s ease !important;
-            }
-
-            .pavel-card-grid:hover {
-                border-color: #EC4899 !important;
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(236, 72, 153, 0.35) !important;
-            }
-
-            .pavel-hero-banner {
-                background: linear-gradient(135deg, rgba(45, 21, 80, 0.9) 0%, rgba(29, 14, 54, 0.95) 100%) !important;
-                border: 1px solid rgba(168, 85, 247, 0.35) !important;
-                border-radius: 16px !important;
-                padding: 30px !important;
-                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5) !important;
-                margin-bottom: 25px !important;
-            }
-
-            /* --- 3. CHAMPS DE SAISIE (INPUTS BLANCS LUMINEUX) --- */
-            .stTextInput input, .stPasswordInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
-                background-color: #FFFFFF !important;
-                border: 1px solid rgba(168, 85, 247, 0.5) !important;
-                border-radius: 12px !important;
-                color: #0F172A !important;
-                font-weight: 500 !important;
-                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-            }
-
-            .stTextInput input:focus, .stPasswordInput input:focus, .stTextArea textarea:focus {
-                border-color: #EC4899 !important;
-                box-shadow: 0 0 20px rgba(236, 72, 153, 0.4) !important;
-            }
-
-            /* Fix couleur des placeholders et textes dans inputs */
-            .stTextInput input::placeholder, .stTextArea textarea::placeholder {
-                color: #64748B !important;
-            }
-
-            /* --- 4. CORRECTION DES ALERTES (ex: "Aucune clé API") --- */
-            .stAlert {
-                background-color: rgba(30, 16, 53, 0.9) !important;
-                border: 1px solid rgba(168, 85, 247, 0.4) !important;
-                color: #E2E8F0 !important;
-                border-radius: 12px !important;
-            }
-
-            /* --- 5. BOUTONS (DÉGRADÉ MAGENTA/VIOLET & EFFET GLOW) --- */
-            .stButton > button {
-                background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-                border: none !important;
-                color: #FFFFFF !important;
-                border-radius: 12px !important;
-                font-weight: 600 !important;
-                letter-spacing: 0.4px !important;
-                padding: 0.6rem 1.2rem !important;
-                box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4) !important;
-                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-            }
-
-            .stButton > button:hover {
-                transform: translateY(-2px) scale(1.01) !important;
-                box-shadow: 0 10px 30px rgba(236, 72, 153, 0.6), 0 0 25px rgba(168, 85, 247, 0.5) !important;
-            }
-
-            .stButton > button:active {
-                transform: translateY(1px) scale(0.99) !important;
-                box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3) !important;
-            }
-
-            /* --- 6. ONGLETS (TABS) BIEN VISIBLES --- */
-            .stTabs [data-baseweb="tab-list"] {
-                gap: 10px;
-                background-color: transparent;
-                border-bottom: 1px solid rgba(168, 85, 247, 0.25);
-                padding-bottom: 10px;
-            }
-
-            .stTabs [data-baseweb="tab"] {
-                background-color: rgba(30, 16, 53, 0.7);
-                border: 1px solid rgba(168, 85, 247, 0.3);
-                border-radius: 10px;
-                color: #CBD5E1;
-                padding: 8px 16px;
-                font-weight: 600;
-            }
-
-            .stTabs [aria-selected="true"] {
-                background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-                border: none !important;
-                color: #FFFFFF !important;
-                box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
-            }
-
-            /* --- 7. BADGES --- */
-            .zapio-badge {
-                background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
-                color: white;
-                padding: 5px 12px;
-                border-radius: 8px;
-                font-size: 0.75rem;
-                font-weight: 600;
-                box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
-            }
+        div[data-testid="stPills"] button {{
+            background-color: {card_bg} !important;
+            border: 1px solid {card_border} !important;
+            color: {text_color} !important;
+            border-radius: 8px !important;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out !important;
+        }}
+        div[data-testid="stPills"] button:hover {{
+            border-color: #EC4899 !important;
+            transform: translateY(-1px);
+        }}
+        div[data-testid="stPills"] button[aria-selected="true"] {{
+            background-color: #EC4899 !important;
+            border-color: #EC4899 !important;
+            color: #FFF !important;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }}
         </style>
     """, unsafe_allow_html=True)
