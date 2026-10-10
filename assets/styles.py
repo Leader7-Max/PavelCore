@@ -30,7 +30,7 @@ def inject_custom_design():
         sub_title_color = "#FFF"
         hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
 
-    # Styles CSS globaux avec effets d'animation et de survol
+    # Styles CSS globaux avec effets d'animation, de survol et correction des boutons
     st.markdown(f"""
         <style>
         @keyframes fadeIn {{
@@ -111,6 +111,33 @@ def inject_custom_design():
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
         }}
+        
+        /* Correction globale des boutons Streamlit (principal) */
+        div.stButton > button {{
+            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            transition: all 0.25s ease-in-out !important;
+        }}
+        div.stButton > button:hover {{
+            opacity: 0.9 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+        }}
+        
+        /* Boutons secondaires (contour et fond adaptés au thème) */
+        div.stButton > button[kind="secondary"] {{
+            background: {card_bg} !important;
+            border: 1px solid {card_border} !important;
+            color: {text_color} !important;
+        }}
+        div.stButton > button[kind="secondary"]:hover {{
+            border-color: #EC4899 !important;
+            color: #EC4899 !important;
+        }}
+
         div[data-testid="stPills"] button {{
             background-color: {card_bg} !important;
             border: 1px solid {card_border} !important;
