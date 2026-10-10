@@ -1,118 +1,133 @@
 import streamlit as st
 
 def inject_custom_design():
-    st.markdown("""
+    """Gère les couleurs dynamiques et injecte le design CSS global de PavelCore."""
+    
+    # Récupération du mode de thème depuis la session
+    theme_mode = st.session_state.get("theme_mode", "Sombre Nuit")
+
+    # Couleurs dynamiques
+    if theme_mode == "Blanc Épuré":
+        bg_app = "#F8FAFC"
+        text_color = "#0F172A"
+        card_bg = "#FFFFFF"
+        card_border = "#E2E8F0"
+        card_gradient = "linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%)"
+        header_box_bg = "#F1F5F9"
+        header_box_text = "#475569"
+        desc_color = "#475569"
+        sub_title_color = "#0F172A"
+        hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)"
+    else:
+        bg_app = "#0E031C"
+        text_color = "#F8FAFC"
+        card_bg = "#170A2E"
+        card_border = "#2B1552"
+        card_gradient = "linear-gradient(135deg, #1A0B36 0%, #120524 100%)"
+        header_box_bg = "#1E0A3C"
+        header_box_text = "#A78BFA"
+        desc_color = "#CBD5E1"
+        sub_title_color = "#FFF"
+        hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
+
+    # Styles CSS globaux avec effets d'animation et de survol
+    st.markdown(f"""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-        /* Structure générale */
-        html, body, [data-testid="stAppViewContainer"], .stApp {
-            background-color: #0F1117 !important;
-            color: #F0F2F6 !important;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
-
-        /* En-tête Streamlit */
-        [data-testid="stHeader"] {
-            background-color: transparent !important;
-        }
-
-        /* Titres & Labels */
-        h1, h2, h3, h4, h5, h6, label, label p, .stMarkdown {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-        }
-
-        /* Champs de saisie texte (Input & Textarea) */
-        div[data-baseweb="input"] input, 
-        div[data-baseweb="textarea"] textarea,
-        .stTextInput input, 
-        .stTextArea textarea {
-            color: #0F172A !important;
-            background-color: #FFFFFF !important;
-            border: 1px solid #CBD5E1 !important;
-            border-radius: 8px !important;
-            font-weight: 500 !important;
-        }
-
-        /* Menus déroulants (Selectbox) */
-        div[data-baseweb="select"] > div {
-            background-color: #FFFFFF !important;
-            color: #0F172A !important;
-            border-radius: 8px !important;
-        }
-
-        li[role="option"], div[role="option"] {
-            color: #0F172A !important;
-            background-color: #FFFFFF !important;
-        }
-
-        /* FIX BOUTONS (Soumettre / Connexion / Enregistrer) */
-        .stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background-color: #FF3B30 !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            border: none !important;
-            border-radius: 10px !important;
-            padding: 12px 20px !important;
-            width: 100% !important;
-            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3) !important;
-        }
-
-        /* FIX ONGLETS (Vue Calendrier & Liste, etc.) */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px !important;
-            background-color: #1A1D27 !important;
-            padding: 6px !important;
-            border-radius: 10px !important;
-            border: 1px solid #2A2E3D !important;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            border-radius: 6px !important;
-            padding: 8px 16px !important;
-            background-color: transparent !important;
-        }
-
-        .stTabs [data-baseweb="tab"] p, .stTabs [data-baseweb="tab"] span {
-            color: #E2E8F0 !important;
-            font-weight: 600 !important;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background-color: #FF3B30 !important;
-        }
-
-        .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-        }
-
-        /* Cartes & Badges */
-        .zapio-card {
-            background-color: #181B24 !important;
-            border: 1px solid #2A2E3D !important;
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(8px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        .stApp {{
+            background-color: {bg_app} !important;
+            color: {text_color} !important;
+            animation: fadeIn 0.4s ease-in-out;
+        }}
+        .pavel-hero-banner {{
+            background: {hero_bg};
+            border: 1px solid rgba(236, 72, 153, 0.25);
+            border-radius: 18px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease-in-out;
+        }}
+        .pavel-hero-banner:hover {{
+            box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
+        }}
+        .sub-section-header {{
+            background: {hero_bg};
+            border-left: 5px solid #EC4899;
+            padding: 15px 20px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 25px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-in-out;
+        }}
+        .pavel-card-grid {{
+            background: {card_gradient};
+            border: 1px solid {card_border};
             border-radius: 14px;
-            padding: 18px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
             margin-bottom: 15px;
-        }
-
-        .zapio-badge {
-            background-color: #2E3345;
-            color: #FF3B30;
+        }}
+        .pavel-card-grid:hover {{
+            transform: translateY(-6px) scale(1.01);
+            border-color: #EC4899;
+            box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
+        }}
+        .zapio-badge {{
+            background: rgba(236, 72, 153, 0.1);
+            color: #DB2777;
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .zapio-badge-green {
-            background-color: rgba(52, 199, 89, 0.15);
-            color: #34C759;
+            font-weight: 600;
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }}
+        .zapio-badge-green {{
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 0.8rem;
-            font-weight: 700;
-        }
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }}
+        .zapio-card {{
+            background: {card_bg};
+            border: 1px solid {card_border};
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+            transition: all 0.25s ease-in-out;
+        }}
+        .zapio-card:hover {{
+            border-color: #8B5CF6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
+        }}
+        div[data-testid="stPills"] button {{
+            background-color: {card_bg} !important;
+            border: 1px solid {card_border} !important;
+            color: {text_color} !important;
+            border-radius: 8px !important;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out !important;
+        }}
+        div[data-testid="stPills"] button:hover {{
+            border-color: #EC4899 !important;
+            transform: translateY(-1px);
+        }}
+        div[data-testid="stPills"] button[aria-selected="true"] {{
+            background-color: #EC4899 !important;
+            border-color: #EC4899 !important;
+            color: #FFF !important;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }}
         </style>
     """, unsafe_allow_html=True)
