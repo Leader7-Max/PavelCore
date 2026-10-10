@@ -1,6 +1,5 @@
 import sys
 import os
-import re
 import json
 import base64
 import streamlit as st
@@ -26,10 +25,12 @@ init_session_state()
 from assets.styles import inject_custom_design
 inject_custom_design()
 
-# Import des vues modulaires
+# Import de toutes les vues modulaires
 from views.agenda_view import render_agenda_view
 from views.dev_ia_view import render_dev_ia_view
 from views.projets_view import render_projets_view
+from views.media_view import render_media_view
+from views.vault_contacts_view import render_vault_view, render_contacts_view
 
 # Dossier local pour le stockage des fichiers uploadés
 UPLOADS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploaded_files")
@@ -281,205 +282,10 @@ else:
             render_projets_view(sub_title_color, desc_color)
 
         elif current == "Médias & Fichiers":
-            st.markdown(f'''
-                <div class="sub-section-header">
-                    <span class="zapio-badge">STOCKAGE & RESSOURCES</span>
-                    <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">📁 Images, ZIP, APK & Documents</h1>
-                </div>
-            ''', unsafe_allow_html=True)
-
-            sub_tab = st.pills(
-                "Type de fichier",
-                options=["📤 Envoyer un fichier", "🔗 Lien externe (Drive, Web)"],
-                default="📤 Envoyer un fichier",
-                label_visibility="collapsed"
-            )
-
-            if sub_tab == "📤 Envoyer un fichier":
-                uploaded_file = st.file_uploader(
-                    "Choisissez un fichier à sauvegarder (Images, ZIP, APK, PDFs, DOCX, TXT...)",
-                    type=["png", "jpg", "jpeg", "gif", "zip", "rar", "apk", "pdf", "docx", "txt", "csv"]
-                )
-                file_title = st.text_input("Nom / Titre personnalisé pour le fichier")
-                file_category = st.selectbox("Catégorie de fichier", ["🖼️ Images & Visuels", "📦 Fichiers ZIP / Archives", "📱 Applications APK", "📄 Documents & PDFs", "🔗 Liens Utiles"])
-
-                if st.button("💾 Enregistrer le fichier"):
-                    if uploaded_file is not None and file_title:
-                        file_path = os.path.join(UPLOADS_DIR, uploaded_file.name)
-                        with open(file_path, "wb") as f:
-                            f.write(uploaded_file.getbuffer())
-
-                        st.session_state.saved_media_files.append({
-                            "title": file_title,
-                            "filename": uploaded_file.name,
-                            "path": file_path,
-                            "size": f"{round(uploaded_file.size / (1024 * 1024), 2)} MB",
-                            "type": file_category,
-                            "is_local": True
-                        })
-                        st.toast("📁 Fichier sauvegardé avec succès !", icon="✅")
-                        st.rerun()
-                    else:
-                        st.warning("Veuillez charger un fichier et renseigner un titre.")
-
-            elif sub_tab == "🔗 Lien externe (Drive, Web)":
-                with st.form("form_external_link", clear_on_submit=True):
-                    ext_title = st.text_input("Titre du lien ou fichier")
-                    ext_url = st.text_input("URL directe (ex: Google Drive, Dropbox, Lien web)")
-                    ext_cat = st.selectbox("Catégorie", ["🖼️ Images & Visuels", "📦 Fichiers ZIP / Archives", "📱 Applications APK", "📄 Documents & PDFs", "🔗 Liens Utiles"])
-                    ext_desc = st.text_area("Description du fichier")
-                    if st.form_submit_button("Enregistrer le lien"):
-                        if ext_title and ext_url:
-                            st.session_state.saved_media_files.append({
-                                "title": ext_title,
-                                "url": ext_url,
-                                "desc": ext_desc,
-                                "type": ext_cat,
-                                "is_local": False
-                            })
-                            st.toast("🔗 Lien sauvegardé avec succès !", icon="✅")
-                            st.rerun()
-
-            st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0;'>", unsafe_allow_html=True)
-            st.markdown(f"<h3 style='color:{sub_title_color};'>📚 Fichiers & Médias Enregistrés</h3>", unsafe_allow_html=True)
-
-            if not st.session_state.saved_media_files:
-                st.info("Aucun fichier n'a été enregistré pour le moment.")
-
-            for item in st.session_state.saved_media_files:
-                st.markdown(f'''
-                    <div class="zapio-card">
-                        <span class="zapio-badge" style="font-size:0.7rem;">{item["type"]}</span>
-                        <h3 style="color:{sub_title_color}; margin-top:5px;">{item["title"]}</h3>
-                ''', unsafe_allow_html=True)
-
-                if item.get("is_local", False):
-                    st.caption(f"Fichier : {item['filename']} | Taille : {item['size']}")
-                    if os.path.exists(item["path"]):
-                        with open(item["path"], "rb") as file_data:
-                            st.download_button(
-                                label=f"📥 Télécharger {item['filename']}",
-                                data=file_data,
-                                file_name=item["filename"],
-                                use_container_width=True
-                            )
-                else:
-                    st.write(f"Description : {item.get('desc', '')}")
-                    st.markdown(f'<a href="{item["url"]}" target="_blank" style="color:#EC4899; font-weight:600;">🌐 Ouvrir / Télécharger via le lien</a>', unsafe_allow_html=True)
-
-                st.markdown('</div>', unsafe_allow_html=True)
+            render_media_view(sub_title_color, UPLOADS_DIR)
 
         elif current == "Coffre-Fort":
-            sub_tab = st.pills(
-                "Navigation Coffre-Fort",
-                options=["🔐 Clés API", "🔑 Identifiants & Mots de passe"],
-                default="🔐 Clés API",
-                label_visibility="collapsed"
-            )
-            if sub_tab == "🔐 Clés API":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">SÉCURITÉ & CREDENTIALS</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔐 Clés d'API & Tokens</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-                with st.form("form_api_keys", clear_on_submit=True):
-                    service = st.text_input("Nom du Service (ex: OpenAI, GitHub)")
-                    api_key = st.text_input("Clé API / Token Secret", type="password")
-                    if st.form_submit_button("🔒 Sauvegarder la clé"):
-                        if service and api_key:
-                            st.session_state.saved_api_keys.append({"service": service, "key": api_key})
-                            st.toast("🔐 Clé API sauvegardée en toute sécurité !", icon="✅")
-                            st.rerun()
-                        else:
-                            st.warning("Veuillez remplir tous les champs.")
-                for ak in st.session_state.saved_api_keys:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{ak["service"]}</h3>', unsafe_allow_html=True)
-                    st.code(ak['key'], language='text')
-                    st.markdown('</div>', unsafe_allow_html=True)
-
-            elif sub_tab == "🔑 Identifiants & Mots de passe":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">GESTIONNAIRE D'ACCÈS</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔑 Identifiants & Mots de passe</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-                with st.form("form_creds", clear_on_submit=True):
-                    site = st.text_input("Plateforme / Site web")
-                    username = st.text_input("Identifiant / Email")
-                    password = st.text_input("Mot de passe", type="password")
-                    if st.form_submit_button("Enregistrer les accès"):
-                        if site and username and password:
-                            st.session_state.saved_user_credentials.append({"site": site, "user": username, "pass": password})
-                            st.toast("🔑 Identifiants enregistrés avec succès !", icon="✅")
-                            st.rerun()
-                        else:
-                            st.warning("Veuillez remplir tous les champs.")
-                for uc in st.session_state.saved_user_credentials:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{uc["site"]}</h3><p style="color:{desc_color};"><b>Identifiant:</b> {uc["user"]}</p>', unsafe_allow_html=True)
-                    st.code(uc['pass'], language='text')
-                    st.markdown('</div>', unsafe_allow_html=True)
+            render_vault_view(sub_title_color, desc_color)
 
         elif current == "Contacts & Emails":
-            sub_tab = st.pills(
-                "Navigation Contacts",
-                options=["🎴 Carnet de Contacts", "📧 Modèles d'Emails & Scripts"],
-                default="🎴 Carnet de Contacts",
-                label_visibility="collapsed"
-            )
-            if sub_tab == "🎴 Carnet de Contacts":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">RÉPERTOIRE PROFESSIONNEL</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🎴 Carnet de Contacts</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-                with st.form("form_contacts", clear_on_submit=True):
-                    fullname = st.text_input("Nom & Prénom / Entreprise")
-                    email_contact = st.text_input("Adresse Email")
-                    phone = st.text_input("Numéro de Téléphone")
-                    category = st.selectbox("Catégorie", ["Client", "Partenaire / Prestataire", "VIP", "Personnel"])
-                    notes = st.text_area("Notes / Rôle")
-                    if st.form_submit_button("Ajouter le contact"):
-                        if fullname:
-                            st.session_state.saved_contacts.append({
-                                "name": fullname,
-                                "email": email_contact,
-                                "phone": phone,
-                                "cat": category,
-                                "notes": notes
-                            })
-                            st.toast("🎴 Contact sauvegardé !", icon="✅")
-                            st.rerun()
-                        else:
-                            st.warning("Veuillez renseigner au moins le nom du contact.")
-                for ct in st.session_state.saved_contacts:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{ct["name"]} <span class="zapio-badge" style="font-size:0.7rem;">{ct["cat"]}</span></h3><p style="color:{desc_color};">📧 {ct["email"]} | 📞 {ct["phone"]}</p><p style="color:{desc_color}; font-size:0.85rem;">{ct["notes"]}</p></div>', unsafe_allow_html=True)
-
-            elif sub_tab == "📧 Modèles d'Emails & Scripts":
-                st.markdown(f'''
-                    <div class="sub-section-header">
-                        <span class="zapio-badge">COMMUNICATION & TEMPLATES</span>
-                        <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">📧 Modèles d'Emails & Scripts</h1>
-                    </div>
-                ''', unsafe_allow_html=True)
-                with st.form("form_email_tpl", clear_on_submit=True):
-                    title = st.text_input("Titre du modèle (ex: Relance devis DJ, Prospection)")
-                    subject = st.text_input("Objet du mail")
-                    body = st.text_area("Corps du message / Script")
-                    if st.form_submit_button("Sauvegarder le modèle"):
-                        if title and body:
-                            st.session_state.saved_email_templates.append({
-                                "title": title,
-                                "subject": subject,
-                                "body": body
-                            })
-                            st.toast("📧 Modèle d'email sauvegardé !", icon="✅")
-                            st.rerun()
-                        else:
-                            st.warning("Veuillez renseigner le titre et le corps du message.")
-                for et in st.session_state.saved_email_templates:
-                    st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{et["title"]}</h3><p style="color:{desc_color};"><b>Objet:</b> {et["subject"]}</p>', unsafe_allow_html=True)
-                    st.code(et['body'], language='markdown')
-                    st.markdown('</div>', unsafe_allow_html=True)
+            render_contacts_view(sub_title_color, desc_color)
