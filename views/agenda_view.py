@@ -4,14 +4,13 @@ import calendar
 from datetime import datetime, date, time
 
 def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#2B1552", header_box_bg="#1E0A3C", header_box_text="#A78BFA", text_color="#F8FAFC"):
-    """Gère l'affichage complet du module Agenda, Calendrier et Liste des tâches avec confirmation de suppression."""
+    """Gère l'affichage complet du module Agenda, Calendrier et Liste des tâches avec des champs de saisie texte ultra-stables."""
     
     MONTH_NAMES_FR = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
         "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
     ]
 
-    # Initialisation de l'état de confirmation dans la session si absent
     if "confirm_delete_agenda_idx" not in st.session_state:
         st.session_state.confirm_delete_agenda_idx = None
 
@@ -162,7 +161,6 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
                     </div>
                 ''', unsafe_allow_html=True)
                 
-                # Gestion de la double confirmation pour supprimer
                 if st.session_state.confirm_delete_agenda_idx == idx:
                     col_conf1, col_conf2 = st.columns(2)
                     with col_conf1:
@@ -180,16 +178,18 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
                         st.session_state.confirm_delete_agenda_idx = idx
                         st.rerun()
 
-    # 3. ONGLET PROGRAMMER
+    # 3. ONGLET PROGRAMMER (Champs texte ultra-stables pour éviter les bugs de visibilité)
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form", clear_on_submit=True):
             st.markdown(f"<h3 style='color: {sub_title_color};'>Planifier une nouvelle date</h3>", unsafe_allow_html=True)
             title = st.text_input("Titre de l'événement / Rappel", placeholder="Ex: Prestation DJ / Réunion")
+            
             c_date, c_time = st.columns(2)
             with c_date:
-                event_date = st.date_input("Date", value=date.today())
+                date_str = st.text_input("Date (Format AAAA-MM-JJ ou JJ/MM/AAAA)", value=date.today().strftime("%Y-%m-%d"))
             with c_time:
-                event_time = st.time_input("Heure exacte", value=time(12, 0))
+                time_str = st.text_input("Heure exacte (Format HH:MM)", value="12:00")
+                
             c_cat, c_ring = st.columns(2)
             with c_cat:
                 category = st.selectbox("Catégorie", ["Business / Travail", "Dev & Tech", "Personnel", "Rendez-vous Urgent", "Événement DJ / Prestation"])
@@ -199,9 +199,28 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
             
             if st.form_submit_button("🔔 Ajouter au Calendrier"):
                 if title:
-                    st.session_state.agenda_events.append({"title": title, "date": event_date, "time": event_time, "category": category, "desc": desc, "ringtone": ringtone})
-                    st.session_state.agenda_active_tab = "liste"
-                    st.toast("✅ Événement ajouté avec succès !", icon="🎉")
-                    st.rerun()
+                    try:
+                        # Conversion sécurisée de la date saisie
+                        if "-" in date_str:
+                            parsed_date = datetime.strptime(date_str.strip(), "%Y-%m-%d").date()
+                        else:
+                            parsed_date = datetime.strptime(date_str.strip(), "%d/%m/%Y").date()
+                            
+                        # Conversion sécurisée de l'heure saisie
+                        parsed_time = datetime.strptime(time_str.strip(), "%H:%M").time()
+                        
+                        st.session_state.agenda_events.append({
+                            "title": title, 
+                            "date": parsed_date, 
+                            "time": parsed_time, 
+                            "category": category, 
+                            "desc": desc, 
+                            "ringtone": ringtone
+                        })
+                        st.session_state.agenda_active_tab = "liste"
+                        st.toast("✅ Événement ajouté avec succès !", icon="🎉")
+                        st.rerun()
+                    except ValueError:
+                        st.error("Erreur de format : Veuillez respecter le format AAAA-MM-JJ (ou JJ/MM/AAAA) pour la date et HH:MM pour l'heure.")
                 else:
                     st.warning("Veuillez saisir un titre pour l'événement.")
