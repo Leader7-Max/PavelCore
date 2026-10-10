@@ -104,7 +104,7 @@ else:
     sub_title_color = "#FFF"
     hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
 
-# Styles CSS (avec la grille fluide pour le calendrier)
+# Styles CSS (Grille CSS fluide pour le calendrier)
 st.markdown(f"""
     <style>
     .stApp {{
@@ -305,7 +305,7 @@ def render_agenda_module():
                         </div>
                     '''
 
-        # Rendu unifié Grid pour un alignement parfait sur smartphone
+        # Rendu unifié Grid pour un alignement parfait sur smartphone et PC
         st.markdown(f'''
             <div class="calendar-grid-container" style="margin-bottom: 6px;">
                 {header_html}
