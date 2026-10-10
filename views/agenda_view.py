@@ -4,7 +4,7 @@ import calendar
 from datetime import datetime, date, time
 
 def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#2B1552", header_box_bg="#1E0A3C", header_box_text="#A78BFA", text_color="#F8FAFC"):
-    """Gère l'affichage complet du module Agenda & Calendrier."""
+    """Gère l'affichage complet du module Agenda, Calendrier et Liste des tâches."""
     
     MONTH_NAMES_FR = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
@@ -18,14 +18,21 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
             st.rerun()
 
     st.markdown(f'<div style="margin-top: 10px; margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
-    col_btn1, col_btn2, col_clear = st.columns([2.3, 2.5, 2])
+    
+    # Navigation par onglets (Ajout d'une vue Liste)
+    col_btn1, col_btn2, col_btn3, col_clear = st.columns([2, 2, 2, 2])
     
     with col_btn1:
-        if st.button("📅 Vue Calendrier", type="primary" if st.session_state.agenda_active_tab == "vue" else "secondary", use_container_width=True, key="nav_btn_vue"):
+        if st.button("📅 Calendrier", type="primary" if st.session_state.agenda_active_tab == "vue" else "secondary", use_container_width=True, key="nav_btn_vue"):
             st.session_state.agenda_active_tab = "vue"
             st.rerun()
 
     with col_btn2:
+        if st.button("📋 Liste des tâches", type="primary" if st.session_state.agenda_active_tab == "liste" else "secondary", use_container_width=True, key="nav_btn_liste"):
+            st.session_state.agenda_active_tab = "liste"
+            st.rerun()
+
+    with col_btn3:
         if st.button("➕ Programmer", type="primary" if st.session_state.agenda_active_tab == "add" else "secondary", use_container_width=True, key="nav_btn_add"):
             st.session_state.agenda_active_tab = "add"
             st.rerun()
@@ -39,6 +46,7 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
 
     st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
 
+    # 1. VUE CALENDRIER
     if st.session_state.agenda_active_tab == "vue":
         today = date.today()
         current_year = today.year
@@ -131,6 +139,33 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
         '''
         components.html(calendar_full_html, height=420, scrolling=False)
 
+    # 2. VUE LISTE DES TÂCHES
+    elif st.session_state.agenda_active_tab == "liste":
+        st.markdown(f"<h3 style='color: {sub_title_color};'>📋 Liste de toutes les tâches programmées</h3>", unsafe_allow_html=True)
+        
+        if not st.session_state.agenda_events:
+            st.info("Aucune tâche ou événement enregistré pour le moment. Cliquez sur 'Programmer' pour en ajouter.")
+        else:
+            # Tri des événements par date et heure
+            sorted_events = sorted(st.session_state.agenda_events, key=lambda x: (x['date'], x['time']))
+            
+            for idx, ev in enumerate(sorted_events):
+                st.markdown(f'''
+                    <div class="zapio-card" style="border-left: 5px solid #EC4899;">
+                        <span class="zapio-badge">{ev["category"]}</span>
+                        <h4 style="margin-top:8px; color:{sub_title_color};">{ev["title"]}</h4>
+                        <p style="margin: 4px 0; font-size: 0.9rem;">📅 <b>Date :</b> {ev["date"].strftime("%d/%m/%Y")} | ⏰ <b>Heure :</b> {ev["time"].strftime("%H:%M")}</p>
+                        <p style="margin: 4px 0; font-size: 0.85rem; opacity: 0.8;">💬 {ev.get("desc", "Aucune note complémentaire.")}</p>
+                    </div>
+                ''', unsafe_allow_html=True)
+                
+                # Option de suppression individuelle d'une tâche
+                if st.button(f"🗑️ Supprimer cette tâche", key=f"del_ev_{idx}", type="secondary"):
+                    st.session_state.agenda_events.remove(ev)
+                    st.toast("🗑️ Tâche supprimée avec succès.", icon="ℹ️")
+                    st.rerun()
+
+    # 3. ONGLET PROGRAMMER
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form", clear_on_submit=True):
             st.markdown(f"<h3 style='color: {sub_title_color};'>Planifier une nouvelle date</h3>", unsafe_allow_html=True)
@@ -146,11 +181,12 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
             with c_ring:
                 ringtone = st.selectbox("Sonnerie", ["Alarme Digitale", "Bip Futuriste", "Douce Mélodie", "Silence"])
             desc = st.text_area("Notes complémentaires")
+            
             if st.form_submit_button("🔔 Ajouter au Calendrier"):
                 if title:
                     st.session_state.agenda_events.append({"title": title, "date": event_date, "time": event_time, "category": category, "desc": desc, "ringtone": ringtone})
-                    st.session_state.agenda_active_tab = "vue"
-                    st.toast("✅ Événement ajouté avec succès dans l'agenda !", icon="🎉")
+                    st.session_state.agenda_active_tab = "liste" # Redirige directement vers la liste pour voir la tâche ajoutée
+                    st.toast("✅ Événement ajouté avec succès !", icon="🎉")
                     st.rerun()
                 else:
                     st.warning("Veuillez saisir un titre pour l'événement.")
