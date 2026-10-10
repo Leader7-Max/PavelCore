@@ -3,10 +3,8 @@ import streamlit as st
 def inject_custom_design():
     """Gère les couleurs dynamiques et injecte le design CSS global de PavelCore."""
     
-    # Récupération du mode de thème depuis la session
     theme_mode = st.session_state.get("theme_mode", "Sombre Nuit")
 
-    # Couleurs dynamiques
     if theme_mode == "Blanc Épuré":
         bg_app = "#F8FAFC"
         text_color = "#0F172A"
@@ -30,7 +28,6 @@ def inject_custom_design():
         sub_title_color = "#FFF"
         hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
 
-    # Styles CSS globaux avec effets d'animation, de survol et correction des boutons
     st.markdown(f"""
         <style>
         @keyframes fadeIn {{
@@ -50,10 +47,6 @@ def inject_custom_design():
             text-align: center;
             margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease-in-out;
-        }}
-        .pavel-hero-banner:hover {{
-            box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
         }}
         .sub-section-header {{
             background: {hero_bg};
@@ -62,7 +55,6 @@ def inject_custom_design():
             border-radius: 0 12px 12px 0;
             margin-bottom: 25px;
             margin-top: 10px;
-            animation: fadeIn 0.3s ease-in-out;
         }}
         .pavel-card-grid {{
             background: {card_gradient};
@@ -70,14 +62,7 @@ def inject_custom_design():
             border-radius: 14px;
             padding: 25px;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
             margin-bottom: 15px;
-        }}
-        .pavel-card-grid:hover {{
-            transform: translateY(-6px) scale(1.01);
-            border-color: #EC4899;
-            box-shadow: 0 12px 35px rgba(236, 72, 153, 0.25);
         }}
         .zapio-badge {{
             background: rgba(236, 72, 153, 0.1);
@@ -103,39 +88,35 @@ def inject_custom_design():
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-            transition: all 0.25s ease-in-out;
         }}
-        .zapio-card:hover {{
-            border-color: #8B5CF6;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
-        }}
-        
-        /* Correction globale des boutons Streamlit (principal) */
-        div.stButton > button {{
-            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+
+        /* --- FORCAGE RADICAL DES BOUTONS EN ROUGE --- */
+        div.stButton > button, 
+        button[kind="primary"], 
+        button[kind="secondary"],
+        button {{
+            background-color: #EF4444 !important;
+            background: #EF4444 !important;
             color: #FFFFFF !important;
-            border: none !important;
-            font-weight: 600 !important;
+            border: 1px solid #DC2626 !important;
+            font-weight: 700 !important;
             border-radius: 8px !important;
-            transition: all 0.25s ease-in-out !important;
-        }}
-        div.stButton > button:hover {{
-            opacity: 0.9 !important;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
         }}
         
-        /* Boutons secondaires (contour et fond adaptés au thème) */
-        div.stButton > button[kind="secondary"] {{
-            background: {card_bg} !important;
-            border: 1px solid {card_border} !important;
-            color: {text_color} !important;
+        div.stButton > button:hover, 
+        button[kind="primary"]:hover, 
+        button[kind="secondary"]:hover,
+        button:hover {{
+            background-color: #DC2626 !important;
+            background: #DC2626 !important;
+            color: #FFFFFF !important;
+            border-color: #B91C1C !important;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
         }}
-        div.stButton > button[kind="secondary"]:hover {{
-            border-color: #EC4899 !important;
-            color: #EC4899 !important;
+        
+        /* Forcer la couleur du texte à l'intérieur des boutons */
+        div.stButton > button p, button p, span {{
+            color: #FFFFFF !important;
         }}
 
         div[data-testid="stPills"] button {{
@@ -144,17 +125,11 @@ def inject_custom_design():
             color: {text_color} !important;
             border-radius: 8px !important;
             font-weight: 500;
-            transition: all 0.2s ease-in-out !important;
-        }}
-        div[data-testid="stPills"] button:hover {{
-            border-color: #EC4899 !important;
-            transform: translateY(-1px);
         }}
         div[data-testid="stPills"] button[aria-selected="true"] {{
             background-color: #EC4899 !important;
             border-color: #EC4899 !important;
             color: #FFF !important;
-            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
         }}
         </style>
     """, unsafe_allow_html=True)
