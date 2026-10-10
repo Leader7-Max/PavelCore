@@ -104,7 +104,7 @@ else:
     sub_title_color = "#FFF"
     hero_bg = "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)"
 
-# Styles CSS (Force la grille 7 colonnes même sur écran mobile)
+# Styles CSS globaux
 st.markdown(f"""
     <style>
     .stApp {{
@@ -169,33 +169,6 @@ st.markdown(f"""
         margin-bottom: 15px;
         box-shadow: 0 2px 12px rgba(0,0,0,0.03);
     }}
-    .calendar-grid-wrapper {{
-        display: grid !important;
-        grid-template-columns: repeat(7, 1fr) !important;
-        gap: 3px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }}
-    .calendar-header-box {{
-        background: {header_box_bg};
-        color: {header_box_text};
-        text-align: center;
-        padding: 6px 1px;
-        border-radius: 6px;
-        font-weight: 700;
-        font-size: 0.75rem;
-        border: 1px solid {card_border};
-        box-sizing: border-box;
-    }}
-    .calendar-day-box {{
-        min-height: 65px;
-        border-radius: 6px;
-        padding: 4px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        box-sizing: border-box;
-    }}
     div[data-testid="stPills"] button {{
         background-color: {card_bg} !important;
         border: 1px solid {card_border} !important;
@@ -259,9 +232,9 @@ def render_agenda_module():
 
         st.markdown("<div style='margin-bottom:15px;'></div>", unsafe_allow_html=True)
         
-        # En-têtes des 7 jours
+        # En-têtes des jours de la semaine
         days_header = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
-        header_html = "".join([f'<div class="calendar-header-box">{h}</div>' for h in days_header])
+        header_html = "".join([f'<div style="background:{header_box_bg}; color:{header_box_text}; text-align:center; padding:6px 2px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid {card_border}; box-sizing:border-box;">{h}</div>' for h in days_header])
 
         events_by_day = {}
         for ev in st.session_state.agenda_events:
@@ -278,7 +251,7 @@ def render_agenda_module():
         for week in month_days:
             for day_num in week:
                 if day_num == 0:
-                    cells_html += '<div class="calendar-day-box" style="background:rgba(100,100,100,0.05); opacity:0.15; border:1px solid transparent;"></div>'
+                    cells_html += '<div style="min-height:65px; border-radius:6px; padding:4px; background:rgba(100,100,100,0.05); opacity:0.15; border:1px solid transparent; box-sizing:border-box;"></div>'
                 else:
                     is_today = (day_num == today.day and selected_month_idx == today.month and selected_year == today.year)
                     day_events = events_by_day.get(day_num, [])
@@ -291,15 +264,15 @@ def render_agenda_module():
 
                     event_html = ""
                     for ev_item in visible_events:
-                        event_html += f'<div style="background:#F43F5E; color:#FFF; font-size:0.5rem; font-weight:800; border-radius:3px; padding:1px 2px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">⏰ {ev_item["time"].strftime("%H:%M")}</div>'
+                        event_html += f'<div style="background:#F43F5E; color:#FFF; font-size:0.45rem; font-weight:800; border-radius:3px; padding:1px 2px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">⏰ {ev_item["time"].strftime("%H:%M")}</div>'
                     if hidden_count > 0:
-                        event_html += f'<div style="background:#A78BFA; color:#1E0A3C; font-size:0.45rem; font-weight:800; border-radius:3px; padding:1px; margin-top:1px; text-align:center;">+{hidden_count}</div>'
+                        event_html += f'<div style="background:#A78BFA; color:#1E0A3C; font-size:0.4rem; font-weight:800; border-radius:3px; padding:1px; margin-top:1px; text-align:center;">+{hidden_count}</div>'
 
                     day_marker = '📌' if is_today else ''
                     day_color = '#EC4899' if is_today else text_color
                     
                     cells_html += f'''
-                        <div class="calendar-day-box" style="background:{bg_color}; border:1px solid {border_color};">
+                        <div style="min-height:65px; border-radius:6px; padding:4px; background:{bg_color}; border:1px solid {border_color}; display:flex; flex-direction:column; justify-content:flex-start; box-sizing:border-box;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="font-weight:800; font-size:0.75rem; color:{day_color};">{day_num} {day_marker}</span>
                             </div>
@@ -307,9 +280,9 @@ def render_agenda_module():
                         </div>
                     '''
 
-        # Grille globale stricte à 7 colonnes pour forcer l'alignement
+        # Injection directe du conteneur Grid pur (bloque l'empilement vertical sur mobile)
         st.markdown(f'''
-            <div class="calendar-grid-wrapper">
+            <div style="display: grid !important; grid-template-columns: repeat(7, 1fr) !important; gap: 3px !important; width: 100% !important; box-sizing: border-box !important;">
                 {header_html}
                 {cells_html}
             </div>
