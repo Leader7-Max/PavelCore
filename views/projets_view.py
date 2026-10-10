@@ -1,6 +1,11 @@
 import streamlit as st
 
 def render_projets_module():
+    # Initialisation sécurisée des états de session si absents
+    for key in ["saved_current_projects", "saved_future_projects", "saved_ideas"]:
+        if key not in st.session_state:
+            st.session_state[key] = []
+
     sub_tab = st.pills(
         "Navigation Projets",
         options=["🚀 Projets en cours", "🔮 Projets futurs", "💡 Idées"],
@@ -15,7 +20,8 @@ def render_projets_module():
                 <h1 style="color: #FFF; font-size: 1.8rem; margin: 5px 0 0 0;">🚀 Projets en cours</h1>
             </div>
         ''', unsafe_allow_html=True)
-        with st.form("form_curr_proj"):
+        
+        with st.form("form_curr_proj", clear_on_submit=True):
             name = st.text_input("Nom du projet")
             client = st.text_input("Client / Marque")
             deadline = st.date_input("Date limite")
@@ -24,6 +30,9 @@ def render_projets_module():
                     st.session_state.saved_current_projects.append({"name": name, "client": client, "deadline": str(deadline)})
                     st.toast("🚀 Projet en cours enregistré !", icon="✅")
                     st.rerun()
+                else:
+                    st.warning("Veuillez renseigner au moins le nom du projet.")
+                    
         for cp in st.session_state.saved_current_projects:
             st.markdown(f'<div class="zapio-card"><h3 style="color:#FFF;">{cp["name"]}</h3><p style="color:#CBD5E1;">Client: {cp["client"]} | Échéance: {cp["deadline"]}</p></div>', unsafe_allow_html=True)
 
@@ -34,7 +43,8 @@ def render_projets_module():
                 <h1 style="color: #FFF; font-size: 1.8rem; margin: 5px 0 0 0;">🔮 Projets futurs</h1>
             </div>
         ''', unsafe_allow_html=True)
-        with st.form("form_fut_proj"):
+        
+        with st.form("form_fut_proj", clear_on_submit=True):
             name = st.text_input("Nom du projet futur")
             goal = st.text_input("Objectif")
             if st.form_submit_button("Ajouter"):
@@ -42,6 +52,9 @@ def render_projets_module():
                     st.session_state.saved_future_projects.append({"name": name, "goal": goal})
                     st.toast("🔮 Projet futur ajouté !", icon="✨")
                     st.rerun()
+                else:
+                    st.warning("Veuillez renseigner le nom du projet futur.")
+                    
         for fp in st.session_state.saved_future_projects:
             st.markdown(f'<div class="zapio-card"><h3 style="color:#FFF;">{fp["name"]}</h3><p style="color:#CBD5E1;">Objectif: {fp["goal"]}</p></div>', unsafe_allow_html=True)
 
@@ -52,7 +65,8 @@ def render_projets_module():
                 <h1 style="color: #FFF; font-size: 1.8rem; margin: 5px 0 0 0;">💡 Boîte à Idées</h1>
             </div>
         ''', unsafe_allow_html=True)
-        with st.form("form_ideas"):
+        
+        with st.form("form_ideas", clear_on_submit=True):
             title = st.text_input("Titre de l'idée")
             description = st.text_area("Description")
             if st.form_submit_button("Sauvegarder"):
@@ -60,5 +74,8 @@ def render_projets_module():
                     st.session_state.saved_ideas.append({"title": title, "desc": description})
                     st.toast("💡 Idée sauvegardée !", icon="💡")
                     st.rerun()
+                else:
+                    st.warning("Veuillez renseigner un titre pour l'idée.")
+                    
         for id_item in st.session_state.saved_ideas:
             st.markdown(f'<div class="zapio-card"><h3 style="color:#FFF;">{id_item["title"]}</h3><p style="color:#CBD5E1;">{id_item["desc"]}</p></div>', unsafe_allow_html=True)
