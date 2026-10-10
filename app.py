@@ -30,12 +30,24 @@ except ImportError:
 UPLOADS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploaded_files")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
-# Gestionnaire d'État Global
+# Gestionnaire d'État Global & Nouveautés (Thème, Langue, Comptes multiples)
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Sombre Nuit"
 
+if "language" not in st.session_state:
+    st.session_state.language = "FR"
+
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
+
+if "user_accounts" not in st.session_state:
+    # Comptes enregistrés localement
+    st.session_state.user_accounts = {
+        "pavel@pavelcore.app": {"name": "Pavel Yonta", "pin": "1234"}
+    }
+
+if "current_user_email" not in st.session_state:
+    st.session_state.current_user_email = "pavel@pavelcore.app"
 
 if "direct_agenda" not in st.session_state:
     st.session_state.direct_agenda = False
@@ -102,6 +114,52 @@ if "saved_email_templates" not in st.session_state:
 
 if "current_view" not in st.session_state:
     st.session_state.current_view = "home"
+
+# Dictionnaire de traduction FR / EN
+TRANSLATIONS = {
+    "FR": {
+        "search_placeholder": "🔍 Tapez un mot-clé (ex: Flyer, Python, DJ, Client, Prompt...)",
+        "hero_title": "Tableau de Bord Principal",
+        "hero_desc": "Sélectionnez ci-dessous l'espace de travail ou l'outil à lancer",
+        "agenda": "Agenda & Planning",
+        "agenda_desc": "Calendrier et mode hors-ligne.",
+        "prompts": "Prompts & IA",
+        "prompts_desc": "Bibliothèque complète de prompts IA.",
+        "media": "Médias & Fichiers",
+        "media_desc": "Images, ZIP, APK, PDFs et Documents.",
+        "projects": "Projets & Idées",
+        "projects_desc": "Projets actifs et idées.",
+        "vault": "Coffre-Fort Sécurisé",
+        "vault_desc": "Clés API et mots de passe.",
+        "contacts": "Contacts & Emails",
+        "contacts_desc": "Répertoire et templates d'emails.",
+        "logout": "Déconnexion",
+        "back": "← Retour au Tableau de Bord"
+    },
+    "EN": {
+        "search_placeholder": "🔍 Type a keyword (e.g., Flyer, Python, DJ, Client, Prompt...)",
+        "hero_title": "Main Dashboard",
+        "hero_desc": "Select below the workspace or tool to launch",
+        "agenda": "Agenda & Planning",
+        "agenda_desc": "Calendar and offline mode.",
+        "prompts": "Prompts & AI",
+        "prompts_desc": "Complete AI prompts library.",
+        "media": "Media & Files",
+        "media_desc": "Images, ZIP, APK, PDFs and Documents.",
+        "projects": "Projects & Ideas",
+        "projects_desc": "Active projects and ideas.",
+        "vault": "Secure Vault",
+        "vault_desc": "API keys and passwords.",
+        "contacts": "Contacts & Emails",
+        "contacts_desc": "Directory and email templates.",
+        "logout": "Logout",
+        "back": "← Back to Dashboard"
+    }
+}
+
+def t(key):
+    lang = st.session_state.language
+    return TRANSLATIONS.get(lang, TRANSLATIONS["FR"]).get(key, key)
 
 # Couleurs dynamiques
 if st.session_state.theme_mode == "Blanc Épuré":
@@ -245,7 +303,7 @@ PROMPT_CATEGORIES = [
 
 def render_global_search():
     st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-    search_query = st.text_input("⚡ Recherche Rapide Universelle", placeholder="🔍 Tapez un mot-clé (ex: Flyer, Python, DJ, Client, Prompt...)", key="global_search_input")
+    search_query = st.text_input("⚡ Recherche Rapide Universelle", placeholder=t("search_placeholder"), key="global_search_input")
     
     if search_query.strip():
         q = search_query.strip().lower()
@@ -451,31 +509,81 @@ if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
     render_agenda_module()
 
 elif not st.session_state.authenticated:
-    st.markdown(f'<div style="text-align: center; margin-top: 30px; margin-bottom: 25px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 15px;"><span class="zapio-badge">🔮 Espace Sécurisé & Workspace</span></div></div>', unsafe_allow_html=True)
+    # En-tête Connexion avec Boutons Mini : Thème & Langue
+    col_t_l1, col_t_l2 = st.columns([10, 2])
+    with col_t_l2:
+        col_btn_th, col_btn_lg = st.columns(2)
+        with col_btn_th:
+            if st.button("🌓", help="Changer de thème (Sombre/Blanc)"):
+                st.session_state.theme_mode = "Blanc Épuré" if st.session_state.theme_mode == "Sombre Nuit" else "Sombre Nuit"
+                st.rerun()
+        with col_btn_lg:
+            if st.button("🌐", help="Changer de langue (FR/EN)"):
+                st.session_state.language = "EN" if st.session_state.language == "FR" else "FR"
+                st.rerun()
+
+    st.markdown(f'<div style="text-align: center; margin-top: 15px; margin-bottom: 20px;"><h1 style="font-size: 2.5rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 1.8rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 10px;"><span class="zapio-badge">🔮 Espace Sécurisé & Workspace</span></div></div>', unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        with st.form("login_form"):
-            email = st.text_input("Adresse Email", placeholder="nom@exemple.com")
-            master_key = st.text_input("Clé Maîtresse / PIN", type="password", placeholder="••••••••")
-            submit = st.form_submit_button("Se connecter au Workspace")
-            if submit:
-                if master_key != "":
-                    st.session_state.authenticated = True
-                    st.toast("🔓 Connexion réussie au Workspace.", icon="✨")
-                    st.rerun()
-                else:
-                    st.error("Veuillez saisir votre clé d'accès.")
+        auth_tab = st.pills("Mode d'accès", options=["Se connecter", "Créer un compte"], default="Se connecter", label_visibility="collapsed")
+        
+        if auth_tab == "Se connecter":
+            with st.form("login_form"):
+                email = st.text_input("Adresse Email", placeholder="nom@exemple.com")
+                master_key = st.text_input("Clé Maîtresse / PIN", type="password", placeholder="••••••••")
+                submit = st.form_submit_button("Se connecter au Workspace")
+                if submit:
+                    if email in st.session_state.user_accounts and master_key == st.session_state.user_accounts[email]["pin"]:
+                        st.session_state.authenticated = True
+                        st.session_state.current_user_email = email
+                        st.toast("🔓 Connexion réussie au Workspace.", icon="✨")
+                        st.rerun()
+                    else:
+                        st.error("Email ou Clé Maîtresse / PIN incorrect.")
+        else:
+            with st.form("signup_form"):
+                new_name = st.text_input("Nom complet")
+                new_email = st.text_input("Adresse Email", placeholder="nom@exemple.com")
+                new_pin = st.text_input("Définir une Clé Maîtresse / PIN", type="password")
+                submit_signup = st.form_submit_button("Créer mon compte")
+                if submit_signup:
+                    if new_email and new_pin and new_name:
+                        if new_email in st.session_state.user_accounts:
+                            st.error("Un compte existe déjà avec cet email.")
+                        else:
+                            st.session_state.user_accounts[new_email] = {"name": new_name, "pin": new_pin}
+                            st.session_state.authenticated = True
+                            st.session_state.current_user_email = new_email
+                            st.toast("🎉 Compte créé avec succès ! Bienvenue.", icon="🚀")
+                            st.rerun()
+                    else:
+                        st.warning("Veuillez remplir tous les champs.")
+
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("📅 Accéder directement à l'Agenda (Offline)", use_container_width=True, type="secondary"):
             st.session_state.direct_agenda = True
             st.rerun()
 
 else:
-    col_logo, col_logout = st.columns([3, 1])
+    # Barre supérieure avec logo, gestion du profil/compte, et mini-boutons Thème / Langue / Déconnexion
+    col_logo, col_acc, col_th, col_lg, col_logout = st.columns([2.5, 1, 0.8, 0.8, 1.2])
     with col_logo:
-        st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
+        st.markdown(f'<h1 style="font-size: 1.2rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.8rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.5rem;">● Live</span></h1>', unsafe_allow_html=True)
+    with col_acc:
+        if st.button("⚙️ Compte", use_container_width=True, type="secondary"):
+            st.session_state.current_view = "settings_account"
+            st.rerun()
+    with col_th:
+        if st.button("🌓", use_container_width=True, type="secondary", help="Changer de thème"):
+            st.session_state.theme_mode = "Blanc Épuré" if st.session_state.theme_mode == "Sombre Nuit" else "Sombre Nuit"
+            st.rerun()
+    with col_lg:
+        if st.button(st.session_state.language, use_container_width=True, type="secondary", help="Changer de langue (FR/EN)"):
+            st.session_state.language = "EN" if st.session_state.language == "FR" else "FR"
+            st.rerun()
     with col_logout:
-        if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
+        if st.button(t("logout"), use_container_width=True, type="secondary"):
             st.session_state.authenticated = False
             st.session_state.current_view = "home"
             st.toast("🔒 Déconnexion effectuée.", icon="👋")
@@ -487,43 +595,44 @@ else:
     render_global_search()
 
     if st.session_state.current_view == "home":
+        current_user_name = st.session_state.user_accounts.get(st.session_state.current_user_email, {}).get("name", "Pavel")
         st.markdown(f'''
             <div class="pavel-hero-banner">
                 <span class="zapio-badge" style="margin-bottom: 10px; display: inline-block;">🚀 WORKSPACE CENTRALISÉ</span>
-                <h2 style="font-size: 2.2rem; color: {sub_title_color}; margin: 10px 0 5px 0;">Tableau de Bord Principal</h2>
-                <p style="color: {desc_color}; font-size: 1rem; margin: 0;">Sélectionnez ci-dessous l'espace de travail ou l'outil à lancer</p>
+                <h2 style="font-size: 2rem; color: {sub_title_color}; margin: 10px 0 5px 0;">{t("hero_title")}</h2>
+                <p style="color: {desc_color}; font-size: 0.95rem; margin: 0;">{t("hero_desc")} — <b>{current_user_name}</b></p>
             </div>
         ''', unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
         with c1:
-            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📅 Agenda & Planning</h3><p style="color: {desc_color}; font-size: 0.8rem;">Calendrier et mode hors-ligne.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📅 {t("agenda")}</h3><p style="color: {desc_color}; font-size: 0.8rem;">{t("agenda_desc")}</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir l'Agenda", use_container_width=True, type="primary"):
                 st.session_state.current_view = "Agenda"
                 st.rerun()
 
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🤖 Prompts & IA</h3><p style="color: {desc_color}; font-size: 0.8rem;">Bibliothèque complète de prompts IA.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🤖 {t("prompts")}</h3><p style="color: {desc_color}; font-size: 0.8rem;">{t("prompts_desc")}</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Prompts & IA", use_container_width=True):
                 st.session_state.current_view = "Prompts & IA"
                 st.rerun()
 
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📁 Médias & Fichiers</h3><p style="color: {desc_color}; font-size: 0.8rem;">Images, ZIP, APK, PDFs et Documents.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📁 {t("media")}</h3><p style="color: {desc_color}; font-size: 0.8rem;">{t("media_desc")}</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Médias & Fichiers", use_container_width=True):
                 st.session_state.current_view = "Médias & Fichiers"
                 st.rerun()
 
         with c2:
-            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🚀 Projets & Idées</h3><p style="color: {desc_color}; font-size: 0.8rem;">Projets actifs et idées.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🚀 {t("projects")}</h3><p style="color: {desc_color}; font-size: 0.8rem;">{t("projects_desc")}</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Projets", use_container_width=True):
                 st.session_state.current_view = "Projets"
                 st.rerun()
 
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🔐 Coffre-Fort Sécurisé</h3><p style="color: {desc_color}; font-size: 0.8rem;">Clés API et mots de passe.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🔐 {t("vault")}</h3><p style="color: {desc_color}; font-size: 0.8rem;">{t("vault_desc")}</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir le Coffre-Fort", use_container_width=True):
                 st.session_state.current_view = "Coffre-Fort"
                 st.rerun()
 
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🎴 Contacts & Emails</h3><p style="color: {desc_color}; font-size: 0.8rem;">Répertoire et templates d\'emails.</p></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🎴 {t("contacts")}</h3><p style="color: {desc_color}; font-size: 0.8rem;">{t("contacts_desc")}</p></div>', unsafe_allow_html=True)
             if st.button("Ouvrir Contacts & Emails", use_container_width=True):
                 st.session_state.current_view = "Contacts & Emails"
                 st.rerun()
@@ -531,6 +640,7 @@ else:
         st.markdown("<br>", unsafe_allow_html=True)
         with st.expander("⚙️ Gestion & Sauvegarde Globale du Workspace (Backup JSON)"):
             workspace_data = {
+                "user_accounts": st.session_state.user_accounts,
                 "agenda_events": [
                     {
                         "title": e["title"],
@@ -569,6 +679,7 @@ else:
                 if uploaded_backup is not None:
                     try:
                         imported_data = json.load(uploaded_backup)
+                        st.session_state.user_accounts = imported_data.get("user_accounts", st.session_state.user_accounts)
                         st.session_state.saved_prompts_library = imported_data.get("saved_prompts_library", [])
                         st.session_state.saved_code_snippets = imported_data.get("saved_code_snippets", [])
                         st.session_state.saved_ideas = imported_data.get("saved_ideas", [])
@@ -599,13 +710,34 @@ else:
 
     else:
         current = st.session_state.current_view
-        if st.button("← Retour au Tableau de Bord", key="back_to_home_universal"):
+        if st.button(t("back"), key="back_to_home_universal"):
             st.session_state.current_view = "home"
             st.rerun()
             
         st.markdown(f"<h2 style='color: #EC4899; margin-top: 15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
 
-        if current == "Agenda":
+        if current == "settings_account":
+            st.markdown(f'''
+                <div class="sub-section-header">
+                    <span class="zapio-badge">PARAMÈTRES DU COMPTE</span>
+                    <h1 style="color: {sub_title_color}; font-size: 1.6rem; margin: 5px 0 0 0;">⚙️ Gestion du Compte & Sécurité</h1>
+                </div>
+            ''', unsafe_allow_html=True)
+            
+            curr_email = st.session_state.current_user_email
+            curr_info = st.session_state.user_accounts.get(curr_email, {"name": "", "pin": ""})
+
+            with st.form("form_edit_account"):
+                st.markdown(f"**Email connecté :** {curr_email}")
+                edit_name = st.text_input("Modifier le nom", value=curr_info["name"])
+                edit_pin = st.text_input("Modifier la Clé Maîtresse / PIN", value=curr_info["pin"], type="password")
+                if st.form_submit_button("💾 Enregistrer les modifications"):
+                    st.session_state.user_accounts[curr_email]["name"] = edit_name
+                    st.session_state.user_accounts[curr_email]["pin"] = edit_pin
+                    st.toast("✅ Informations du compte mises à jour !", icon="✨")
+                    st.rerun()
+
+        elif current == "Agenda":
             render_agenda_module()
 
         elif current == "Prompts & IA":
@@ -715,7 +847,7 @@ else:
                 st.markdown(f'''
                     <div class="zapio-card">
                         <span class="zapio-badge" style="font-size:0.7rem;">{item["type"]}</span>
-                        <h3 style="color:{sub_title_color}; margin-top:5px;">{item["title"]}</h3>
+                        <h4 style="margin-top:5px;">{item["title"]}</h4>
                 ''', unsafe_allow_html=True)
 
                 if item.get("is_local", False):
