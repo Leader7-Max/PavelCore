@@ -5,6 +5,7 @@ import calendar
 import json
 import base64
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 from datetime import datetime, date, time
 
@@ -280,13 +281,37 @@ def render_agenda_module():
                         </div>
                     '''
 
-        # Injection directe du conteneur Grid pur (bloque l'empilement vertical sur mobile)
-        st.markdown(f'''
-            <div style="display: grid !important; grid-template-columns: repeat(7, 1fr) !important; gap: 3px !important; width: 100% !important; box-sizing: border-box !important;">
+        # Rendu blindé via components.html pour empêcher tout saut ou écrasement mobile
+        calendar_full_html = f'''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body {{
+                    background-color: transparent;
+                    margin: 0;
+                    padding: 0;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                }}
+                .calendar-grid {{
+                    display: grid !important;
+                    grid-template-columns: repeat(7, 1fr) !important;
+                    gap: 4px !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="calendar-grid">
                 {header_html}
                 {cells_html}
             </div>
-        ''', unsafe_allow_html=True)
+        </body>
+        </html>
+        '''
+        components.html(calendar_full_html, height=420, scrolling=False)
 
     elif st.session_state.agenda_active_tab == "add":
         with st.form("add_event_form", clear_on_submit=True):
