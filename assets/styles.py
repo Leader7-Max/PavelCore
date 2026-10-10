@@ -90,7 +90,7 @@ def inject_custom_design():
             margin-bottom: 15px;
         }}
 
-        /* --- FORCAGE RADICAL DES BOUTONS EN ROUGE --- */
+        /* --- STYLING DES BOUTONS --- */
         div.stButton > button, 
         button[kind="primary"], 
         button[kind="secondary"],
@@ -114,9 +114,18 @@ def inject_custom_design():
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
         }}
         
-        /* Forcer la couleur du texte à l'intérieur des boutons */
         div.stButton > button p, button p, span {{
             color: #FFFFFF !important;
+        }}
+
+        /* --- CORRECTION DE LA VISIBILITÉ DU TEXTE DANS LES INPUTS DATE / HEURE --- */
+        input[type="text"], input[aria-label*="Date"], input[aria-label*="Heure"], div[data-baseweb="input"] input {{
+            color: #000000 !important;
+            font-weight: 600 !important;
+        }}
+        div[data-baseweb="select"] span {{
+            color: #000000 !important;
+            font-weight: 600 !important;
         }}
 
         div[data-testid="stPills"] button {{
