@@ -104,6 +104,15 @@ def delete_event_from_db(event_id):
     conn.commit()
     conn.close()
 
+def clear_all_events_db():
+    """Supprime tous les événements de la base de données."""
+    init_db()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM events")
+    conn.commit()
+    conn.close()
+
 # --- GESTION COFFRE-FORT (API Keys & Credentials) ---
 def load_api_keys_from_db():
     init_db()
