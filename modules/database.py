@@ -28,7 +28,6 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Table Utilisateurs
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +38,6 @@ def init_db():
         )
     ''')
     
-    # Table Agenda
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +51,6 @@ def init_db():
         )
     ''')
     
-    # Table Clés API (Coffre-fort)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS api_keys (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,7 +60,6 @@ def init_db():
         )
     ''')
     
-    # Table Identifiants / Mots de passe (Coffre-fort)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS credentials (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,7 +70,6 @@ def init_db():
         )
     ''')
     
-    # Table Contacts
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS contacts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,7 +87,6 @@ def init_db():
 
 # --- GESTION UTILISATEURS ---
 def create_user_db(email: str, password: str) -> tuple[bool, str]:
-    """Inscrit un nouvel utilisateur dans la base de données."""
     init_db()
     email_clean = email.strip().lower()
     if not email_clean or not password:
@@ -114,7 +108,6 @@ def create_user_db(email: str, password: str) -> tuple[bool, str]:
         return False, "Cet e-mail est déjà utilisé."
 
 def authenticate_user_db(email: str, password: str) -> tuple[bool, dict | str]:
-    """Vérifie la connexion d'un utilisateur."""
     init_db()
     email_clean = email.strip().lower()
     conn = get_connection()
@@ -131,12 +124,12 @@ def authenticate_user_db(email: str, password: str) -> tuple[bool, dict | str]:
         return True, {"id": user_id, "email": user_email}
     return False, "Adresse e-mail ou mot de passe incorrect."
 
-# --- GESTION AGENDA ---
-def load_events_from_db():
+# --- GESTION AGENDA (Filtré par user_id) ---
+def load_events_from_db(user_id: int):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, event_date, event_time, category, description, ringtone FROM events")
+    cursor.execute("SELECT id, title, event_date, event_time, category, description, ringtone FROM events WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
     conn.close()
     
@@ -157,18 +150,18 @@ def load_events_from_db():
         })
     return events
 
-def add_event_to_db(title, ev_date, ev_time, category, desc, ringtone):
+def add_event_to_db(user_id: int, title, ev_date, ev_time, category, desc, ringtone):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO events (title, event_date, event_time, category, description, ringtone)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (title, ev_date.strftime("%Y-%m-%d"), ev_time.strftime("%H:%M"), category, desc, ringtone))
+        INSERT INTO events (user_id, title, event_date, event_time, category, description, ringtone)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (user_id, title, ev_date.strftime("%Y-%m-%d"), ev_time.strftime("%H:%M"), category, desc, ringtone))
     conn.commit()
     conn.close()
 
-def delete_event_from_db(event_id):
+def delete_event_from_db(event_id: int):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
@@ -176,64 +169,55 @@ def delete_event_from_db(event_id):
     conn.commit()
     conn.close()
 
-def clear_all_events_db():
-    """Supprime tous les événements de la base de données."""
+# --- GESTION COFFRE-FORT (Filtré par user_id) ---
+def load_api_keys_from_db(user_id: int):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM events")
-    conn.commit()
-    conn.close()
-
-# --- GESTION COFFRE-FORT (API Keys & Credentials) ---
-def load_api_keys_from_db():
-    init_db()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, service, encrypted_key FROM api_keys")
+    cursor.execute("SELECT id, service, encrypted_key FROM api_keys WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
     conn.close()
     return [{"id": r[0], "service": r[1], "key": r[2]} for r in rows]
 
-def add_api_key_to_db(service, encrypted_key):
+def add_api_key_to_db(user_id: int, service, encrypted_key):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO api_keys (service, encrypted_key) VALUES (?, ?)", (service, encrypted_key))
+    cursor.execute("INSERT INTO api_keys (user_id, service, encrypted_key) VALUES (?, ?, ?)", (user_id, service, encrypted_key))
     conn.commit()
     conn.close()
 
-def load_credentials_from_db():
+def load_credentials_from_db(user_id: int):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, site, username, encrypted_password FROM credentials")
+    cursor.execute("SELECT id, site, username, encrypted_password FROM credentials WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
     conn.close()
     return [{"id": r[0], "site": r[1], "user": r[2], "pass": r[3]} for r in rows]
 
-def add_credential_to_db(site, username, encrypted_password):
+def add_credential_to_db(user_id: int, site, username, encrypted_password):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO credentials (site, username, encrypted_password) VALUES (?, ?, ?)", (site, username, encrypted_password))
+    cursor.execute("INSERT INTO credentials (user_id, site, username, encrypted_password) VALUES (?, ?, ?, ?)", (user_id, site, username, encrypted_password))
     conn.commit()
     conn.close()
 
-# --- GESTION CONTACTS ---
-def load_contacts_from_db():
+# --- GESTION CONTACTS (Filtré par user_id) ---
+def load_contacts_from_db(user_id: int):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, email, phone, category, notes FROM contacts")
+    cursor.execute("SELECT id, name, email, phone, category, notes FROM contacts WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
     conn.close()
     return [{"id": r[0], "name": r[1], "email": r[2], "phone": r[3], "cat": r[4], "notes": r[5]} for r in rows]
 
-def add_contact_to_db(name, email, phone, category, notes):
+def add_contact_to_db(user_id: int, name, email, phone, category, notes):
     init_db()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO contacts (name, email, phone, category, notes) VALUES (?, ?, ?, ?, ?)", (name, email, phone, category, notes))
+    cursor.execute("INSERT INTO contacts (user_id, name, email, phone, category, notes) VALUES (?, ?, ?, ?, ?, ?)", (user_id, name, email, phone, category, notes))
     conn.commit()
     conn.close()
