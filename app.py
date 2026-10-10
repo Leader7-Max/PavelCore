@@ -117,7 +117,7 @@ is_direct_agenda_link = query_params.get("app", None) == "agenda"
 if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
     render_agenda_view(sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
 
-elif not st.session_state.authenticated:
+elif not st.session_state.get("authenticated", False):
     st.markdown(f'<div style="text-align: center; margin-top: 30px; margin-bottom: 25px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 15px;"><span class="zapio-badge">🔮 Espace Sécurisé & Workspace</span></div></div>', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
