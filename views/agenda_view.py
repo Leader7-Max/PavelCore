@@ -4,12 +4,16 @@ import calendar
 from datetime import datetime, date, time
 
 def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#2B1552", header_box_bg="#1E0A3C", header_box_text="#A78BFA", text_color="#F8FAFC"):
-    """Gère l'affichage complet du module Agenda, Calendrier et Liste des tâches."""
+    """Gère l'affichage complet du module Agenda, Calendrier et Liste des tâches avec confirmation de suppression."""
     
     MONTH_NAMES_FR = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
         "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
     ]
+
+    # Initialisation de l'état de confirmation dans la session si absent
+    if "confirm_delete_agenda_idx" not in st.session_state:
+        st.session_state.confirm_delete_agenda_idx = None
 
     query_params = st.query_params
     if st.session_state.get("direct_agenda", False) or query_params.get("app", None) == "agenda":
@@ -19,7 +23,6 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
 
     st.markdown(f'<div style="margin-top: 10px; margin-bottom: 20px;"><span class="zapio-badge">📅 AGENDA AUTONOME & HORS-LIGNE</span><h2 style="margin-top: 10px; font-size: 2rem; color: {sub_title_color};">Agenda & Calendrier Interactif</h2></div>', unsafe_allow_html=True)
     
-    # Navigation par onglets (Calendrier, Liste des tâches, Programmer, Vider)
     col_btn1, col_btn2, col_btn3, col_clear = st.columns([2, 2, 2, 2])
     
     with col_btn1:
@@ -41,6 +44,7 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
         if st.session_state.agenda_events:
             if st.button("🗑️ Vider tout", key="clear_all_events"):
                 st.session_state.agenda_events = []
+                st.session_state.confirm_delete_agenda_idx = None
                 st.toast("🗑️ Agenda vidé avec succès.", icon="ℹ️")
                 st.rerun()
 
@@ -139,7 +143,7 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
         '''
         components.html(calendar_full_html, height=420, scrolling=False)
 
-    # 2. VUE LISTE DES TÂCHES
+    # 2. VUE LISTE DES TÂCHES AVEC CONFIRMATION DE SUPPRESSION
     elif st.session_state.agenda_active_tab == "liste":
         st.markdown(f"<h3 style='color: {sub_title_color};'>📋 Liste de toutes les tâches programmées</h3>", unsafe_allow_html=True)
         
@@ -158,10 +162,23 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
                     </div>
                 ''', unsafe_allow_html=True)
                 
-                if st.button(f"🗑️ Supprimer cette tâche", key=f"del_ev_{idx}", type="secondary"):
-                    st.session_state.agenda_events.remove(ev)
-                    st.toast("🗑️ Tâche supprimée avec succès.", icon="ℹ️")
-                    st.rerun()
+                # Gestion de la double confirmation pour supprimer
+                if st.session_state.confirm_delete_agenda_idx == idx:
+                    col_conf1, col_conf2 = st.columns(2)
+                    with col_conf1:
+                        if st.button("⚠️ Confirmer la suppression", key=f"yes_del_{idx}", type="primary"):
+                            st.session_state.agenda_events.remove(ev)
+                            st.session_state.confirm_delete_agenda_idx = None
+                            st.toast("🗑️ Tâche supprimée avec succès.", icon="ℹ️")
+                            st.rerun()
+                    with col_conf2:
+                        if st.button("Annuler", key=f"no_del_{idx}", type="secondary"):
+                            st.session_state.confirm_delete_agenda_idx = None
+                            st.rerun()
+                else:
+                    if st.button(f"🗑️ Supprimer cette tâche", key=f"del_ev_{idx}", type="secondary"):
+                        st.session_state.confirm_delete_agenda_idx = idx
+                        st.rerun()
 
     # 3. ONGLET PROGRAMMER
     elif st.session_state.agenda_active_tab == "add":
@@ -183,7 +200,7 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
             if st.form_submit_button("🔔 Ajouter au Calendrier"):
                 if title:
                     st.session_state.agenda_events.append({"title": title, "date": event_date, "time": event_time, "category": category, "desc": desc, "ringtone": ringtone})
-                    st.session_state.agenda_active_tab = "liste"  # Redirige vers la liste des tâches après l'ajout
+                    st.session_state.agenda_active_tab = "liste"
                     st.toast("✅ Événement ajouté avec succès !", icon="🎉")
                     st.rerun()
                 else:
