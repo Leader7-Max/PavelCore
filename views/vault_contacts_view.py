@@ -1,5 +1,4 @@
 import streamlit as st
-from modules.security import encrypt_data, decrypt_data
 from modules.database import (
     load_api_keys_from_db, add_api_key_to_db,
     load_credentials_from_db, add_credential_to_db,
@@ -7,112 +6,107 @@ from modules.database import (
 )
 
 def render_vault_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
-    """Gère le coffre-fort sécurisé (Clés API et Mots de passe) connecté à SQLite."""
-    sub_tab = st.pills(
-        "Navigation Coffre-Fort",
-        options=["🔐 Clés API", "🔑 Identifiants & Mots de passe"],
-        default="🔐 Clés API",
-        label_visibility="collapsed",
-        key="pills_vault"
-    )
+    """Gère l'affichage et l'ajout sécurisé dans le Coffre-Fort cloisonné par utilisateur."""
     
-    if sub_tab == "🔐 Clés API":
-        st.markdown(f'''
-            <div class="sub-section-header">
-                <span class="zapio-badge">SÉCURITÉ & CREDENTIALS</span>
-                <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔐 Clés d'API & Tokens</h1>
-            </div>
-        ''', unsafe_allow_html=True)
-        
-        with st.form("form_api_keys", clear_on_submit=True):
-            service = st.text_input("Nom du Service (ex: OpenAI, GitHub)")
-            api_key = st.text_input("Clé API / Token Secret", type="password")
-            if st.form_submit_button("🔒 Sauvegarder la clé"):
-                if service and api_key:
-                    encrypted_key = encrypt_data(api_key)
-                    add_api_key_to_db(service, encrypted_key)
-                    st.session_state.saved_api_keys = load_api_keys_from_db()
-                    st.toast("🔐 Clé API chiffrée et sauvegardée en base !", icon="✅")
-                    st.rerun()
-                else:
-                    st.warning("Veuillez remplir tous les champs.")
-                    
-        for ak in st.session_state.saved_api_keys:
-            decrypted_key = decrypt_data(ak['key'])
-            st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{ak["service"]}</h3>', unsafe_allow_html=True)
-            st.code(decrypted_key, language='text')
-            st.markdown('</div>', unsafe_allow_html=True)
+    # Récupération sécurisée du user_id de la session
+    user_id = st.session_state.user_info["id"] if st.session_state.get("user_info") else 0
 
-    elif sub_tab == "🔑 Identifiants & Mots de passe":
-        st.markdown(f'''
-            <div class="sub-section-header">
-                <span class="zapio-badge">GESTIONNAIRE D'ACCÈS</span>
-                <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🔑 Identifiants & Mots de passe</h1>
-            </div>
-        ''', unsafe_allow_html=True)
-        
-        with st.form("form_creds", clear_on_submit=True):
-            site = st.text_input("Plateforme / Site web")
-            username = st.text_input("Identifiant / Email")
-            password = st.text_input("Mot de passe", type="password")
-            if st.form_submit_button("Enregistrer les accès"):
-                if site and username and password:
-                    encrypted_password = encrypt_data(password)
-                    add_credential_to_db(site, username, encrypted_password)
-                    st.session_state.saved_user_credentials = load_credentials_from_db()
-                    st.toast("🔑 Identifiants chiffrés et enregistrés en base !", icon="✅")
+    st.markdown(f"<h2 style='color: {sub_title_color}; margin-top: 10px;'>🔐 Coffre-Fort Sécurisé</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: {desc_color};'>Stockez vos clés API et identifiants de manière chiffrée et isolée.</p>", unsafe_allow_html=True)
+
+    # Rafraîchissement des données de l'utilisateur
+    st.session_state.saved_api_keys = load_api_keys_from_db(user_id)
+    st.session_state.saved_user_credentials = load_credentials_from_db(user_id)
+
+    tab_api, tab_cred = st.tabs(["🔑 Clés API", "🔑 Identifiants & Mots de passe"])
+
+    with tab_api:
+        st.markdown("### Vos Clés API Enregistrées")
+        if not st.session_state.saved_api_keys:
+            st.info("Aucune clé API enregistrée.")
+        else:
+            for item in st.session_state.saved_api_keys:
+                st.code(f"Service: {item['service']} | Clé: {item['key']}", language="text")
+
+        st.markdown("---")
+        st.markdown("### Ajouter une clé API")
+        with st.form("api_key_form"):
+            service_name = st.text_input("Nom du Service (ex: OpenAI, GitHub, Stripe)")
+            api_key_val = st.text_input("Clé Secrète", type="password")
+            submit_api = st.form_submit_button("Enregistrer la Clé API", use_container_width=True)
+            if submit_api:
+                if service_name.strip() and api_key_val.strip():
+                    add_api_key_to_db(user_id, service_name, api_key_val)
+                    st.session_state.saved_api_keys = load_api_keys_from_db(user_id)
+                    st.toast("✅ Clé API enregistrée en toute sécurité.", icon="🔒")
                     st.rerun()
                 else:
-                    st.warning("Veuillez remplir tous les champs.")
-                    
-        for uc in st.session_state.saved_user_credentials:
-            decrypted_password = decrypt_data(uc['pass'])
-            st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{uc["site"]}</h3><p style="color:{desc_color};"><b>Identifiant:</b> {uc["user"]}</p>', unsafe_allow_html=True)
-            st.code(decrypted_password, language='text')
-            st.markdown('</div>', unsafe_allow_html=True)
+                    st.error("Tous les champs sont obligatoires.")
+
+    with tab_cred:
+        st.markdown("### Vos Identifiants Enregistrés")
+        if not st.session_state.saved_user_credentials:
+            st.info("Aucun identifiant enregistré.")
+        else:
+            for item in st.session_state.saved_user_credentials:
+                st.markdown(f"- **{item['site']}** (Utilisateur : `{item['user']}`)")
+
+        st.markdown("---")
+        st.markdown("### Ajouter des identifiants")
+        with st.form("cred_form"):
+            site_name = st.text_input("Site / Application")
+            username = st.text_input("Nom d'utilisateur / Email")
+            password = st.text_input("Mot de passe", type="password")
+            submit_cred = st.form_submit_button("Enregistrer les Identifiants", use_container_width=True)
+            if submit_cred:
+                if site_name.strip() and username.strip() and password.strip():
+                    add_credential_to_db(user_id, site_name, username, password)
+                    st.session_state.saved_user_credentials = load_credentials_from_db(user_id)
+                    st.toast("✅ Identifiants enregistrés avec succès.", icon="🔒")
+                    st.rerun()
+                else:
+                    st.error("Veuillez remplir tous les champs.")
 
 def render_contacts_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
-    """Gère le carnet de contacts connecté à SQLite."""
-    sub_tab = st.pills(
-        "Navigation Contacts",
-        options=["🎴 Carnet de Contacts", "📧 Modèles d'Emails & Scripts"],
-        default="🎴 Carnet de Contacts",
-        label_visibility="collapsed",
-        key="pills_contacts"
-    )
+    """Gère l'affichage et l'ajout dans le carnet de contacts cloisonné par utilisateur."""
     
-    if sub_tab == "🎴 Carnet de Contacts":
-        st.markdown(f'''
-            <div class="sub-section-header">
-                <span class="zapio-badge">RÉPERTOIRE PROFESSIONNEL</span>
-                <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🎴 Carnet de Contacts</h1>
-            </div>
-        ''', unsafe_allow_html=True)
-        
-        with st.form("form_contacts", clear_on_submit=True):
-            fullname = st.text_input("Nom & Prénom / Entreprise")
-            email_contact = st.text_input("Adresse Email")
-            phone = st.text_input("Numéro de Téléphone")
-            category = st.selectbox("Catégorie", ["Client", "Partenaire / Prestataire", "VIP", "Personnel"])
-            notes = st.text_area("Notes / Rôle")
-            if st.form_submit_button("Ajouter le contact"):
-                if fullname:
-                    add_contact_to_db(fullname, email_contact, phone, category, notes)
-                    st.session_state.saved_contacts = load_contacts_from_db()
-                    st.toast("🎴 Contact sauvegardé en base !", icon="✅")
-                    st.rerun()
-                else:
-                    st.warning("Veuillez renseigner au moins le nom du contact.")
-                    
-        for ct in st.session_state.saved_contacts:
-            st.markdown(f'<div class="zapio-card"><h3 style="color:{sub_title_color};">{ct["name"]} <span class="zapio-badge" style="font-size:0.7rem;">{ct["cat"]}</span></h3><p style="color:{desc_color};">📧 {ct["email"]} | 📞 {ct["phone"]}</p><p style="color:{desc_color}; font-size:0.85rem;">{ct["notes"]}</p></div>', unsafe_allow_html=True)
+    # Récupération sécurisée du user_id de la session
+    user_id = st.session_state.user_info["id"] if st.session_state.get("user_info") else 0
 
-    elif sub_tab == "📧 Modèles d'Emails & Scripts":
-        st.markdown(f'''
-            <div class="sub-section-header">
-                <span class="zapio-badge">COMMUNICATION & TEMPLATES</span>
-                <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">📧 Modèles d'Emails & Scripts</h1>
-            </div>
-        ''', unsafe_allow_html=True)
-        # (Tu peux également connecter cette partie à SQLite si tu le souhaites par la suite)
-        st.info("Module de templates d'emails actif.")
+    st.markdown(f"<h2 style='color: {sub_title_color}; margin-top: 10px;'>🎴 Contacts & Répertoire</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: {desc_color};'>Gérez vos contacts professionnels et personnels.</p>", unsafe_allow_html=True)
+
+    # Rafraîchissement des contacts de l'utilisateur
+    st.session_state.saved_contacts = load_contacts_from_db(user_id)
+
+    st.markdown("### Vos Contacts")
+    if not st.session_state.saved_contacts:
+        st.info("Aucun contact enregistré.")
+    else:
+        for c in st.session_state.saved_contacts:
+            st.markdown(f"""
+                <div style="background-color: #170A2E; border: 1px solid #2B1552; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                    <h4 style="margin: 0; color: {sub_title_color};">{c['name']} <span style="font-size: 0.8rem; background: #8B5CF6; color: #FFF; padding: 2px 6px; border-radius: 4px;">{c['cat']}</span></h4>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #CBD5E1;">📧 {c['email']} | 📞 {c['phone']}</p>
+                    <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: #94A3B8;">📝 {c['notes']}</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### Ajouter un Contact")
+    with st.form("contact_form"):
+        name = st.text_input("Nom complet")
+        email = st.text_input("Adresse Email")
+        phone = st.text_input("Numéro de Téléphone")
+        category = st.selectbox("Catégorie", ["Client", "Partenaire", "Prestataire", "Personnel", "Autre"])
+        notes = st.text_area("Notes / Remarques")
+        submit_contact = st.form_submit_button("Enregistrer le Contact", use_container_width=True)
+        
+        if submit_contact:
+            if name.strip():
+                add_contact_to_db(user_id, name, email, phone, category, notes)
+                st.session_state.saved_contacts = load_contacts_from_db(user_id)
+                st.toast("✅ Contact enregistré avec succès !", icon="🎴")
+                st.rerun()
+            else:
+                st.error("Le nom du contact est obligatoire.")
