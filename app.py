@@ -25,6 +25,9 @@ init_session_state()
 from assets.styles import inject_custom_design
 inject_custom_design()
 
+# Import des fonctions base de données utilisateurs
+from modules.database import create_user_db, authenticate_user_db
+
 # Import de toutes les vues modulaires
 from views.agenda_view import render_agenda_view
 from views.dev_ia_view import render_dev_ia_view
@@ -118,32 +121,67 @@ if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
     render_agenda_view(sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
 
 elif not st.session_state.get("authenticated", False):
-    st.markdown(f'<div style="text-align: center; margin-top: 30px; margin-bottom: 25px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 15px;"><span class="zapio-badge">🔮 Espace Sécurisé & Workspace</span></div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="text-align: center; margin-top: 25px; margin-bottom: 20px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé</span></div></div>', unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        with st.form("login_form"):
-            email = st.text_input("Adresse Email", placeholder="nom@exemple.com")
-            master_key = st.text_input("Clé Maîtresse / PIN", type="password", placeholder="••••••••")
-            submit = st.form_submit_button("Se connecter au Workspace")
-            if submit:
-                if master_key != "":
-                    st.session_state.authenticated = True
-                    st.toast("🔓 Connexion réussie au Workspace.", icon="✨")
-                    st.rerun()
-                else:
-                    st.error("Veuillez saisir votre clé d'accès.")
+        tab_login, tab_signup = st.tabs(["🔑 Connexion", "✨ Créer un Compte"])
+        
+        with tab_login:
+            with st.form("login_form"):
+                email = st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
+                password = st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
+                submit_login = st.form_submit_button("Se connecter au Workspace", use_container_width=True)
+                
+                if submit_login:
+                    ok, res = authenticate_user_db(email, password)
+                    if ok:
+                        st.session_state.authenticated = True
+                        st.session_state.user_info = res
+                        st.toast(f"🔓 Bienvenue, {res['email']} !", icon="✨")
+                        st.rerun()
+                    else:
+                        st.error(res)
+
+        with tab_signup:
+            with st.form("signup_form"):
+                new_email = st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
+                new_pass = st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
+                confirm_pass = st.text_input("Confirmer le mot de passe", type="password", placeholder="••••••••", key="signup_confirm_pass")
+                submit_signup = st.form_submit_button("S'inscrire et rejoindre PavelCore", use_container_width=True)
+                
+                if submit_signup:
+                    if new_pass != confirm_pass:
+                        st.error("Les deux mots de passe ne correspondent pas.")
+                    elif len(new_pass) < 6:
+                        st.warning("Le mot de passe doit contenir au moins 6 caractères.")
+                    else:
+                        ok, msg = create_user_db(new_email, new_pass)
+                        if ok:
+                            st.success(msg)
+                        else:
+                            st.error(msg)
+        
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("📅 Accéder directement à l'Agenda (Offline)", use_container_width=True, type="secondary"):
+        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
             st.session_state.direct_agenda = True
             st.rerun()
 
 else:
-    col_logo, col_logout = st.columns([3, 1])
+    # --- HEADER SUPÉRIEUR UNIFIÉ ---
+    col_logo, col_user, col_logout = st.columns([2, 2, 1])
+    
     with col_logo:
-        st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 4px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 5px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
+        st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 6px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 6px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
+    
+    with col_user:
+        current_email = st.session_state.get("user_info", {}).get("email", "Session Active") if st.session_state.get("user_info") else "Membre"
+        st.markdown(f'<div style="text-align: center; color: {desc_color}; font-size: 0.85rem; padding-top: 5px;">👤 Connecté en tant que : <strong style="color: {sub_title_color};">{current_email}</strong></div>', unsafe_allow_html=True)
+
     with col_logout:
         if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
             st.session_state.authenticated = False
+            st.session_state.user_info = None
             st.session_state.current_view = "home"
             st.toast("🔒 Déconnexion effectuée.", icon="👋")
             st.rerun()
