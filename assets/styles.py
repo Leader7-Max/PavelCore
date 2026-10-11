@@ -87,7 +87,6 @@ def inject_custom_design():
                 width: 100% !important;
             }
 
-            /* Règle spécifique implacable pour le bouton de téléchargement */
             div[data-testid="stDownloadButton"] button,
             .stDownloadButton button {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
@@ -181,26 +180,24 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               7. ONGLETS & NAVIGATION RESPONSIVE MOBILE
+               7. FORÇAGE ABSOLU DES COLONNES CÔTE À CÔTE (MOBILE & PC)
                ========================================================= */
-            div[data-baseweb="tab-list"] {
-                background-color: #230E3D !important;
-                padding: 6px !important;
-                border-radius: 12px !important;
-                border: 1px solid rgba(236, 72, 153, 0.3) !important;
-                gap: 6px !important;
-            }
-
-            /* Forcer les colonnes d'authentification côte à côte même sur mobile */
-            @media (max-width: 640px) {
-                [data-testid="stHorizontalBlock"] {
+            @media (max-width: 900px) {
+                div[data-testid="stHorizontalBlock"] {
                     display: flex !important;
                     flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    gap: 8px !important;
                 }
-                [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+                div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
                     width: 50% !important;
                     flex: 1 1 50% !important;
-                    min-width: unset !important;
+                    min-width: 0 !important;
+                }
+                div[data-testid="stHorizontalBlock"] button {
+                    font-size: 0.8rem !important;
+                    padding: 8px 6px !important;
+                    white-space: nowrap !important;
                 }
             }
         </style>
