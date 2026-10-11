@@ -130,29 +130,20 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # Boutons d'authentification en Flexbox HTML pur (garantis côte à côte sur mobile)
-        is_login_active = st.session_state.auth_mode == "login"
-        is_signup_active = st.session_state.auth_mode == "signup"
+        # Basculement instantané par WebSocket via st.segmented_control (sans rechargement HTTP)
+        current_label = "🔑 Connexion" if st.session_state.auth_mode == "login" else "✨ Créer un Compte"
+        
+        selected_action = st.segmented_control(
+            "Mode d'authentification",
+            options=["🔑 Connexion", "✨ Créer un Compte"],
+            default=current_label,
+            label_visibility="collapsed",
+            key="auth_segmented_switch"
+        )
 
-        st.markdown(f"""
-            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
-                <div style="flex: 1; min-width: 0;">
-                    <a href="?auth=login" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_login_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_login_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
-                        🔑 Connexion
-                    </a>
-                </div>
-                <div style="flex: 1; min-width: 0;">
-                    <a href="?auth=signup" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_signup_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_signup_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
-                        ✨ Inscription
-                    </a>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-
-        # Gestion du clic HTML via l'URL
-        if "auth" in query_params:
-            st.session_state.auth_mode = query_params["auth"]
-            st.query_params.clear()
+        desired_mode = "login" if "Connexion" in selected_action else "signup"
+        if desired_mode != st.session_state.auth_mode:
+            st.session_state.auth_mode = desired_mode
             st.rerun()
 
         st.markdown("<br>", unsafe_allow_html=True)
