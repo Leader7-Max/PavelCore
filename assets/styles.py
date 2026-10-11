@@ -1,7 +1,7 @@
 import streamlit as st
 
 def inject_custom_design():
-    """Injecte le système de design Silicon Valley avec un ciblage CSS universel pour les expanders et file uploaders."""
+    """Injecte le système de design Silicon Valley avec correction complète du bouton d'upload."""
     
     st.markdown("""
         <style>
@@ -90,59 +90,62 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               5. FIX TOTAL POUR EXPANDERS (BARRE BLANCHE) ET UPLOADERS
+               5. FIX TOTAL BOUTON FILE UPLOADER ET ACCESSIBILITÉ
                ========================================================= */
             
-            /* Annule le fond blanc forcé sur toute la boîte expander */
-            div[data-testid="stExpander"], 
-            details {
+            /* Fond du conteneur de dépôt de fichier */
+            div[data-testid="stFileUploader"] {
+                background-color: rgba(35, 14, 61, 0.9) !important;
+                border: 2px dashed #EC4899 !important;
+                border-radius: 14px !important;
+                padding: 15px !important;
+            }
+
+            /* Bouton "Browse files" / "Parcourir" interne au file uploader */
+            div[data-testid="stFileUploader"] button {
+                background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%) !important;
+                color: #FFFFFF !important;
+                font-weight: 800 !important;
+                border-radius: 8px !important;
+                border: none !important;
+                padding: 8px 18px !important;
+                box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4) !important;
+            }
+
+            div[data-testid="stFileUploader"] button:hover {
+                background: linear-gradient(135deg, #FB7185 0%, #F43F5E 100%) !important;
+                box-shadow: 0 6px 18px rgba(225, 29, 72, 0.7) !important;
+            }
+
+            /* Forcer le texte explicatif de l'uploader en blanc et gris clair */
+            div[data-testid="stFileUploader"] section * {
+                color: #FFFFFF !important;
+            }
+
+            div[data-testid="stFileUploader"] small {
+                color: #CBD5E1 !important;
+                font-size: 0.85rem !important;
+            }
+
+            /* Expanders */
+            div[data-testid="stExpander"], details {
                 background: #230E3D !important;
                 border: 1px solid rgba(236, 72, 153, 0.3) !important;
                 border-radius: 12px !important;
-                overflow: hidden !important;
             }
 
-            /* Fix de la barre d'en-tête (summary) de l'expander */
-            div[data-testid="stExpander"] summary, 
-            details summary,
-            div[data-testid="stExpander"] summary *,
-            details summary * {
+            div[data-testid="stExpander"] summary, details summary {
                 background-color: #230E3D !important;
                 color: #FFFFFF !important;
                 font-weight: 700 !important;
-                font-size: 1rem !important;
             }
 
-            /* Contenu interne de l'expander */
-            div[data-testid="stExpanderDetails"],
-            details > div {
+            div[data-testid="stExpanderDetails"], details > div {
                 background-color: rgba(15, 5, 29, 0.6) !important;
                 color: #FFFFFF !important;
             }
 
-            /* Fix du bloc File Uploader (Restaurer une sauvegarde) */
-            div[data-testid="stFileUploader"],
-            section[data-testid="stFileUploaderDropzone"] {
-                background-color: rgba(35, 14, 61, 0.8) !important;
-                border: 1px dashed rgba(236, 72, 153, 0.5) !important;
-                border-radius: 10px !important;
-            }
-
-            /* Tous les textes à l'intérieur de l'uploader */
-            div[data-testid="stFileUploader"] *,
-            section[data-testid="stFileUploaderDropzone"] * {
-                color: #FFFFFF !important;
-            }
-
-            /* Texte secondaire d'information (ex: 200MB per file...) */
-            section[data-testid="stFileUploaderDropzone"] small,
-            div[data-testid="stFileUploader"] small {
-                color: #CBD5E1 !important;
-            }
-
-            /* =========================================================
-               6. CARTES & BADGES
-               ========================================================= */
+            /* Cartes & Badges */
             .pavel-card-grid, .zapio-card {
                 background: rgba(23, 10, 46, 0.75) !important;
                 border: 1px solid rgba(255, 255, 255, 0.12) !important;
