@@ -1,11 +1,10 @@
 import streamlit as st
-import time
 import random
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec des notifications rotatives internationales en direct."""
+    """Affiche le Tableau de Bord principal de PavelCore avec un widget de témoignages mondiaux en bas à droite (dynamique au clic/action, 0 latence)."""
     
-    # CSS pour le style des cartes et l'animation de la notification flottante
+    # CSS pour positionner le widget fixe en bas à droite, propre et sans fioritures
     st.markdown("""
         <style>
             /* Badges de compteurs néon */
@@ -21,7 +20,7 @@ def render_home_view():
                 letter-spacing: 0.5px !important;
             }
 
-            /* Halo lumineux au survol des cartes */
+            /* Halo lumineux au survol des cartes de modules */
             .pavel-card-grid {
                 background: rgba(23, 10, 46, 0.75) !important;
                 border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -37,33 +36,22 @@ def render_home_view():
                 transform: translateY(-3px) !important;
             }
 
-            /* Animation de la notification popup style toast */
-            @keyframes slideInNotification {
-                0% { opacity: 0; transform: translateY(-20px) scale(0.95); }
-                100% { opacity: 1; transform: translateY(0) scale(1); }
-            }
-
-            .pavel-live-notification {
-                background: linear-gradient(135deg, rgba(30, 10, 60, 0.95) 0%, rgba(20, 8, 40, 0.98) 100%) !important;
-                border: 1px solid rgba(236, 72, 153, 0.5) !important;
-                border-radius: 16px !important;
-                padding: 14px 18px !important;
-                margin-top: 20px !important;
-                margin-bottom: 20px !important;
-                box-shadow: 0 8px 30px rgba(236, 72, 153, 0.25), 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+            /* Widget de notification fixe en bas à droite */
+            .pavel-bottom-right-toast {
+                position: fixed;
+                bottom: 25px;
+                right: 25px;
+                z-index: 99999;
+                background: rgba(23, 10, 46, 0.95) !important;
+                border: 1px solid rgba(236, 72, 153, 0.4) !important;
+                border-radius: 14px !important;
+                padding: 14px 16px !important;
+                width: 350px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
                 display: flex;
                 align-items: center;
-                gap: 15px;
-                animation: slideInNotification 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                position: relative;
-                overflow: hidden;
-            }
-
-            .pavel-live-notification::before {
-                content: '';
-                position: absolute;
-                top: 0; left: 0; width: 4px; height: 100%;
-                background: linear-gradient(180deg, #EC4899 0%, #8B5CF6 100%);
+                gap: 12px;
+                backdrop-filter: blur(10px);
             }
         </style>
     """, unsafe_allow_html=True)
@@ -82,7 +70,7 @@ def render_home_view():
     st.markdown(f"""
         <div class="pavel-hero-banner" style="position: relative; overflow: hidden;">
             <div style="position: relative; z-index: 2;">
-                <span class="pavel-counter-badge">🚀 Workspace Actif (200+ Membres)</span>
+                <span class="pavel-counter-badge">🚀 Workspace Actif (300+ Membres Mondiaux)</span>
                 <h1 style="color: #FFFFFF; margin-top: 10px; font-size: 2.2rem; font-weight: 800;">Tableau de Bord</h1>
                 <p style="color: #CBD5E1; font-size: 1.05rem; margin-bottom: 0;">
                     Bienvenue dans votre espace sécurisé, <strong style="color: #F472B6;">{user_email}</strong>. 
@@ -92,80 +80,55 @@ def render_home_view():
         </div>
     """, unsafe_allow_html=True)
 
-    # --- LISTE ÉTENDUE DES TÉMOIGNAGES INTERNATIONAUX ---
-    international_testimonials = [
-        {
-            "name": "Yannick M.",
-            "role": "Cameroun 🇨🇲",
-            "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-            "comment": "J'adore cette application ! L'agenda et la gestion des events sont parfaits depuis Douala.",
-            "time": "En direct"
-        },
-        {
-            "name": "Aïssatou B.",
-            "role": "France 🇫🇷",
-            "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-            "comment": "Une fluidité remarquable, bravo à l'équipe pour ce bijou technologique depuis Grenoble !",
-            "time": "En direct"
-        },
-        {
-            "name": "Koffi K.",
-            "role": "Côte d'Ivoire 🇨🇮",
-            "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-            "comment": "Franchement propre ! Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan.",
-            "time": "En direct"
-        },
-        {
-            "name": "Fatoumata D.",
-            "role": "Guinée 🇬🇳",
-            "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-            "comment": "J'adore l'interface et la recherche universelle, c'est ultra intuitif à Conakry.",
-            "time": "En direct"
-        },
-        {
-            "name": "John S.",
-            "role": "USA 🇺🇸",
-            "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
-            "comment": "Amazing workspace! The performance and security standards are top notch.",
-            "time": "En direct"
-        },
-        {
-            "name": "Emre K.",
-            "role": "Turquie 🇹🇷",
-            "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
-            "comment": "Harika bir uygulama! Design and speed are incredible. Greetings from Istanbul!",
-            "time": "En direct"
-        }
+    # --- BASE DE DONNÉES MONDIALE DES TÉMOIGNAGES (TOUS LES PAYS AVEC DRAPEAUX) ---
+    world_testimonials = [
+        # Afrique
+        {"name": "Yannick M.", "country": "🇨🇲 Cameroun", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "J'adore cette application ! L'agenda est parfait depuis Douala."},
+        {"name": "Koffi K.", "country": "🇨🇮 Côte d'Ivoire", "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "comment": "Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan."},
+        {"name": "Aïssatou D.", "country": "🇬🇳 Guinée", "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&auto=format&fit=crop&q=80", "comment": "L'interface et la recherche universelle sont ultra intuitives à Conakry."},
+        {"name": "Mamadou S.", "country": "🇸🇳 Sénégal", "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80", "comment": "Le top du top pour gérer mes plannings et projets depuis Dakar. J'valide !"},
+        {"name": "Amine B.", "country": "🇲🇦 Maroc", "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", "comment": "Application magnifique et extrêmement rapide depuis Casablanca."},
+        {"name": "Mehdi T.", "country": "🇹🇳 Tunisie", "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80", "comment": "Un outil de travail exceptionnel. Salutations depuis Tunis !"},
+        {"name": "Ibrahim K.", "country": "🇲🇱 Mali", "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", "comment": "Une fluidité exemplaire, bravo pour PavelCore depuis Bamako."},
+
+        # Europe
+        {"name": "Éléonore V.", "country": "🇫🇷 France", "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80", "comment": "Une fluidité remarquable, bravo pour ce bijou technologique depuis Grenoble !"},
+        {"name": "Emre K.", "country": "🇹🇷 Turquie", "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", "comment": "Harika bir uygulama! Design and speed are incredible from Istanbul."},
+        {"name": "Hans W.", "country": "🇩🇪 Allemagne", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "Ausgezeichnet! Incredible speed and clean architecture from Berlin."},
+        {"name": "Matteo R.", "country": "🇮🇹 Italie", "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "comment": "Fantastico! Un workspace davvero potente ed elegante da Milano."},
+        {"name": "Carmen G.", "country": "🇪🇸 Espagne", "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", "comment": "Me encanta esta aplicación, muy fluida y profesional desde Madrid."},
+        {"name": "Lucas D.", "country": "🇧🇪 Belgique", "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80", "comment": "Super boulot, c'est devenu mon outil quotidien à Bruxelles."},
+        {"name": "Noah S.", "country": "🇨🇭 Suisse", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "Précis, sécurisé et ultra rapide. Salutations depuis Genève !"},
+
+        # Amérique & Asie
+        {"name": "Michael S.", "country": "🇺🇸 USA", "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80", "comment": "Amazing workspace! The performance and security standards are top notch."},
+        {"name": "Sophie L.", "country": "🇨🇦 Canada", "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80", "comment": "Super clean interface, very fast and secure from Montreal."},
+        {"name": "Kenji T.", "country": "🇯🇵 Japon", "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "comment": "Subarashii! The design and reactivity are futuristic from Tokyo."},
+        {"name": "Beatriz S.", "country": "🇧🇷 Brésil", "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", "comment": "Maravilhoso! Estou amando usar o PavelCore no Rio de Janeiro."}
     ]
 
-    # Gestion de l'index rotatif dans l'état de session
+    # Rotation propre et instantanée à chaque interaction de l'utilisateur (0 latence)
     if "notif_idx" not in st.session_state:
         st.session_state.notif_idx = 0
+    else:
+        st.session_state.notif_idx = (st.session_state.notif_idx + 1) % len(world_testimonials)
 
-    curr_notif = international_testimonials[st.session_state.notif_idx]
+    curr_notif = world_testimonials[st.session_state.notif_idx]
 
-    # Affichage du conteneur de notification en temps réel
+    # Affichage du widget fixe en bas à droite
     st.markdown(f"""
-        <div class="pavel-live-notification">
-            <img src="{curr_notif['avatar']}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #EC4899; box-shadow: 0 0 10px rgba(236,72,153,0.5);" alt="Avatar">
+        <div class="pavel-bottom-right-toast">
+            <img src="{curr_notif['avatar']}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #EC4899;" alt="Avatar">
             <div style="flex-grow: 1; min-width: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <div>
-                        <strong style="color: #FFFFFF; font-size: 0.95rem;">{curr_notif['name']}</strong>
-                        <span style="color: #A78BFA; font-size: 0.75rem; margin-left: 6px;">({curr_notif['role']})</span>
-                    </div>
-                    <span style="font-size: 0.7rem; color: #34C759; font-weight: 700;">● {curr_notif['time']}</span>
+                    <strong style="color: #FFFFFF; font-size: 0.88rem;">{curr_notif['name']}</strong>
+                    <span style="font-size: 0.78rem; color: #A78BFA; font-weight: 700;">{curr_notif['country']}</span>
                 </div>
-                <p style="color: #CBD5E1; font-size: 0.88rem; margin: 0; font-style: italic; line-height: 1.3;">"{curr_notif['comment']}"</p>
+                <p style="color: #CBD5E1; font-size: 0.82rem; margin: 0; font-style: italic; line-height: 1.25;">"{curr_notif['comment']}"</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
-
-    # Passage automatique au témoignage suivant et actualisation toutes les 5 secondes
-    st.session_state.notif_idx = (st.session_state.notif_idx + 1) % len(international_testimonials)
-    time.sleep(5)
-    st.rerun()
-    # -------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### ⚡ Accès Rapide aux Modules")
