@@ -4,9 +4,16 @@ import random
 def render_home_view():
     """Affiche le Tableau de Bord principal de PavelCore avec un widget de témoignages mondiaux en bas à droite (dynamique au clic/action, 0 latence)."""
     
-    # CSS pour positionner le widget fixe en bas à droite, propre et sans fioritures
+    # CSS pour positionner le widget fixe en bas à droite et forcer l'alignement des colonnes sur mobile
     st.markdown("""
         <style>
+            /* Correction pour forcer les boutons et colonnes côte à côte sur mobile sans latence */
+            [data-testid="column"] {
+                width: calc(50% - 1rem) !important;
+                flex: 1 1 calc(50% - 1rem) !important;
+                min-width: calc(50% - 1rem) !important;
+            }
+
             /* Badges de compteurs néon */
             .pavel-counter-badge {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
