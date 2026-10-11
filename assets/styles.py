@@ -1,7 +1,7 @@
 import streamlit as st
 
 def inject_custom_design():
-    """Injecte le système de design Silicon Valley premium avec contraste parfait, boutons néon et lisibilité totale."""
+    """Injecte le système de design Silicon Valley avec un ciblage CSS universel pour les expanders et file uploaders."""
     
     st.markdown("""
         <style>
@@ -18,7 +18,7 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               2. CORRECTION CRITIQUE : LABELS DE FORMULAIRES ULTRA-LISIBLES
+               2. LABELS DE FORMULAIRES ULTRA-LISIBLES
                ========================================================= */
             div[data-testid="stWidgetLabel"] label, 
             div[data-testid="stWidgetLabel"] p,
@@ -33,7 +33,7 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               3. CHAMPS DE SAISIE DESIGN GLASSMORPHISM PREMIUM
+               3. CHAMPS DE SAISIE DESIGN GLASSMORPHISM
                ========================================================= */
             div[data-baseweb="input"] > div, 
             div[data-baseweb="textarea"] > div,
@@ -64,7 +64,7 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               4. BOUTONS NÉON VIP (EFFET HOVER & GLOW)
+               4. BOUTONS NÉON VIP
                ========================================================= */
             div[data-testid="stButton"] > button,
             div[data-testid="stFormSubmitButton"] > button,
@@ -76,7 +76,7 @@ def inject_custom_design():
                 border-radius: 50px !important;
                 border: 1px solid rgba(255, 255, 255, 0.3) !important;
                 padding: 10px 24px !important;
-                box-shadow: 0 4px 18px rgba(236, 72, 153, 0.45), 0 0 12px rgba(139, 92, 246, 0.3) !important;
+                box-shadow: 0 4px 18px rgba(236, 72, 153, 0.45) !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 cursor: pointer !important;
             }
@@ -85,31 +85,69 @@ def inject_custom_design():
             div[data-testid="stFormSubmitButton"] > button:hover,
             div[data-testid="stDownloadButton"] > button:hover {
                 transform: translateY(-3px) scale(1.02) !important;
-                box-shadow: 0 8px 28px rgba(236, 72, 153, 0.75), 0 0 20px rgba(139, 92, 246, 0.6) !important;
+                box-shadow: 0 8px 28px rgba(236, 72, 153, 0.75) !important;
                 border-color: #FFFFFF !important;
             }
 
-            div[data-testid="stButton"] > button:active,
-            div[data-testid="stFormSubmitButton"] > button:active,
-            div[data-testid="stDownloadButton"] > button:active {
-                transform: translateY(1px) scale(0.98) !important;
+            /* =========================================================
+               5. FIX TOTAL POUR EXPANDERS (BARRE BLANCHE) ET UPLOADERS
+               ========================================================= */
+            
+            /* Annule le fond blanc forcé sur toute la boîte expander */
+            div[data-testid="stExpander"], 
+            details {
+                background: #230E3D !important;
+                border: 1px solid rgba(236, 72, 153, 0.3) !important;
+                border-radius: 12px !important;
+                overflow: hidden !important;
+            }
+
+            /* Fix de la barre d'en-tête (summary) de l'expander */
+            div[data-testid="stExpander"] summary, 
+            details summary,
+            div[data-testid="stExpander"] summary *,
+            details summary * {
+                background-color: #230E3D !important;
+                color: #FFFFFF !important;
+                font-weight: 700 !important;
+                font-size: 1rem !important;
+            }
+
+            /* Contenu interne de l'expander */
+            div[data-testid="stExpanderDetails"],
+            details > div {
+                background-color: rgba(15, 5, 29, 0.6) !important;
+                color: #FFFFFF !important;
+            }
+
+            /* Fix du bloc File Uploader (Restaurer une sauvegarde) */
+            div[data-testid="stFileUploader"],
+            section[data-testid="stFileUploaderDropzone"] {
+                background-color: rgba(35, 14, 61, 0.8) !important;
+                border: 1px dashed rgba(236, 72, 153, 0.5) !important;
+                border-radius: 10px !important;
+            }
+
+            /* Tous les textes à l'intérieur de l'uploader */
+            div[data-testid="stFileUploader"] *,
+            section[data-testid="stFileUploaderDropzone"] * {
+                color: #FFFFFF !important;
+            }
+
+            /* Texte secondaire d'information (ex: 200MB per file...) */
+            section[data-testid="stFileUploaderDropzone"] small,
+            div[data-testid="stFileUploader"] small {
+                color: #CBD5E1 !important;
             }
 
             /* =========================================================
-               5. CARTES, BADGES & EXPANDERS
+               6. CARTES & BADGES
                ========================================================= */
             .pavel-card-grid, .zapio-card {
                 background: rgba(23, 10, 46, 0.75) !important;
                 border: 1px solid rgba(255, 255, 255, 0.12) !important;
                 border-radius: 16px !important;
                 padding: 18px !important;
-                backdrop-filter: blur(12px) !important;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            }
-            .pavel-card-grid:hover {
-                border-color: rgba(236, 72, 153, 0.6) !important;
-                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25) !important;
-                transform: translateY(-2px) !important;
             }
             
             .zapio-badge, .pavel-counter-badge {
@@ -119,57 +157,6 @@ def inject_custom_design():
                 border-radius: 20px !important;
                 font-size: 0.75rem !important;
                 font-weight: 700 !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.5px !important;
-                box-shadow: 0 0 12px rgba(236, 72, 153, 0.6) !important;
-            }
-            
-            .pavel-hero-banner {
-                background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%) !important;
-                border: 1px solid rgba(255, 255, 255, 0.15) !important;
-                border-radius: 20px !important;
-                padding: 28px !important;
-                margin-bottom: 25px !important;
-                backdrop-filter: blur(12px) !important;
-            }
-
-            /* =========================================================
-               6. CORRECTION EXPANDERS & FILE UPLOADER (SAUVEGARDE)
-               ========================================================= */
-            div[data-testid="stExpander"] {
-                background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%) !important;
-                border-radius: 12px !important;
-                border: 1px solid rgba(255, 255, 255, 0.25) !important;
-                margin-bottom: 12px !important;
-                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25) !important;
-            }
-
-            .streamlit-expanderHeader p, 
-            .streamlit-expanderHeader span, 
-            div[data-testid="stExpander"] summary, 
-            div[data-testid="stExpander"] summary p {
-                color: #FFFFFF !important;
-                font-weight: 700 !important;
-            }
-
-            div[data-testid="stExpanderDetails"] {
-                background-color: rgba(0, 0, 0, 0.25) !important;
-                border-bottom-left-radius: 12px !important;
-                border-bottom-right-radius: 12px !important;
-                padding: 15px !important;
-                color: #FFFFFF !important;
-            }
-
-            /* Correction spécifique File Uploader (Restauration Backup JSON) */
-            div[data-testid="stFileUploader"] label,
-            div[data-testid="stFileUploader"] span,
-            div[data-testid="stFileUploader"] div {
-                color: #FFFFFF !important;
-                font-weight: 600 !important;
-            }
-            
-            div[data-testid="stFileUploader"] small {
-                color: #CBD5E1 !important;
             }
         </style>
     """, unsafe_allow_html=True)
