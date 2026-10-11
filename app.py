@@ -64,7 +64,7 @@ def _view(module: str, func: str):
             )
         return error_placeholder
 
-# ── CSS des boutons Connexion / Inscription (votre design) ─
+# ── CSS des boutons Connexion / Inscription & Cartes Succès ─
 AUTH_SWITCH_CSS = """
 <style>
 .st-key-auth_switch [data-testid="stHorizontalBlock"]{
@@ -115,6 +115,19 @@ AUTH_SWITCH_CSS = """
     display: flex !important;
     align-items: center !important;
     gap: 15px !important;
+}
+
+/* Design Card Coffre-Fort Sécurisé */
+.pavel-vault-success-banner {
+    background: linear-gradient(135deg, rgba(30, 10, 60, 0.95) 0%, rgba(15, 5, 30, 0.98) 100%) !important;
+    border: 2px solid #EC4899 !important;
+    border-radius: 16px !important;
+    padding: 20px 24px !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 0 25px rgba(236, 72, 153, 0.4), inset 0 0 15px rgba(139, 92, 246, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
 }
 </style>
 """
@@ -185,15 +198,11 @@ def do_signup():
     else:
         ok, msg = create_user_db(email, p1)
         if ok:
-            # 1. Message de succès
             st.session_state.auth_msg = ("success", f"✨ Compte créé avec succès pour {email} ! Vous pouvez vous connecter.")
-            # 2. Re-remplir automatiquement l'email dans le formulaire de connexion
             st.session_state["login_email"] = email
-            # 3. Réinitialiser et effacer les champs d'inscription
             st.session_state.pop("signup_email", None)
             st.session_state.pop("signup_pass", None)
             st.session_state.pop("signup_confirm_pass", None)
-            # 4. Basculer automatiquement sur l'onglet Connexion
             st.session_state.auth_mode = "login"
         else:
             st.session_state.auth_msg = ("error", msg)
@@ -209,7 +218,7 @@ def go_direct_agenda():
 
 def leave_demo_agenda():
     st.session_state.direct_agenda = False
-    st.query_params.clear()          # retire ?app=agenda
+    st.query_params.clear()
 
 def go_home():
     st.session_state.current_view = "home"
@@ -243,7 +252,6 @@ def show_auth_msg():
             getattr(st, kind)(text)
 
 def run_background_alarms():
-    """Les alarmes sonnent dans toutes les rubriques. L'Agenda affiche son propre panneau (un seul moteur actif)."""
     user = st.session_state.get("user_info")
     if not user:
         return
@@ -256,11 +264,10 @@ def run_background_alarms():
         st.session_state["alarm_engine_error"] = str(exc)
         logging.error(f"Erreur dans le moteur d'alarmes d'arrière-plan : {exc}")
 
-# Toast affiché une seule fois
 if st.session_state.get("flash"):
     st.toast(st.session_state.pop("flash"))
 
-# ── Recherche globale isolée (ne relance pas toute la page) ─
+# ── Recherche globale isolée ──────────────────────────────
 @st.fragment
 def render_global_search():
     q_raw = st.text_input(
@@ -277,7 +284,6 @@ def render_global_search():
     st.markdown(f"### 🔎 Résultats de recherche pour : *'{q_raw}'*")
 
     def has(value) -> bool:
-        """Recherche tolérante aux valeurs vides (None) venant de la base."""
         return q in str(value or "").lower()
 
     def card(badge, title, extra=""):
@@ -339,7 +345,7 @@ def render_global_search():
 # ══════════════════════════════════════════════════════════
 is_direct_agenda_link = st.query_params.get("app") == "agenda"
 
-# ── AGENDA DÉMO (avec bouton retour) ──────────────────────
+# ── AGENDA DÉMO ───────────────────────────────────────────
 if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
     back_label = "← Retour au Tableau de Bord" if st.session_state.get("authenticated") else "← Retour à la connexion"
     st.button(back_label, key="back_from_demo_agenda", type="secondary", on_click=leave_demo_agenda)
@@ -360,7 +366,6 @@ elif not st.session_state.get("authenticated", False):
         unsafe_allow_html=True,
     )
 
-    # 🚀 Bouton d'accès direct positionné juste après le badge de sécurité
     _, col_top_btn, _ = st.columns([1, 2, 1])
     with col_top_btn:
         st.button(
@@ -378,7 +383,6 @@ elif not st.session_state.get("authenticated", False):
         st.markdown(AUTH_SWITCH_CSS, unsafe_allow_html=True)
         mode = st.session_state.auth_mode
 
-        # Boutons côte à côte, design d'origine, sans rechargement de page
         with st.container(key="auth_switch"):
             b1, b2 = st.columns(2)
             with b1:
@@ -441,7 +445,6 @@ else:
 
     current = st.session_state.current_view
 
-    # Moteur d'alarmes invisible dans toutes les rubriques (l'Agenda a son propre panneau)
     if current != "Agenda":
         run_background_alarms()
 
@@ -451,6 +454,30 @@ else:
     else:
         st.button("← Retour au Tableau de Bord", key="back_to_home_universal",
                   type="secondary", on_click=go_home)
+        
+        # 🛡️ Si l'utilisateur entre dans l'espace Coffre-Fort, affichage de la bannière spectaculaire "Coffre-fort verrouillé par chaînes et cadenas robustes"
+        if current == "Coffre-Fort":
+            st.markdown(
+                """
+                <div class="pavel-vault-success-banner">
+                    <div style="font-size: 2.5rem; background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); 
+                                border-radius: 14px; width: 60px; height: 60px; display: flex; 
+                                align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(236,72,153,0.7);
+                                border: 1px solid rgba(255,255,255,0.4);">
+                        🔐
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <span class="zapio-badge" style="margin-bottom: 6px; display: inline-block;">🔒 Accès Sécurisé & Chiffré</span>
+                        <h3 style="color: #FFFFFF; margin: 0 0 4px 0; font-size: 1.25rem;">Coffre-Fort Déverrouillé avec Succès</h3>
+                        <p style="color: #CBD5E1; font-size: 0.88rem; margin: 0;">
+                            Vos clés API, mots de passe et secrets sont protégés par un cryptage robuste et des verrous inviolables.
+                        </p>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
         st.markdown(f"<h2 style='color: #EC4899; margin-top: 15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
 
         if current == "Agenda":
