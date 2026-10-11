@@ -194,10 +194,13 @@ def run_background_alarms():
     user = st.session_state.get("user_info")
     if not user:
         return
-    from modules.notifier import render_notifier
-    with st.container(key="pc_engine"):
-        st.markdown(ENGINE_CSS, unsafe_allow_html=True)
-        render_notifier(load_events_from_db(user["id"]), show_panel=False)
+    try:
+        from modules.notifier import render_notifier
+        with st.container(key="pc_engine"):
+            st.markdown(ENGINE_CSS, unsafe_allow_html=True)
+            render_notifier(load_events_from_db(user["id"]), show_panel=False)
+    except Exception as exc:
+        st.session_state["alarm_engine_error"] = str(exc)
 
 # Toast affiché une seule fois
 if st.session_state.get("flash"):
