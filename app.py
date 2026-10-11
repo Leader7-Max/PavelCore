@@ -10,7 +10,6 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-# ── Config page (doit être le 1er appel Streamlit) ────────
 st.set_page_config(
     page_title="PavelCore — Workspace & Agenda Premium",
     page_icon="🔮",
@@ -23,22 +22,12 @@ from modules.database import create_user_db, authenticate_user_db
 
 init_session_state()
 
-# ── CSS : injecté une seule fois par session ──────────────
-if not st.session_state.get("_css_ready"):
-    try:
-        from assets.styles import inject_custom_design
-        inject_custom_design()
-        st.session_state["_css_ready"] = True
-    except Exception:
-        pass
-else:
-    # Streamlit supprime le CSS si l'élément n'est pas rendu : on le ré-injecte
-    # de façon légère (sans recalcul coûteux).
-    try:
-        from assets.styles import inject_custom_design
-        inject_custom_design()
-    except Exception:
-        pass
+# CSS global (à rappeler à chaque exécution : Streamlit retire l'élément sinon)
+try:
+    from assets.styles import inject_custom_design
+    inject_custom_design()
+except Exception:
+    pass
 
 UPLOADS_DIR = os.path.join(ROOT_DIR, "uploaded_files")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
@@ -61,19 +50,64 @@ text_color, sub_title_color, desc_color = T["text_color"], T["sub_title_color"],
 header_box_bg, header_box_text = T["header_box_bg"], T["header_box_text"]
 card_border, card_bg = T["card_border"], T["card_bg"]
 
-# ── Import paresseux des vues (seulement après login) ─────
+# ── Import paresseux des vues (chargées seulement si utilisées) ─
 def _view(module: str, func: str):
     return getattr(importlib.import_module(f"views.{module}"), func)
+
+# ── CSS des boutons Connexion / Inscription (votre design) ─
+AUTH_SWITCH_CSS = """
+<style>
+.st-key-auth_switch [data-testid="stHorizontalBlock"]{
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+}
+.st-key-auth_switch [data-testid="stColumn"],
+.st-key-auth_switch [data-testid="column"]{
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+}
+.st-key-auth_switch button{
+    width: 100% !important;
+    border-radius: 50px !important;
+    padding: 12px 8px !important;
+    box-shadow: 0 4px 12px rgba(236,72,153,0.3) !important;
+    transition: none !important;
+}
+.st-key-auth_switch button p{
+    color: #FFF !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    margin: 0 !important;
+}
+/* Bouton actif */
+.st-key-auth_switch button[kind="primary"],
+.st-key-auth_switch button[data-testid="stBaseButton-primary"]{
+    background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+}
+/* Bouton inactif */
+.st-key-auth_switch button[kind="secondary"],
+.st-key-auth_switch button[data-testid="stBaseButton-secondary"]{
+    background: #230E3D !important;
+    border: 1px solid rgba(236,72,153,0.4) !important;
+}
+</style>
+"""
 
 # ── Sécurité login : anti force brute ─────────────────────
 MAX_ATTEMPTS, LOCK_SECONDS = 5, 60
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 def _locked_for() -> int:
-    until = st.session_state.get("lock_until", 0)
-    return max(0, int(until - time.time()))
+    return max(0, int(st.session_state.get("lock_until", 0) - time.time()))
 
-# ── Callbacks (exécutés AVANT le rerun : 1 seul cycle) ────
+# ── Callbacks (exécutés avant le rerun : un seul cycle) ───
+def set_auth_mode(mode: str):
+    st.session_state.auth_mode = mode
+    st.session_state.auth_msg = None
+
 def do_login():
     email = st.session_state.get("login_email", "").strip().lower()
     pwd = st.session_state.get("login_pass", "")
@@ -91,7 +125,7 @@ def do_login():
         st.session_state.authenticated = True
         st.session_state.user_info = res
         st.session_state.login_attempts = 0
-        st.session_state.pop("login_pass", None)   # ne pas garder le mot de passe en session
+        st.session_state.pop("login_pass", None)
         st.session_state.flash = f"🔓 Bienvenue, {res['email']} !"
     else:
         n = st.session_state.get("login_attempts", 0) + 1
@@ -109,27 +143,31 @@ def do_signup():
 
     if not EMAIL_RE.match(email):
         st.session_state.auth_msg = ("warning", "Adresse email invalide.")
-    elif len(p1) < 8:
-        st.session_state.auth_msg = ("warning", "Le mot de passe doit contenir au moins 8 caractères.")
+    elif len(p1) < 6:
+        st.session_state.auth_msg = ("warning", "Le mot de passe doit contenir au moins 6 caractères.")
     elif p1 != p2:
         st.session_state.auth_msg = ("error", "Les deux mots de passe ne correspondent pas.")
     else:
         ok, msg = create_user_db(email, p1)
         if ok:
-            st.session_state.auth_msg = ("success", msg + " Vous pouvez maintenant vous connecter.")
+            st.session_state.auth_msg = ("success", msg)
             st.session_state.pop("signup_pass", None)
             st.session_state.pop("signup_confirm_pass", None)
         else:
             st.session_state.auth_msg = ("error", msg)
 
 def do_logout():
-    for k in ("authenticated", "user_info"):
-        st.session_state[k] = False if k == "authenticated" else None
+    st.session_state.authenticated = False
+    st.session_state.user_info = None
     st.session_state.current_view = "home"
     st.session_state.flash = "🔒 Déconnexion effectuée."
 
 def go_direct_agenda():
     st.session_state.direct_agenda = True
+
+def leave_demo_agenda():
+    st.session_state.direct_agenda = False
+    st.query_params.clear()          # retire ?app=agenda
 
 def go_home():
     st.session_state.current_view = "home"
@@ -139,11 +177,11 @@ def show_auth_msg():
     if msg:
         getattr(st, msg[0])(msg[1])
 
-# ── Message flash (toast) affiché une fois ────────────────
+# Toast affiché une seule fois
 if st.session_state.get("flash"):
     st.toast(st.session_state.pop("flash"))
 
-# ── Recherche globale isolée : ne relance pas toute la page ─
+# ── Recherche globale isolée (ne relance pas toute la page) ─
 @st.fragment
 def render_global_search():
     q_raw = st.text_input(
@@ -157,7 +195,7 @@ def render_global_search():
 
     ss = st.session_state
     count = 0
-    st.markdown(f"### 🔎 Résultats pour : *'{q_raw}'*")
+    st.markdown(f"### 🔎 Résultats de recherche pour : *'{q_raw}'*")
 
     def card(badge, title, extra=""):
         st.markdown(
@@ -190,7 +228,7 @@ def render_global_search():
         st.markdown("#### 📅 Agenda & Événements")
         for it in events:
             count += 1
-            card(it["category"], it["title"], f'<p>Date : {it["date"]} à {it["time"]}</p>')
+            card(it["category"], it["title"], f'<p>Date: {it["date"]} à {it["time"]}</p>')
 
     contacts = [c for c in ss.saved_contacts
                 if q in c["name"].lower() or q in c.get("email", "").lower()
@@ -218,7 +256,11 @@ def render_global_search():
 # ══════════════════════════════════════════════════════════
 is_direct_agenda_link = st.query_params.get("app") == "agenda"
 
+# ── AGENDA DÉMO (avec bouton retour) ──────────────────────
 if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
+    back_label = "← Retour au Tableau de Bord" if st.session_state.get("authenticated") else "← Retour à la connexion"
+    st.button(back_label, key="back_from_demo_agenda", type="secondary", on_click=leave_demo_agenda)
+
     _view("agenda_view", "render_agenda_view")(
         sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color
     )
@@ -226,67 +268,88 @@ if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
 # ── ÉCRAN D'AUTHENTIFICATION ──────────────────────────────
 elif not st.session_state.get("authenticated", False):
     st.markdown(
-        f'<div style="text-align:center;margin:25px 0 20px;"><h1 style="font-size:2.8rem;margin-bottom:5px;">'
-        f'<span style="color:{text_color};">pavel</span>'
-        f'<span style="background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#FFF;padding:2px 10px;'
-        f'border-radius:8px;font-size:2rem;margin-left:6px;">CORE</span></h1>'
-        f'<div style="margin-top:10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé</span></div></div>',
+        f'<div style="text-align: center; margin-top: 25px; margin-bottom: 20px;">'
+        f'<h1 style="font-size: 2.8rem; margin-bottom: 5px;">'
+        f'<span style="color: {text_color};">pavel</span>'
+        f'<span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; '
+        f'padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1>'
+        f'<div style="margin-top: 10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé</span></div></div>',
         unsafe_allow_html=True,
     )
 
+    if "auth_mode" not in st.session_state:
+        st.session_state.auth_mode = "login"
+
     _, col, _ = st.columns([1, 2, 1])
     with col:
-        tab_login, tab_signup = st.tabs(["🔑 Connexion", "✨ Inscription"])
+        st.markdown(AUTH_SWITCH_CSS, unsafe_allow_html=True)
+        mode = st.session_state.auth_mode
 
-        with tab_login:
-            with st.form("login_form", border=False):
+        # Boutons côte à côte, design d'origine, sans rechargement de page
+        with st.container(key="auth_switch"):
+            b1, b2 = st.columns(2)
+            with b1:
+                st.button(
+                    "🔑 Connexion", key="btn_mode_login", use_container_width=True,
+                    type="primary" if mode == "login" else "secondary",
+                    on_click=set_auth_mode, args=("login",),
+                )
+            with b2:
+                st.button(
+                    "✨ Inscription", key="btn_mode_signup", use_container_width=True,
+                    type="primary" if mode == "signup" else "secondary",
+                    on_click=set_auth_mode, args=("signup",),
+                )
+
+        st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
+        if mode == "login":
+            with st.form("login_form"):
                 st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
                 st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
                 st.form_submit_button(
-                    "Se connecter au Workspace", use_container_width=True,
-                    type="primary", on_click=do_login,
+                    "Se connecter au Workspace", use_container_width=True, on_click=do_login
                 )
-            show_auth_msg()
-
-        with tab_signup:
-            with st.form("signup_form", border=False):
+        else:
+            with st.form("signup_form"):
                 st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
-                st.text_input("Créer un mot de passe (8 caractères min.)", type="password",
-                              placeholder="••••••••", key="signup_pass")
-                st.text_input("Confirmer le mot de passe", type="password",
-                              placeholder="••••••••", key="signup_confirm_pass")
+                st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
+                st.text_input("Confirmer le mot de passe", type="password", placeholder="••••••••", key="signup_confirm_pass")
                 st.form_submit_button(
-                    "S'inscrire et rejoindre PavelCore", use_container_width=True,
-                    type="primary", on_click=do_signup,
+                    "S'inscrire et rejoindre PavelCore", use_container_width=True, on_click=do_signup
                 )
-            show_auth_msg()
 
-        st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)",
-                  use_container_width=True, type="secondary", on_click=go_direct_agenda)
+        show_auth_msg()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.button(
+            "📅 Accéder directement à l'Agenda (Hors-ligne / Démo)",
+            use_container_width=True, type="secondary", on_click=go_direct_agenda,
+        )
 
 # ── APPLICATION (utilisateur connecté) ────────────────────
 else:
     col_logo, col_user, col_logout = st.columns([2, 2, 1])
     with col_logo:
         st.markdown(
-            f'<h1 style="font-size:1.3rem;margin:0;display:flex;align-items:center;gap:6px;">'
-            f'<span style="color:{text_color};">pavel</span>'
-            f'<span style="background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#FFF;padding:2px 6px;'
-            f'border-radius:6px;font-size:0.85rem;">CORE</span>'
-            f'<span class="zapio-badge-green" style="font-size:0.55rem;">● Live</span></h1>',
+            f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 6px;">'
+            f'<span style="color: {text_color};">pavel</span>'
+            f'<span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; '
+            f'padding: 2px 6px; border-radius: 6px; font-size: 0.85rem;">CORE</span>'
+            f'<span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>',
             unsafe_allow_html=True,
         )
     with col_user:
         email = (st.session_state.get("user_info") or {}).get("email", "Membre")
         st.markdown(
-            f'<div style="text-align:center;color:{desc_color};font-size:0.85rem;padding-top:5px;">'
-            f'👤 Connecté en tant que : <strong style="color:{sub_title_color};">{email}</strong></div>',
+            f'<div style="text-align: center; color: {desc_color}; font-size: 0.85rem; padding-top: 5px;">'
+            f'👤 Connecté en tant que : <strong style="color: {sub_title_color};">{email}</strong></div>',
             unsafe_allow_html=True,
         )
     with col_logout:
         st.button("🔒 Déconnexion", use_container_width=True, type="secondary", on_click=do_logout)
 
-    st.markdown("<hr style='border-color:rgba(236,72,153,0.2);margin:15px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0;'>", unsafe_allow_html=True)
     render_global_search()
 
     current = st.session_state.current_view
@@ -296,7 +359,7 @@ else:
     else:
         st.button("← Retour au Tableau de Bord", key="back_to_home_universal",
                   type="secondary", on_click=go_home)
-        st.markdown(f"<h2 style='color:#EC4899;margin-top:15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='color: #EC4899; margin-top: 15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
 
         if current == "Agenda":
             _view("agenda_view", "render_agenda_view")(
