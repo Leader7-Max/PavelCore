@@ -135,78 +135,109 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # CSS ciblé UNIQUEMENT sur les boutons d'authentification pour garder le centrage global de la page
+        # CSS et structure HTML pure pour un basculement local instantané (0 charge serveur)
         st.markdown("""
             <style>
-                .custom-auth-buttons div[data-testid="stHorizontalBlock"] {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    flex-wrap: nowrap !important;
-                    gap: 10px !important;
+                .auth-tab-btn {
+                    flex: 1;
+                    padding: 12px 8px;
+                    border-radius: 50px;
+                    text-align: center;
+                    font-weight: 700;
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                    border: 1px solid rgba(236,72,153,0.4);
+                    background: #230E3D;
+                    color: #FFF;
+                    transition: all 0.2s ease;
                 }
-                .custom-auth-buttons div[data-testid="column"] {
-                    width: 50% !important;
-                    flex: 1 1 50% !important;
-                    min-width: 0 !important;
+                .auth-tab-btn.active {
+                    background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+                    border-color: rgba(255,255,255,0.4);
+                    box-shadow: 0 4px 12px rgba(236,72,153,0.3);
                 }
             </style>
+            <script>
+                function switchAuthTab(mode) {
+                    const loginForm = document.getElementById('form-login-container');
+                    const signupForm = document.getElementById('form-signup-container');
+                    const btnLogin = document.getElementById('btn-tab-login');
+                    const btnSignup = document.getElementById('btn-tab-signup');
+                    
+                    if(mode === 'login') {
+                        if(loginForm) loginForm.style.display = 'block';
+                        if(signupForm) signupForm.style.display = 'none';
+                        if(btnLogin) { btnLogin.classList.add('active'); }
+                        if(btnSignup) { btnSignup.classList.remove('active'); }
+                    } else {
+                        if(loginForm) loginForm.style.display = 'none';
+                        if(signupForm) signupForm.style.display = 'block';
+                        if(btnSignup) { btnSignup.classList.add('active'); }
+                        if(btnLogin) { btnLogin.classList.remove('active'); }
+                    }
+                }
+            </script>
         """, unsafe_allow_html=True)
 
-        # Conteneur isolé pour les boutons de connexion / inscription
-        st.markdown('<div class="custom-auth-buttons">', unsafe_allow_html=True)
-        auth_col1, auth_col2 = st.columns(2)
-        with auth_col1:
-            if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
-                st.session_state.auth_mode = "login"
-                st.rerun()
-        with auth_col2:
-            if st.button("✨ Inscription", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
-                st.session_state.auth_mode = "signup"
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        is_login = st.session_state.auth_mode == "login"
+
+        # Boutons de bascule HTML cliquables instantanément sans recharger Python
+        st.markdown(f"""
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
+                <div id="btn-tab-login" class="auth-tab-btn {'active' if is_login else ''}" onclick="switchAuthTab('login')">
+                    🔑 Connexion
+                </div>
+                <div id="btn-tab-signup" class="auth-tab-btn {'active' if not is_login else ''}" onclick="switchAuthTab('signup')">
+                    ✨ Inscription
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Bouton d'accès direct à l'Agenda
+        # Conteneur Connexion
+        st.markdown(f'<div id="form-login-container" style="display: {"block" if is_login else "none"};">', unsafe_allow_html=True)
+        with st.form("login_form"):
+            email = st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
+            password = st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
+            submit_login = st.form_submit_button("Se connecter au Workspace", use_container_width=True)
+            
+            if submit_login:
+                ok, res = authenticate_user_db(email, password)
+                if ok:
+                    st.session_state.authenticated = True
+                    st.session_state.user_info = res
+                    st.toast(f"🔓 Bienvenue, {res['email']} !", icon="✨")
+                    st.rerun()
+                else:
+                    st.error(res)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Conteneur Inscription
+        st.markdown(f'<div id="form-signup-container" style="display: {"none" if is_login else "block"};">', unsafe_allow_html=True)
+        with st.form("signup_form"):
+            new_email = st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
+            new_pass = st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
+            confirm_pass = st.text_input("Confirmer le mot de passe", type="password", placeholder="••••••••", key="signup_confirm_pass")
+            submit_signup = st.form_submit_button("S'inscrire et rejoindre PavelCore", use_container_width=True)
+            
+            if submit_signup:
+                if new_pass != confirm_pass:
+                    st.error("Les deux mots de passe ne correspondent pas.")
+                elif len(new_pass) < 6:
+                    st.warning("Le mot de passe doit contenir au moins 6 caractères.")
+                else:
+                    ok, msg = create_user_db(new_email, new_pass)
+                    if ok:
+                        st.success(msg)
+                    else:
+                        st.error(msg)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
         if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
             st.session_state.direct_agenda = True
             st.rerun()
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        if st.session_state.auth_mode == "login":
-            with st.form("login_form"):
-                email = st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
-                password = st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
-                submit_login = st.form_submit_button("Se connecter au Workspace", use_container_width=True)
-                
-                if submit_login:
-                    ok, res = authenticate_user_db(email, password)
-                    if ok:
-                        st.session_state.authenticated = True
-                        st.session_state.user_info = res
-                        st.toast(f"🔓 Bienvenue, {res['email']} !", icon="✨")
-                        st.rerun()
-                    else:
-                        st.error(res)
-        else:
-            with st.form("signup_form"):
-                new_email = st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
-                new_pass = st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
-                confirm_pass = st.text_input("Confirmer le mot de passe", type="password", placeholder="••••••••", key="signup_confirm_pass")
-                submit_signup = st.form_submit_button("S'inscrire et rejoindre PavelCore", use_container_width=True)
-                
-                if submit_signup:
-                    if new_pass != confirm_pass:
-                        st.error("Les deux mots de passe ne correspondent pas.")
-                    elif len(new_pass) < 6:
-                        st.warning("Le mot de passe doit contenir au moins 6 caractères.")
-                    else:
-                        ok, msg = create_user_db(new_email, new_pass)
-                        if ok:
-                            st.success(msg)
-                        else:
-                            st.error(msg)
 
 else:
     col_logo, col_user, col_logout = st.columns([2, 2, 1])
