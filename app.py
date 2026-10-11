@@ -103,6 +103,19 @@ AUTH_SWITCH_CSS = """
     background: #230E3D !important;
     border: 1px solid rgba(236,72,153,0.4) !important;
 }
+
+/* Design Card Message Succès Inscription */
+.pavel-auth-success-card {
+    background: linear-gradient(135deg, rgba(35, 14, 61, 0.95) 0%, rgba(23, 10, 46, 0.95) 100%) !important;
+    border: 1px solid rgba(236, 72, 153, 0.5) !important;
+    border-radius: 16px !important;
+    padding: 18px 20px !important;
+    margin-top: 15px !important;
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.25) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+}
 </style>
 """
 
@@ -172,9 +185,16 @@ def do_signup():
     else:
         ok, msg = create_user_db(email, p1)
         if ok:
-            st.session_state.auth_msg = ("success", msg)
+            # 1. Message de succès
+            st.session_state.auth_msg = ("success", f"✨ Compte créé avec succès pour {email} ! Vous pouvez vous connecter.")
+            # 2. Re-remplir automatiquement l'email dans le formulaire de connexion
+            st.session_state["login_email"] = email
+            # 3. Réinitialiser et effacer les champs d'inscription
+            st.session_state.pop("signup_email", None)
             st.session_state.pop("signup_pass", None)
             st.session_state.pop("signup_confirm_pass", None)
+            # 4. Basculer automatiquement sur l'onglet Connexion
+            st.session_state.auth_mode = "login"
         else:
             st.session_state.auth_msg = ("error", msg)
 
@@ -197,7 +217,30 @@ def go_home():
 def show_auth_msg():
     msg = st.session_state.get("auth_msg")
     if msg:
-        getattr(st, msg[0])(msg[1])
+        kind, text = msg[0], msg[1]
+        if kind == "success":
+            st.markdown(
+                f"""
+                <div class="pavel-auth-success-card">
+                    <div style="font-size: 1.8rem; background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); 
+                                border-radius: 50%; width: 42px; height: 42px; display: flex; 
+                                align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(236,72,153,0.6);">
+                        ✨
+                    </div>
+                    <div>
+                        <strong style="color: #FFFFFF; font-size: 0.95rem; display: block; margin-bottom: 2px;">
+                            Compte créé avec succès !
+                        </strong>
+                        <span style="color: #CBD5E1; font-size: 0.85rem;">
+                            {text.replace("✨ Compte créé avec succès ! ", "")}
+                        </span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            getattr(st, kind)(text)
 
 def run_background_alarms():
     """Les alarmes sonnent dans toutes les rubriques. L'Agenda affiche son propre panneau (un seul moteur actif)."""
