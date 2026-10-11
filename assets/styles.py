@@ -181,7 +181,7 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               7. ONGLETS STREAMLIT (st.tabs) - FORÇAGE RADICAL CSS
+               7. ONGLETS & NAVIGATION RESPONSIVE MOBILE
                ========================================================= */
             div[data-baseweb="tab-list"] {
                 background-color: #230E3D !important;
@@ -191,44 +191,17 @@ def inject_custom_design():
                 gap: 6px !important;
             }
 
-            button[data-baseweb="tab"] {
-                background-color: transparent !important;
-                border-radius: 8px !important;
-                border: none !important;
-            }
-
-            button[data-baseweb="tab"] *, 
-            button[data-baseweb="tab"] div, 
-            button[data-baseweb="tab"] span, 
-            button[data-baseweb="tab"] p {
-                color: #CBD5E1 !important;
-                font-weight: 600 !important;
-            }
-
-            button[data-baseweb="tab"]:hover {
-                background-color: rgba(139, 92, 246, 0.2) !important;
-            }
-            button[data-baseweb="tab"]:hover *,
-            button[data-baseweb="tab"]:hover span {
-                color: #FFFFFF !important;
-            }
-
-            button[data-baseweb="tab"][aria-selected="true"] {
-                background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-                box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
-            }
-            button[data-baseweb="tab"][aria-selected="true"] *,
-            button[data-baseweb="tab"][aria-selected="true"] span,
-            button[data-baseweb="tab"][aria-selected="true"] p {
-                color: #FFFFFF !important;
-                font-weight: 700 !important;
-            }
-
-            div[data-baseweb="tab-highlight"],
-            div[data-testid="stTabs"] div[data-baseweb="tab-highlight"],
-            [data-baseweb="tab-border"] {
-                background-color: #EC4899 !important;
-                background: #EC4899 !important;
+            /* Forcer les colonnes d'authentification côte à côte même sur mobile */
+            @media (max-width: 640px) {
+                [data-testid="stHorizontalBlock"] {
+                    display: flex !important;
+                    flex-direction: row !important;
+                }
+                [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+                    width: 50% !important;
+                    flex: 1 1 50% !important;
+                    min-width: unset !important;
+                }
             }
         </style>
     """, unsafe_allow_html=True)
