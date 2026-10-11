@@ -181,39 +181,51 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               7. ONGLETS STREAMLIT (st.tabs) PERSONNALISÉS
+               7. ONGLETS STREAMLIT (st.tabs) PERSONNALISÉS & FORCÉS
                ========================================================= */
             div[data-baseweb="tab-list"] {
-                gap: 8px !important;
-                background-color: rgba(23, 10, 46, 0.5) !important;
-                padding: 6px !important;
+                gap: 10px !important;
+                background-color: #230E3D !important;
+                padding: 8px !important;
                 border-radius: 14px !important;
-                border: 1px solid rgba(236, 72, 153, 0.2) !important;
+                border: 1px solid rgba(236, 72, 153, 0.3) !important;
             }
 
             div[data-baseweb="tab"] {
                 background-color: transparent !important;
                 border-radius: 10px !important;
+                padding: 10px 20px !important;
+            }
+
+            div[data-baseweb="tab"] p, 
+            div[data-baseweb="tab"] span {
                 color: #CBD5E1 !important;
                 font-weight: 600 !important;
-                padding: 10px 18px !important;
-                transition: all 0.3s ease !important;
+                font-size: 0.95rem !important;
             }
 
             div[data-baseweb="tab"]:hover {
-                background-color: rgba(139, 92, 246, 0.15) !important;
+                background-color: rgba(139, 92, 246, 0.2) !important;
+            }
+
+            div[data-baseweb="tab"]:hover p,
+            div[data-baseweb="tab"]:hover span {
                 color: #FFFFFF !important;
             }
 
             div[data-baseweb="tab"][aria-selected="true"] {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-                color: #FFFFFF !important;
-                font-weight: 700 !important;
                 box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
             }
 
+            div[data-baseweb="tab"][aria-selected="true"] p,
+            div[data-baseweb="tab"][aria-selected="true"] span {
+                color: #FFFFFF !important;
+                font-weight: 700 !important;
+            }
+
             div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
-                background-color: #EC4899 !important;
+                display: none !important;
             }
         </style>
     """, unsafe_allow_html=True)
