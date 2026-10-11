@@ -1,7 +1,7 @@
 import streamlit as st
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec un design ultra-premium."""
+    """Affiche le Tableau de Bord principal de PavelCore avec un design ultra-premium et responsive."""
     
     # Récupération de l'utilisateur connecté
     user_email = st.session_state.user_info.get("email", "Utilisateur") if st.session_state.get("user_info") else "Mode Invité"
@@ -26,9 +26,9 @@ def render_home_view():
     with col1:
         st.markdown("""
             <div class="pavel-card-grid">
-                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📅 Agenda & Planning</div>
-                <div style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin: 8px 0;">Synchronisé</div>
-                <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Module actif et sécurisé</div>
+                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📅 Agenda</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Synchronisé</div>
+                <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Module actif</div>
             </div>
         """, unsafe_allow_html=True)
 
@@ -36,8 +36,8 @@ def render_home_view():
         st.markdown("""
             <div class="pavel-card-grid">
                 <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🔐 Coffre-Fort</div>
-                <div style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin: 8px 0;">Chiffré</div>
-                <div style="font-size: 0.8rem; color: #F472B6; font-weight: 600;">● Protection cloisonnée</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Chiffré</div>
+                <div style="font-size: 0.8rem; color: #F472B6; font-weight: 600;">● Cloisonné</div>
             </div>
         """, unsafe_allow_html=True)
 
@@ -45,36 +45,36 @@ def render_home_view():
         st.markdown("""
             <div class="pavel-card-grid">
                 <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Performance</div>
-                <div style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin: 8px 0;">Ultra-Fluide</div>
-                <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Design System Actif</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Ultra-Fluide</div>
+                <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Design Actif</div>
             </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Section Actions Rapides & Aperçu
+    # Section Accès Rapide aux Modules avec alignement robuste
     st.markdown("### ⚡ Accès Rapide aux Modules")
     
     q_col1, q_col2 = st.columns(2)
     
     with q_col1:
         st.markdown("""
-            <div class="pavel-card-grid">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.2rem;">🗓️ Gérer l'Agenda</h3>
-                <p style="color: #94A3B8; font-size: 0.9rem;">Consultez votre calendrier, planifiez vos événements et suivez vos échéances.</p>
+            <div class="pavel-card-grid" style="min-height: 140px;">
+                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🗓️ Gérer l'Agenda</h3>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Consultez votre calendrier, planifiez vos événements et suivez vos échéances.</p>
             </div>
         """, unsafe_allow_html=True)
-        if st.button("Ouvrir l'Agenda", key="goto_agenda", type="primary"):
-            st.session_state.active_tab = "Agenda"
+        if st.button("Ouvrir l'Agenda", key="goto_agenda", use_container_width=True, type="primary"):
+            st.session_state.current_view = "Agenda"
             st.rerun()
 
     with q_col2:
         st.markdown("""
-            <div class="pavel-card-grid">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.2rem;">🔑 Sécuriser vos Données</h3>
-                <p style="color: #94A3B8; font-size: 0.9rem;">Accédez à votre coffre-fort pour stocker vos clés API et identifiants en toute sécurité.</p>
+            <div class="pavel-card-grid" style="min-height: 140px;">
+                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🔑 Sécuriser vos Données</h3>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Accédez à votre coffre-fort pour stocker vos clés API et identifiants en toute sécurité.</p>
             </div>
         """, unsafe_allow_html=True)
-        if st.button("Ouvrir le Coffre-Fort", key="goto_vault", type="secondary"):
-            st.session_state.active_tab = "Coffre-Fort"
+        if st.button("Ouvrir le Coffre-Fort", key="goto_vault", use_container_width=True, type="secondary"):
+            st.session_state.current_view = "Coffre-Fort"
             st.rerun()
