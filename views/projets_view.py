@@ -1,23 +1,24 @@
 import streamlit as st
 
 def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
-    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec des expanders sur fond rouge et texte blanc."""
+    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec des expanders en violet clair et texte blanc."""
     
-    # CSS personnalisé pour forcer le fond rouge (avec un effet dégradé chic) et le texte en blanc
+    # CSS personnalisé pour un fond violet clair élégant et texte en blanc
     st.markdown("""
         <style>
             div[data-testid="stExpander"] {
-                background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+                background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%) !important;
                 border-radius: 12px !important;
-                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border: 1px solid rgba(255, 255, 255, 0.25) !important;
                 margin-bottom: 12px !important;
+                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25) !important;
             }
             .streamlit-expanderHeader p, .streamlit-expanderHeader span, div[data-testid="stExpander"] summary, div[data-testid="stExpander"] summary p {
                 color: #FFFFFF !important;
                 font-weight: 700 !important;
             }
             div[data-testid="stExpanderDetails"] {
-                background-color: rgba(0, 0, 0, 0.2) !important;
+                background-color: rgba(0, 0, 0, 0.15) !important;
                 border-bottom-left-radius: 12px !important;
                 border-bottom-right-radius: 12px !important;
                 padding: 15px !important;
