@@ -1,7 +1,7 @@
 import streamlit as st
 
 def inject_custom_design():
-    """Injecte le design et force l'affichage permanent du bouton de téléchargement."""
+    """Injecte le système de design Silicon Valley et assure la visibilité permanente de tous les boutons et uploaders."""
     
     st.markdown("""
         <style>
@@ -54,8 +54,8 @@ def inject_custom_design():
             }
 
             input, textarea {
-                color: #FFFFFF !important;
-                font-weight: 500 !important;
+                color: #0F172A !important;
+                font-weight: 600 !important;
                 caret-color: #EC4899 !important;
             }
 
