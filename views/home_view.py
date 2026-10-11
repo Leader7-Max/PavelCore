@@ -1,9 +1,9 @@
 import streamlit as st
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec des compteurs dynamiques au design néon/glow ultra-premium."""
+    """Affiche le Tableau de Bord principal de PavelCore au design néon/glow ultra-premium."""
     
-    # CSS dédié au stylage haut de gamme des compteurs et badges du dashboard
+    # CSS dédié au stylage haut de gamme des badges du dashboard
     st.markdown("""
         <style>
             /* Badges de compteurs néon en haut à droite des cartes */
@@ -17,17 +17,6 @@ def render_home_view():
                 box-shadow: 0 0 12px rgba(236, 72, 153, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4) !important;
                 border: 1px solid rgba(255, 255, 255, 0.4) !important;
                 letter-spacing: 0.5px !important;
-            }
-
-            /* Valeurs chiffrées des cartes de métriques du haut */
-            .pavel-metric-value {
-                font-size: 1.6rem !important;
-                font-weight: 800 !important;
-                background: linear-gradient(135deg, #FFFFFF 0%, #F472B6 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                filter: drop-shadow(0 2px 8px rgba(236, 72, 153, 0.4));
-                margin: 6px 0 !important;
             }
 
             /* Halo lumineux au survol des cartes */
@@ -71,36 +60,6 @@ def render_home_view():
             </div>
         </div>
     """, unsafe_allow_html=True)
-
-    # Grille de Métriques Globales du Haut
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown(f"""
-            <div class="pavel-card-grid">
-                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📅 Agenda</div>
-                <div class="pavel-metric-value">{count_agenda} Événement(s)</div>
-                <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Module actif</div>
-            </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown(f"""
-            <div class="pavel-card-grid">
-                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🔐 Coffre-Fort</div>
-                <div class="pavel-metric-value">{count_vault} Élément(s)</div>
-                <div style="font-size: 0.8rem; color: #F472B6; font-weight: 600;">● Cloisonné</div>
-            </div>
-        """, unsafe_allow_html=True)
-
-    with col3:
-        st.markdown(f"""
-            <div class="pavel-card-grid">
-                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Performance</div>
-                <div class="pavel-metric-value">Ultra-Fluide</div>
-                <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Design Actif</div>
-            </div>
-        """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### ⚡ Accès Rapide aux Modules")
