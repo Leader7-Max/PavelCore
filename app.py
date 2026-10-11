@@ -52,7 +52,16 @@ card_border, card_bg = T["card_border"], T["card_bg"]
 
 # ── Import paresseux des vues (chargées seulement si utilisées) ─
 def _view(module: str, func: str):
-    return getattr(importlib.import_module(f"views.{module}"), func)
+    try:
+        mod = importlib.import_module(f"views.{module}")
+        return getattr(mod, func)
+    except (ModuleNotFoundError, AttributeError) as exc:
+        def error_placeholder(*args, **kwargs):
+            st.error(
+                f"⚠️ Erreur de chargement : Impossible de charger la vue "
+                f"`views.{module}` (fonction `{func}`). Détails : {exc}"
+            )
+        return error_placeholder
 
 # ── CSS des boutons Connexion / Inscription (votre design) ─
 AUTH_SWITCH_CSS = """
