@@ -130,7 +130,7 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # Boutons natifs Streamlit côte à côte pour un basculement instantané sans latence HTTP
+        # --- SEULE MODIFICATION APPORTÉE ICI (Boutons natifs instantanés) ---
         b_col1, b_col2 = st.columns(2)
         with b_col1:
             if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
@@ -140,6 +140,7 @@ elif not st.session_state.get("authenticated", False):
             if st.button("✨ Inscription", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
                 st.session_state.auth_mode = "signup"
                 st.rerun()
+        # -----------------------------------------------------------------
 
         st.markdown("<br>", unsafe_allow_html=True)
 
