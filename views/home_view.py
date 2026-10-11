@@ -3,7 +3,6 @@ import streamlit as st
 def render_home_view():
     """Affiche le Tableau de Bord principal de PavelCore avec un design ultra-premium et responsive."""
     
-    # Récupération de l'utilisateur connecté
     user_email = st.session_state.user_info.get("email", "Utilisateur") if st.session_state.get("user_info") else "Mode Invité"
     
     # En-tête / Bannière Héroïque
@@ -20,13 +19,13 @@ def render_home_view():
         </div>
     """, unsafe_allow_html=True)
 
-    # Grille de Métriques / Statistiques Rapides
+    # Grille de Métriques
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
             <div class="pavel-card-grid">
-                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📅 Agenda</div>
+                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase;">📅 Agenda</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Synchronisé</div>
                 <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Module actif</div>
             </div>
@@ -35,7 +34,7 @@ def render_home_view():
     with col2:
         st.markdown("""
             <div class="pavel-card-grid">
-                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🔐 Coffre-Fort</div>
+                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase;">🔐 Coffre-Fort</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Chiffré</div>
                 <div style="font-size: 0.8rem; color: #F472B6; font-weight: 600;">● Cloisonné</div>
             </div>
@@ -44,37 +43,87 @@ def render_home_view():
     with col3:
         st.markdown("""
             <div class="pavel-card-grid">
-                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Performance</div>
+                <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase;">⚡ Performance</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Ultra-Fluide</div>
                 <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Design Actif</div>
             </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-
-    # Section Accès Rapide aux Modules avec alignement robuste
     st.markdown("### ⚡ Accès Rapide aux Modules")
     
-    q_col1, q_col2 = st.columns(2)
-    
-    with q_col1:
+    # Première ligne de modules
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
         st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 140px;">
+            <div class="pavel-card-grid" style="min-height: 120px;">
                 <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🗓️ Gérer l'Agenda</h3>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Consultez votre calendrier, planifiez vos événements et suivez vos échéances.</p>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Consultez votre calendrier et planifiez vos événements.</p>
             </div>
         """, unsafe_allow_html=True)
-        if st.button("Ouvrir l'Agenda", key="goto_agenda", use_container_width=True, type="primary"):
+        if st.button("Ouvrir l'Agenda", key="btn_agenda", use_container_width=True, type="primary"):
             st.session_state.current_view = "Agenda"
             st.rerun()
 
-    with q_col2:
+    with r_col2:
         st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 140px;">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🔑 Sécuriser vos Données</h3>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Accédez à votre coffre-fort pour stocker vos clés API et identifiants en toute sécurité.</p>
+            <div class="pavel-card-grid" style="min-height: 120px;">
+                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🔐 Coffre-Fort Sécurisé</h3>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Stockez vos clés API et mots de passe en toute sécurité.</p>
             </div>
         """, unsafe_allow_html=True)
-        if st.button("Ouvrir le Coffre-Fort", key="goto_vault", use_container_width=True, type="secondary"):
+        if st.button("Ouvrir le Coffre-Fort", key="btn_vault", use_container_width=True, type="secondary"):
             st.session_state.current_view = "Coffre-Fort"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Seconde ligne de modules
+    r_col3, r_col4 = st.columns(2)
+    with r_col3:
+        st.markdown("""
+            <div class="pavel-card-grid" style="min-height: 120px;">
+                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🤖 Prompts & IA</h3>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Bibliothèque complète de prompts et scripts.</p>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Ouvrir Prompts & IA", key="btn_prompts", use_container_width=True, type="secondary"):
+            st.session_state.current_view = "Prompts & IA"
+            st.rerun()
+
+    with r_col4:
+        st.markdown("""
+            <div class="pavel-card-grid" style="min-height: 120px;">
+                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🚀 Projets & Idées</h3>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Suivi de vos projets actifs et futurs.</p>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Ouvrir Projets", key="btn_projects", use_container_width=True, type="secondary"):
+            st.session_state.current_view = "Projets"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Troisième ligne de modules
+    r_col5, r_col6 = st.columns(2)
+    with r_col5:
+        st.markdown("""
+            <div class="pavel-card-grid" style="min-height: 120px;">
+                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">📁 Médias & Fichiers</h3>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Gestion des images, documents et fichiers.</p>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Ouvrir Médias & Fichiers", key="btn_media", use_container_width=True, type="secondary"):
+            st.session_state.current_view = "Médias & Fichiers"
+            st.rerun()
+
+    with r_col6:
+        st.markdown("""
+            <div class="pavel-card-grid" style="min-height: 120px;">
+                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🎴 Contacts & Emails</h3>
+                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Répertoire et templates de communication.</p>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Ouvrir Contacts & Emails", key="btn_contacts", use_container_width=True, type="secondary"):
+            st.session_state.current_view = "Contacts & Emails"
             st.rerun()
