@@ -19,7 +19,8 @@ st.set_page_config(
 )
 
 from modules.state import init_session_state
-from modules.database import create_user_db, authenticate_user_db, load_events_from_db
+from modules.database import load_events_from_db
+from modules.auth import supabase_signup, supabase_login
 
 init_session_state()
 
@@ -165,7 +166,7 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 def _locked_for() -> int:
     return max(0, int(st.session_state.get("lock_until", 0) - time.time()))
 
-# ── Callbacks (exécutés avant le rerun : un seul cycle) ───
+# ── Callbacks Supabase ────────────────────────────────────
 def set_auth_mode(mode: str):
     st.session_state.auth_mode = mode
     st.session_state.auth_msg = None
@@ -182,7 +183,7 @@ def do_login():
         st.session_state.auth_msg = ("warning", "Renseignez un email valide et votre mot de passe.")
         return
 
-    ok, res = authenticate_user_db(email, pwd)
+    ok, res = supabase_login(email, pwd)
     if ok:
         st.session_state.authenticated = True
         st.session_state.user_info = res
@@ -210,9 +211,9 @@ def do_signup():
     elif p1 != p2:
         st.session_state.auth_msg = ("error", "Les deux mots de passe ne correspondent pas.")
     else:
-        ok, msg = create_user_db(email, p1)
+        ok, msg = supabase_signup(email, p1)
         if ok:
-            st.session_state.auth_msg = ("success", f"✨ Compte créé avec succès pour {email} ! Vous pouvez vous connecter.")
+            st.session_state.auth_msg = ("success", msg)
             st.session_state["login_email"] = email
             st.session_state.pop("signup_email", None)
             st.session_state.pop("signup_pass", None)
@@ -253,10 +254,10 @@ def show_auth_msg():
                     </div>
                     <div>
                         <strong style="color: #FFFFFF; font-size: 0.95rem; display: block; margin-bottom: 2px;">
-                            Compte créé avec succès !
+                            Vérification requise
                         </strong>
                         <span style="color: #CBD5E1; font-size: 0.85rem;">
-                            {text.replace("✨ Compte créé avec succès ! ", "")}
+                            {text}
                         </span>
                     </div>
                 </div>
@@ -377,7 +378,7 @@ elif not st.session_state.get("authenticated", False):
         f'<span style="color: {text_color};">pavel</span>'
         f'<span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; '
         f'padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1>'
-        f'<div style="margin-top: 10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé</span></div></div>',
+        f'<div style="margin-top: 10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé (Supabase Auth)</span></div></div>',
         unsafe_allow_html=True,
     )
 
@@ -442,7 +443,7 @@ else:
             f'<span style="color: {text_color};">pavel</span>'
             f'<span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; '
             f'padding: 2px 6px; border-radius: 6px; font-size: 0.85rem;">CORE</span>'
-            f'<span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>',
+            f'<span class="zapio-badge-green" style="font-size: 0.55rem;">● Live (Supabase)</span></h1>',
             unsafe_allow_html=True,
         )
     with col_user:
@@ -457,7 +458,6 @@ else:
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0;'>", unsafe_allow_html=True)
 
-    # 🔓 Affichage de la bannière de bienvenue avec fermeture automatique au bout de 5 secondes (5000 ms)
     if st.session_state.get("welcome_banner_msg"):
         welcome_text = st.session_state.pop("welcome_banner_msg")
         st.markdown(
