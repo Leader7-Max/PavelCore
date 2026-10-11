@@ -128,6 +128,7 @@ AUTH_SWITCH_CSS = """
     display: flex !important;
     align-items: center !important;
     gap: 18px !important;
+    transition: opacity 0.8s ease-out;
 }
 
 /* Design Card Coffre-Fort Sécurisé */
@@ -187,7 +188,6 @@ def do_login():
         st.session_state.user_info = res
         st.session_state.login_attempts = 0
         st.session_state.pop("login_pass", None)
-        # On stocke un message persistant pour l'affichage en bannière (au lieu d'un simple toast éphémère)
         st.session_state.welcome_banner_msg = f"🔓 Bienvenue dans votre Workspace sécurisé, {res['email']} !"
     else:
         n = st.session_state.get("login_attempts", 0) + 1
@@ -457,12 +457,12 @@ else:
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0;'>", unsafe_allow_html=True)
 
-    # 🔓 Affichage persistant et élégant du message de bienvenue après connexion
+    # 🔓 Affichage de la bannière de bienvenue avec fermeture automatique au bout de 5 secondes (5000 ms)
     if st.session_state.get("welcome_banner_msg"):
-        welcome_text = st.session_state.welcome_banner_msg
+        welcome_text = st.session_state.pop("welcome_banner_msg")
         st.markdown(
             f"""
-            <div class="pavel-login-success-banner">
+            <div id="pavel-welcome-toast" class="pavel-login-success-banner">
                 <div style="font-size: 2.2rem; background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); 
                             border-radius: 14px; width: 52px; height: 52px; display: flex; 
                             align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(236,72,153,0.6);
@@ -475,12 +475,18 @@ else:
                     <p style="color: #CBD5E1; font-size: 0.86rem; margin: 0;">{welcome_text}</p>
                 </div>
             </div>
+            <script>
+                setTimeout(function() {{
+                    var banner = document.getElementById("pavel-welcome-toast");
+                    if (banner) {{
+                        banner.style.opacity = '0';
+                        setTimeout(function() {{ banner.style.display = 'none'; }}, 800);
+                    }}
+                }}, 5000);
+            </script>
             """,
             unsafe_allow_html=True,
         )
-        if st.button("Fermer cette notification", key="btn_close_welcome_banner", type="secondary"):
-            st.session_state.welcome_banner_msg = None
-            st.rerun()
 
     render_global_search()
 
