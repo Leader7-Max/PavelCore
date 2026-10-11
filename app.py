@@ -1,258 +1,315 @@
 import sys
 import os
-import json
-import base64
+import re
+import time
+import importlib
 import streamlit as st
-import pandas as pd
-from datetime import datetime, date, time
 
-# Correctif robuste pour les chemins sur Streamlit Cloud
+# ── Chemins ────────────────────────────────────────────────
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-# Configuration de la page
+# ── Config page (doit être le 1er appel Streamlit) ────────
 st.set_page_config(
     page_title="PavelCore — Workspace & Agenda Premium",
     page_icon="🔮",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
 
-# Import de l'état global modulaire
 from modules.state import init_session_state
-init_session_state()
-
-# Import sécurisé et injection du design CSS global
-try:
-    from assets.styles import inject_custom_design
-    inject_custom_design()
-except Exception:
-    pass
-
-# Import des fonctions base de données utilisateurs
 from modules.database import create_user_db, authenticate_user_db
 
-# Import de toutes les vues modulaires
-from views.home_view import render_home_view
-from views.agenda_view import render_agenda_view
-from views.dev_ia_view import render_dev_ia_view
-from views.projets_view import render_projets_view
-from views.media_view import render_media_view
-from views.vault_contacts_view import render_vault_view, render_contacts_view
-from views.backup_view import render_backup_view
+init_session_state()
 
-# Dossier local pour le stockage des fichiers uploadés
+# ── CSS : injecté une seule fois par session ──────────────
+if not st.session_state.get("_css_ready"):
+    try:
+        from assets.styles import inject_custom_design
+        inject_custom_design()
+        st.session_state["_css_ready"] = True
+    except Exception:
+        pass
+else:
+    # Streamlit supprime le CSS si l'élément n'est pas rendu : on le ré-injecte
+    # de façon légère (sans recalcul coûteux).
+    try:
+        from assets.styles import inject_custom_design
+        inject_custom_design()
+    except Exception:
+        pass
+
 UPLOADS_DIR = os.path.join(ROOT_DIR, "uploaded_files")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
-# Définition sécurisée des couleurs pour les variables de texte
-theme_mode = st.session_state.get("theme_mode", "Sombre Nuit")
-if theme_mode == "Blanc Épuré":
-    text_color = "#0F172A"
-    sub_title_color = "#0F172A"
-    desc_color = "#475569"
-    header_box_bg = "#F1F5F9"
-    header_box_text = "#475569"
-    card_border = "#E2E8F0"
-    card_bg = "#FFFFFF"
-else:
-    text_color = "#F8FAFC"
-    sub_title_color = "#FFF"
-    desc_color = "#CBD5E1"
-    header_box_bg = "#1E0A3C"
-    header_box_text = "#A78BFA"
-    card_border = "#2B1552"
-    card_bg = "#170A2E"
+# ── Thème ──────────────────────────────────────────────────
+THEMES = {
+    "Blanc Épuré": dict(
+        text_color="#0F172A", sub_title_color="#0F172A", desc_color="#475569",
+        header_box_bg="#F1F5F9", header_box_text="#475569",
+        card_border="#E2E8F0", card_bg="#FFFFFF",
+    ),
+    "Sombre Nuit": dict(
+        text_color="#F8FAFC", sub_title_color="#FFF", desc_color="#CBD5E1",
+        header_box_bg="#1E0A3C", header_box_text="#A78BFA",
+        card_border="#2B1552", card_bg="#170A2E",
+    ),
+}
+T = THEMES.get(st.session_state.get("theme_mode", "Sombre Nuit"), THEMES["Sombre Nuit"])
+text_color, sub_title_color, desc_color = T["text_color"], T["sub_title_color"], T["desc_color"]
+header_box_bg, header_box_text = T["header_box_bg"], T["header_box_text"]
+card_border, card_bg = T["card_border"], T["card_bg"]
 
+# ── Import paresseux des vues (seulement après login) ─────
+def _view(module: str, func: str):
+    return getattr(importlib.import_module(f"views.{module}"), func)
+
+# ── Sécurité login : anti force brute ─────────────────────
+MAX_ATTEMPTS, LOCK_SECONDS = 5, 60
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+def _locked_for() -> int:
+    until = st.session_state.get("lock_until", 0)
+    return max(0, int(until - time.time()))
+
+# ── Callbacks (exécutés AVANT le rerun : 1 seul cycle) ────
+def do_login():
+    email = st.session_state.get("login_email", "").strip().lower()
+    pwd = st.session_state.get("login_pass", "")
+    st.session_state.auth_msg = None
+
+    if _locked_for() > 0:
+        st.session_state.auth_msg = ("error", f"Trop de tentatives. Réessayez dans {_locked_for()} s.")
+        return
+    if not EMAIL_RE.match(email) or not pwd:
+        st.session_state.auth_msg = ("warning", "Renseignez un email valide et votre mot de passe.")
+        return
+
+    ok, res = authenticate_user_db(email, pwd)
+    if ok:
+        st.session_state.authenticated = True
+        st.session_state.user_info = res
+        st.session_state.login_attempts = 0
+        st.session_state.pop("login_pass", None)   # ne pas garder le mot de passe en session
+        st.session_state.flash = f"🔓 Bienvenue, {res['email']} !"
+    else:
+        n = st.session_state.get("login_attempts", 0) + 1
+        st.session_state.login_attempts = n
+        if n >= MAX_ATTEMPTS:
+            st.session_state.lock_until = time.time() + LOCK_SECONDS
+            st.session_state.login_attempts = 0
+        st.session_state.auth_msg = ("error", res)
+
+def do_signup():
+    email = st.session_state.get("signup_email", "").strip().lower()
+    p1 = st.session_state.get("signup_pass", "")
+    p2 = st.session_state.get("signup_confirm_pass", "")
+    st.session_state.auth_msg = None
+
+    if not EMAIL_RE.match(email):
+        st.session_state.auth_msg = ("warning", "Adresse email invalide.")
+    elif len(p1) < 8:
+        st.session_state.auth_msg = ("warning", "Le mot de passe doit contenir au moins 8 caractères.")
+    elif p1 != p2:
+        st.session_state.auth_msg = ("error", "Les deux mots de passe ne correspondent pas.")
+    else:
+        ok, msg = create_user_db(email, p1)
+        if ok:
+            st.session_state.auth_msg = ("success", msg + " Vous pouvez maintenant vous connecter.")
+            st.session_state.pop("signup_pass", None)
+            st.session_state.pop("signup_confirm_pass", None)
+        else:
+            st.session_state.auth_msg = ("error", msg)
+
+def do_logout():
+    for k in ("authenticated", "user_info"):
+        st.session_state[k] = False if k == "authenticated" else None
+    st.session_state.current_view = "home"
+    st.session_state.flash = "🔒 Déconnexion effectuée."
+
+def go_direct_agenda():
+    st.session_state.direct_agenda = True
+
+def go_home():
+    st.session_state.current_view = "home"
+
+def show_auth_msg():
+    msg = st.session_state.get("auth_msg")
+    if msg:
+        getattr(st, msg[0])(msg[1])
+
+# ── Message flash (toast) affiché une fois ────────────────
+if st.session_state.get("flash"):
+    st.toast(st.session_state.pop("flash"))
+
+# ── Recherche globale isolée : ne relance pas toute la page ─
+@st.fragment
 def render_global_search():
-    st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-    search_query = st.text_input("⚡ Recherche Rapide Universelle", placeholder="🔍 Tapez un mot-clé (ex: Flyer, Python, DJ, Client, Prompt...)", key="global_search_input")
-    
-    if search_query.strip():
-        q = search_query.strip().lower()
-        results_count = 0
-        st.markdown(f"### 🔎 Résultats de recherche pour : *'{search_query}'*")
+    q_raw = st.text_input(
+        "⚡ Recherche Rapide Universelle",
+        placeholder="🔍 Tapez un mot-clé (ex: Flyer, Python, DJ, Client, Prompt...)",
+        key="global_search_input",
+    )
+    q = q_raw.strip().lower()
+    if not q:
+        return
 
-        # 1. Prompts
-        matched_prompts = [p for p in st.session_state.saved_prompts_library if q in p["title"].lower() or q in p["prompt"].lower() or q in p["category"].lower()]
-        if matched_prompts:
-            st.markdown("#### 🧠 Prompts & IA")
-            for item in matched_prompts:
-                results_count += 1
-                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["category"]}</span><h4 style="margin-top:5px;">{item["title"]}</h4>', unsafe_allow_html=True)
-                st.code(item["prompt"], language="markdown")
-                st.markdown('</div>', unsafe_allow_html=True)
+    ss = st.session_state
+    count = 0
+    st.markdown(f"### 🔎 Résultats pour : *'{q_raw}'*")
 
-        # 2. Fichiers & Médias
-        matched_files = [f for f in st.session_state.saved_media_files if q in f["title"].lower() or q in f.get("filename", "").lower() or q in f.get("type", "").lower() or q in f.get("desc", "").lower()]
-        if matched_files:
-            st.markdown("#### 📁 Médias & Fichiers")
-            for item in matched_files:
-                results_count += 1
-                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["type"]}</span><h4 style="margin-top:5px;">{item["title"]}</h4></div>', unsafe_allow_html=True)
+    def card(badge, title, extra=""):
+        st.markdown(
+            f'<div class="zapio-card"><span class="zapio-badge">{badge}</span>'
+            f'<h4 style="margin-top:5px;">{title}</h4>{extra}</div>',
+            unsafe_allow_html=True,
+        )
 
-        # 3. Événements Agenda
-        matched_events = [e for e in st.session_state.agenda_events if q in e["title"].lower() or q in e.get("desc", "").lower() or q in e.get("category", "").lower()]
-        if matched_events:
-            st.markdown("#### 📅 Agenda & Événements")
-            for item in matched_events:
-                results_count += 1
-                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["category"]}</span><h4 style="margin-top:5px;">{item["title"]}</h4><p>Date: {item["date"]} à {item["time"]}</p></div>', unsafe_allow_html=True)
+    prompts = [p for p in ss.saved_prompts_library
+               if q in p["title"].lower() or q in p["prompt"].lower() or q in p["category"].lower()]
+    if prompts:
+        st.markdown("#### 🧠 Prompts & IA")
+        for it in prompts:
+            count += 1
+            card(it["category"], it["title"])
+            st.code(it["prompt"], language="markdown")
 
-        # 4. Contacts
-        matched_contacts = [c for c in st.session_state.saved_contacts if q in c["name"].lower() or q in c.get("email", "").lower() or q in c.get("phone", "").lower() or q in c.get("notes", "").lower()]
-        if matched_contacts:
-            st.markdown("#### 🎴 Contacts")
-            for item in matched_contacts:
-                results_count += 1
-                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["cat"]}</span><h4 style="margin-top:5px;">{item["name"]}</h4><p>📧 {item["email"]} | 📞 {item["phone"]}</p></div>', unsafe_allow_html=True)
+    files = [f for f in ss.saved_media_files
+             if q in f["title"].lower() or q in f.get("filename", "").lower()
+             or q in f.get("type", "").lower() or q in f.get("desc", "").lower()]
+    if files:
+        st.markdown("#### 📁 Médias & Fichiers")
+        for it in files:
+            count += 1
+            card(it["type"], it["title"])
 
-        # 5. Projets & Idées
-        matched_projects = [p for p in st.session_state.saved_current_projects + st.session_state.saved_future_projects if q in p["name"].lower() or q in p.get("desc", "").lower() or q in p.get("client", "").lower()]
-        if matched_projects:
-            st.markdown("#### 🚀 Projets")
-            for item in matched_projects:
-                results_count += 1
-                st.markdown(f'<div class="zapio-card"><h4 style="margin-top:5px;">{item["name"]}</h4></div>', unsafe_allow_html=True)
+    events = [e for e in ss.agenda_events
+              if q in e["title"].lower() or q in e.get("desc", "").lower() or q in e.get("category", "").lower()]
+    if events:
+        st.markdown("#### 📅 Agenda & Événements")
+        for it in events:
+            count += 1
+            card(it["category"], it["title"], f'<p>Date : {it["date"]} à {it["time"]}</p>')
 
-        if results_count == 0:
-            st.warning("Aucun élément ne correspond à votre recherche.")
-        st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0;'>", unsafe_allow_html=True)
+    contacts = [c for c in ss.saved_contacts
+                if q in c["name"].lower() or q in c.get("email", "").lower()
+                or q in c.get("phone", "").lower() or q in c.get("notes", "").lower()]
+    if contacts:
+        st.markdown("#### 🎴 Contacts")
+        for it in contacts:
+            count += 1
+            card(it["cat"], it["name"], f'<p>📧 {it.get("email","")} | 📞 {it.get("phone","")}</p>')
 
-# AUTH & NAVIGATION
-query_params = st.query_params
-is_direct_agenda_link = query_params.get("app", None) == "agenda"
+    projects = [p for p in ss.saved_current_projects + ss.saved_future_projects
+                if q in p["name"].lower() or q in p.get("desc", "").lower() or q in p.get("client", "").lower()]
+    if projects:
+        st.markdown("#### 🚀 Projets")
+        for it in projects:
+            count += 1
+            card("Projet", it["name"])
+
+    if count == 0:
+        st.warning("Aucun élément ne correspond à votre recherche.")
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0;'>", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════
+# ROUTAGE
+# ══════════════════════════════════════════════════════════
+is_direct_agenda_link = st.query_params.get("app") == "agenda"
 
 if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
-    render_agenda_view(sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
+    _view("agenda_view", "render_agenda_view")(
+        sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color
+    )
 
+# ── ÉCRAN D'AUTHENTIFICATION ──────────────────────────────
 elif not st.session_state.get("authenticated", False):
-    st.markdown(f'<div style="text-align: center; margin-top: 25px; margin-bottom: 20px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé</span></div></div>', unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if "auth_mode" not in st.session_state:
-            st.session_state.auth_mode = "login"
+    st.markdown(
+        f'<div style="text-align:center;margin:25px 0 20px;"><h1 style="font-size:2.8rem;margin-bottom:5px;">'
+        f'<span style="color:{text_color};">pavel</span>'
+        f'<span style="background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#FFF;padding:2px 10px;'
+        f'border-radius:8px;font-size:2rem;margin-left:6px;">CORE</span></h1>'
+        f'<div style="margin-top:10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé</span></div></div>',
+        unsafe_allow_html=True,
+    )
 
-        if "auth" in query_params:
-            target_mode = query_params["auth"]
-            if target_mode in ["login", "signup"] and st.session_state.auth_mode != target_mode:
-                st.session_state.auth_mode = target_mode
-                st.query_params.clear()
-                st.rerun()
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        tab_login, tab_signup = st.tabs(["🔑 Connexion", "✨ Inscription"])
 
-        is_login_active = st.session_state.auth_mode == "login"
-        is_signup_active = st.session_state.auth_mode == "signup"
+        with tab_login:
+            with st.form("login_form", border=False):
+                st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
+                st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
+                st.form_submit_button(
+                    "Se connecter au Workspace", use_container_width=True,
+                    type="primary", on_click=do_login,
+                )
+            show_auth_msg()
 
-        # Conteneur Flexbox HTML strict avec formulaires GET intégrés pour les boutons côte à côte
-        st.markdown(f"""
-            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
-                <div style="flex: 1; min-width: 0;">
-                    <form method="get" style="margin:0;">
-                        <input type="hidden" name="auth" value="login">
-                        <button type="submit" style="width: 100%; cursor: pointer; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_login_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_login_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
-                            🔑 Connexion
-                        </button>
-                    </form>
-                </div>
-                <div style="flex: 1; min-width: 0;">
-                    <form method="get" style="margin:0;">
-                        <input type="hidden" name="auth" value="signup">
-                        <button type="submit" style="width: 100%; cursor: pointer; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_signup_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_signup_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
-                            ✨ Inscription
-                        </button>
-                    </form>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        with tab_signup:
+            with st.form("signup_form", border=False):
+                st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
+                st.text_input("Créer un mot de passe (8 caractères min.)", type="password",
+                              placeholder="••••••••", key="signup_pass")
+                st.text_input("Confirmer le mot de passe", type="password",
+                              placeholder="••••••••", key="signup_confirm_pass")
+                st.form_submit_button(
+                    "S'inscrire et rejoindre PavelCore", use_container_width=True,
+                    type="primary", on_click=do_signup,
+                )
+            show_auth_msg()
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)",
+                  use_container_width=True, type="secondary", on_click=go_direct_agenda)
 
-        if st.session_state.auth_mode == "login":
-            with st.form("login_form"):
-                email = st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
-                password = st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
-                submit_login = st.form_submit_button("Se connecter au Workspace", use_container_width=True)
-                
-                if submit_login:
-                    ok, res = authenticate_user_db(email, password)
-                    if ok:
-                        st.session_state.authenticated = True
-                        st.session_state.user_info = res
-                        st.toast(f"🔓 Bienvenue, {res['email']} !", icon="✨")
-                        st.rerun()
-                    else:
-                        st.error(res)
-        else:
-            with st.form("signup_form"):
-                new_email = st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
-                new_pass = st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
-                confirm_pass = st.text_input("Confirmer le mot de passe", type="password", placeholder="••••••••", key="signup_confirm_pass")
-                submit_signup = st.form_submit_button("S'inscrire et rejoindre PavelCore", use_container_width=True)
-                
-                if submit_signup:
-                    if new_pass != confirm_pass:
-                        st.error("Les deux mots de passe ne correspondent pas.")
-                    elif len(new_pass) < 6:
-                        st.warning("Le mot de passe doit contenir au moins 6 caractères.")
-                    else:
-                        ok, msg = create_user_db(new_email, new_pass)
-                        if ok:
-                            st.success(msg)
-                        else:
-                            st.error(msg)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
-            st.session_state.direct_agenda = True
-            st.rerun()
-
+# ── APPLICATION (utilisateur connecté) ────────────────────
 else:
     col_logo, col_user, col_logout = st.columns([2, 2, 1])
-    
     with col_logo:
-        st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 6px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 6px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
-    
+        st.markdown(
+            f'<h1 style="font-size:1.3rem;margin:0;display:flex;align-items:center;gap:6px;">'
+            f'<span style="color:{text_color};">pavel</span>'
+            f'<span style="background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#FFF;padding:2px 6px;'
+            f'border-radius:6px;font-size:0.85rem;">CORE</span>'
+            f'<span class="zapio-badge-green" style="font-size:0.55rem;">● Live</span></h1>',
+            unsafe_allow_html=True,
+        )
     with col_user:
-        current_email = st.session_state.get("user_info", {}).get("email", "Session Active") if st.session_state.get("user_info") else "Membre"
-        st.markdown(f'<div style="text-align: center; color: {desc_color}; font-size: 0.85rem; padding-top: 5px;">👤 Connecté en tant que : <strong style="color: {sub_title_color};">{current_email}</strong></div>', unsafe_allow_html=True)
-
+        email = (st.session_state.get("user_info") or {}).get("email", "Membre")
+        st.markdown(
+            f'<div style="text-align:center;color:{desc_color};font-size:0.85rem;padding-top:5px;">'
+            f'👤 Connecté en tant que : <strong style="color:{sub_title_color};">{email}</strong></div>',
+            unsafe_allow_html=True,
+        )
     with col_logout:
-        if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
-            st.session_state.authenticated = False
-            st.session_state.user_info = None
-            st.session_state.current_view = "home"
-            st.toast("🔒 Déconnexion effectuée.", icon="👋")
-            st.rerun()
+        st.button("🔒 Déconnexion", use_container_width=True, type="secondary", on_click=do_logout)
 
-    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 15px 0;'>", unsafe_allow_html=True)
-    
+    st.markdown("<hr style='border-color:rgba(236,72,153,0.2);margin:15px 0;'>", unsafe_allow_html=True)
     render_global_search()
 
-    if st.session_state.current_view == "home":
-        render_home_view()
-        render_backup_view(sub_title_color)
+    current = st.session_state.current_view
+    if current == "home":
+        _view("home_view", "render_home_view")()
+        _view("backup_view", "render_backup_view")(sub_title_color)
     else:
-        current = st.session_state.current_view
-        
-        if st.button("← Retour au Tableau de Bord", key="back_to_home_universal", type="secondary"):
-            st.session_state.current_view = "home"
-            st.rerun()
-            
-        st.markdown(f"<h2 style='color: #EC4899; margin-top: 15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
+        st.button("← Retour au Tableau de Bord", key="back_to_home_universal",
+                  type="secondary", on_click=go_home)
+        st.markdown(f"<h2 style='color:#EC4899;margin-top:15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
 
         if current == "Agenda":
-            render_agenda_view(sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
+            _view("agenda_view", "render_agenda_view")(
+                sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
         elif current == "Prompts & IA":
-            render_dev_ia_view(sub_title_color)
+            _view("dev_ia_view", "render_dev_ia_view")(sub_title_color)
         elif current == "Projets":
-            render_projets_view(sub_title_color, desc_color)
+            _view("projets_view", "render_projets_view")(sub_title_color, desc_color)
         elif current == "Médias & Fichiers":
-            render_media_view(sub_title_color, UPLOADS_DIR)
+            _view("media_view", "render_media_view")(sub_title_color, UPLOADS_DIR)
         elif current == "Coffre-Fort":
-            render_vault_view(sub_title_color, desc_color)
+            _view("vault_contacts_view", "render_vault_view")(sub_title_color, desc_color)
         elif current == "Contacts & Emails":
-            render_contacts_view(sub_title_color, desc_color)
+            _view("vault_contacts_view", "render_contacts_view")(sub_title_color, desc_color)
         elif current == "Sauvegarde":
-            render_backup_view(sub_title_color)
+            _view("backup_view", "render_backup_view")(sub_title_color)
