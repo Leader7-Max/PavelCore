@@ -6,8 +6,10 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, date, time
 
-# Correctif pour Streamlit Cloud
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Correctif robuste pour les chemins sur Streamlit Cloud
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
 
 # Configuration de la page
 st.set_page_config(
@@ -21,9 +23,12 @@ st.set_page_config(
 from modules.state import init_session_state
 init_session_state()
 
-# Import et injection du design CSS global
-from assets.styles import inject_custom_design
-inject_custom_design()
+# Import sécurisé et injection du design CSS global
+try:
+    from assets.styles import inject_custom_design
+    inject_custom_design()
+except Exception:
+    pass
 
 # Import des fonctions base de données utilisateurs
 from modules.database import create_user_db, authenticate_user_db
@@ -38,7 +43,7 @@ from views.vault_contacts_view import render_vault_view, render_contacts_view
 from views.backup_view import render_backup_view
 
 # Dossier local pour le stockage des fichiers uploadés
-UPLOADS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploaded_files")
+UPLOADS_DIR = os.path.join(ROOT_DIR, "uploaded_files")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 # Définition sécurisée des couleurs pour les variables de texte
@@ -130,32 +135,42 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # Gestion instantanée via les paramètres Streamlit natifs (sans rechargement HTTP lent)
-        if "auth" in query_params:
-            target_mode = query_params["auth"]
-            if target_mode in ["login", "signup"] and st.session_state.auth_mode != target_mode:
-                st.session_state.auth_mode = target_mode
-                st.query_params.clear()
-                st.rerun()
-
-        is_login_active = st.session_state.auth_mode == "login"
-        is_signup_active = st.session_state.auth_mode == "signup"
-
-        # Boutons d'authentification en Flexbox HTML pur (strictement côte à côte sur mobile)
-        st.markdown(f"""
-            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
-                <div style="flex: 1; min-width: 0;">
-                    <a href="?auth=login" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_login_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_login_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
-                        🔑 Connexion
-                    </a>
-                </div>
-                <div style="flex: 1; min-width: 0;">
-                    <a href="?auth=signup" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_signup_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_signup_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
-                        ✨ Inscription
-                    </a>
-                </div>
-            </div>
+        # CSS ciblé UNIQUEMENT sur les boutons d'authentification pour garder le centrage global de la page
+        st.markdown("""
+            <style>
+                .custom-auth-buttons div[data-testid="stHorizontalBlock"] {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    gap: 10px !important;
+                }
+                .custom-auth-buttons div[data-testid="column"] {
+                    width: 50% !important;
+                    flex: 1 1 50% !important;
+                    min-width: 0 !important;
+                }
+            </style>
         """, unsafe_allow_html=True)
+
+        # Conteneur isolé pour les boutons de connexion / inscription
+        st.markdown('<div class="custom-auth-buttons">', unsafe_allow_html=True)
+        auth_col1, auth_col2 = st.columns(2)
+        with auth_col1:
+            if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
+        with auth_col2:
+            if st.button("✨ Inscription", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
+                st.session_state.auth_mode = "signup"
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Bouton d'accès direct à l'Agenda
+        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
+            st.session_state.direct_agenda = True
+            st.rerun()
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -192,11 +207,6 @@ elif not st.session_state.get("authenticated", False):
                             st.success(msg)
                         else:
                             st.error(msg)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
-            st.session_state.direct_agenda = True
-            st.rerun()
 
 else:
     col_logo, col_user, col_logout = st.columns([2, 2, 1])
