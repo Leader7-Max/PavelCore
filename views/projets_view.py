@@ -1,8 +1,19 @@
 import streamlit as st
 
 def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
-    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec des cartes ouvrables."""
+    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec un design sombre corrigé pour les expanders."""
     
+    # Injection d'un correctif CSS local pour forcer l'affichage lisible des expanders sur fond sombre
+    st.markdown("""
+        <style>
+            /* Correction du texte des expanders sur thème sombre */
+            .streamlit-expanderHeader p, .streamlit-expanderHeader span, div[data-testid="stExpander"] summary {
+                color: #0F172A !important;
+                font-weight: 600 !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
     sub_tab = st.pills(
         "Navigation Projets",
         options=["🚀 Projets en cours", "🔮 Projets futurs", "💡 Idées"],
