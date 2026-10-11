@@ -1,9 +1,9 @@
 import streamlit as st
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec un widget de témoignages optimisé et fluide (0 latence réseau)."""
+    """Affiche le Tableau de Bord principal de PavelCore."""
     
-    # CSS pour positionner le widget fixe en bas à droite et forcer l'alignement des colonnes sur mobile
+    # CSS pour forcer l'alignement des colonnes sur mobile et appliquer les styles des cartes
     st.markdown("""
         <style>
             /* Correction isolée uniquement pour les cartes du tableau de bord */
@@ -41,24 +41,6 @@ def render_home_view():
                 box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25) !important;
                 transform: translateY(-3px) !important;
             }
-
-            /* Widget de notification fixe en bas à droite */
-            .pavel-bottom-right-toast {
-                position: fixed;
-                bottom: 25px;
-                right: 25px;
-                z-index: 99999;
-                background: rgba(23, 10, 46, 0.95) !important;
-                border: 1px solid rgba(236, 72, 153, 0.4) !important;
-                border-radius: 14px !important;
-                padding: 14px 16px !important;
-                width: 330px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                backdrop-filter: blur(10px);
-            }
         </style>
     """, unsafe_allow_html=True)
     
@@ -82,37 +64,6 @@ def render_home_view():
                     Bienvenue dans votre espace sécurisé, <strong style="color: #F472B6;">{user_email}</strong>. 
                     Pilotez vos agendas, votre coffre-fort et vos projets en toute fluidité.
                 </p>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-    # --- BASE DE DONNÉES MONDIALE DES TÉMOIGNAGES (Optimisée sans images lourdes) ---
-    world_testimonials = [
-        {"name": "Yannick M.", "country": "🇨🇲 Cameroun", "emoji": "👨🏾‍💻", "comment": "J'adore cette application ! L'agenda est parfait depuis Douala."},
-        {"name": "Koffi K.", "country": "🇨🇮 Côte d'Ivoire", "emoji": "🚀", "comment": "Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan."},
-        {"name": "Éléonore V.", "country": "🇫🇷 France", "emoji": "⚡", "comment": "Une fluidité remarquable, bravo pour ce bijou technologique depuis Grenoble !"},
-        {"name": "Emre K.", "country": "🇹🇷 Turquie", "emoji": "🌟", "comment": "Harika bir uygulama! Design and speed are incredible from Istanbul."},
-        {"name": "Hans W.", "country": "🇩🇪 Allemagne", "emoji": "💡", "comment": "Ausgezeichnet! Incredible speed and clean architecture from Berlin."},
-        {"name": "Michael S.", "country": "🇺🇸 USA", "emoji": "💎", "comment": "Amazing workspace! The performance and security standards are top notch."}
-    ]
-
-    # Initialisation fixe pour éviter le défilement intempestif à chaque clic
-    if "notif_idx" not in st.session_state:
-        st.session_state.notif_idx = 0
-
-    curr_notif = world_testimonials[st.session_state.notif_idx]
-
-    st.markdown(f"""
-        <div class="pavel-bottom-right-toast">
-            <div style="font-size: 2rem; background: rgba(236,72,153,0.2); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #EC4899;">
-                {curr_notif['emoji']}
-            </div>
-            <div style="flex-grow: 1; min-width: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <strong style="color: #FFFFFF; font-size: 0.88rem;">{curr_notif['name']}</strong>
-                    <span style="font-size: 0.78rem; color: #A78BFA; font-weight: 700;">{curr_notif['country']}</span>
-                </div>
-                <p style="color: #CBD5E1; font-size: 0.82rem; margin: 0; font-style: italic; line-height: 1.25;">"{curr_notif['comment']}"</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
