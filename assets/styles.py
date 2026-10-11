@@ -1,7 +1,7 @@
 import streamlit as st
 
 def inject_custom_design():
-    """Injecte le système de design Silicon Valley et supprime le fond blanc des uploaders et boutons de téléchargement."""
+    """Injecte le système de design Silicon Valley et assure la visibilité permanente de tous les boutons et uploaders."""
     
     st.markdown("""
         <style>
@@ -68,7 +68,7 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               4. BOUTONS NÉON VIP & BOUTON DE TÉLÉCHARGEMENT
+               4. BOUTONS NÉON VIP & BOUTON DE TÉLÉCHARGEMENT PERMANENT
                ========================================================= */
             div[data-testid="stButton"] > button,
             div[data-testid="stFormSubmitButton"] > button,
@@ -94,7 +94,6 @@ def inject_custom_design():
                 border-color: #FFFFFF !important;
             }
 
-            /* Correction spécifique pour enlever tout conteneur blanc autour du bouton de téléchargement */
             div[data-testid="stDownloadButton"] {
                 background: transparent !important;
                 border: none !important;
