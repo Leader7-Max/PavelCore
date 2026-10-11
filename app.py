@@ -28,7 +28,8 @@ inject_custom_design()
 # Import des fonctions base de données utilisateurs
 from modules.database import create_user_db, authenticate_user_db
 
-# Import de toutes les vues modulaires
+# Import de toutes les vues modulaires (y compris le Dashboard)
+from views.home_view import render_home_view
 from views.agenda_view import render_agenda_view
 from views.dev_ia_view import render_dev_ia_view
 from views.projets_view import render_projets_view
@@ -192,48 +193,9 @@ else:
     render_global_search()
 
     if st.session_state.current_view == "home":
-        st.markdown(f'''
-            <div class="pavel-hero-banner">
-                <span class="zapio-badge" style="margin-bottom: 10px; display: inline-block;">🚀 WORKSPACE CENTRALISÉ</span>
-                <h2 style="font-size: 2.2rem; color: {sub_title_color}; margin: 10px 0 5px 0;">Tableau de Bord Principal</h2>
-                <p style="color: {desc_color}; font-size: 1rem; margin: 0;">Sélectionnez ci-dessous l'espace de travail ou l'outil à lancer</p>
-            </div>
-        ''', unsafe_allow_html=True)
+        render_home_view()
         
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📅 Agenda & Planning</h3><p style="color: {desc_color}; font-size: 0.8rem;">Calendrier et mode hors-ligne.</p></div>', unsafe_allow_html=True)
-            if st.button("Ouvrir l'Agenda", use_container_width=True, type="primary"):
-                st.session_state.current_view = "Agenda"
-                st.rerun()
-
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🤖 Prompts & IA</h3><p style="color: {desc_color}; font-size: 0.8rem;">Bibliothèque complète de prompts IA.</p></div>', unsafe_allow_html=True)
-            if st.button("Ouvrir Prompts & IA", use_container_width=True):
-                st.session_state.current_view = "Prompts & IA"
-                st.rerun()
-
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">📁 Médias & Fichiers</h3><p style="color: {desc_color}; font-size: 0.8rem;">Images, ZIP, APK, PDFs et Documents.</p></div>', unsafe_allow_html=True)
-            if st.button("Ouvrir Médias & Fichiers", use_container_width=True):
-                st.session_state.current_view = "Médias & Fichiers"
-                st.rerun()
-
-        with c2:
-            st.markdown(f'<div class="pavel-card-grid"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🚀 Projets & Idées</h3><p style="color: {desc_color}; font-size: 0.8rem;">Projets actifs et idées.</p></div>', unsafe_allow_html=True)
-            if st.button("Ouvrir Projets", use_container_width=True):
-                st.session_state.current_view = "Projets"
-                st.rerun()
-
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🔐 Coffre-Fort Sécurisé</h3><p style="color: {desc_color}; font-size: 0.8rem;">Clés API et mots de passe.</p></div>', unsafe_allow_html=True)
-            if st.button("Ouvrir le Coffre-Fort", use_container_width=True):
-                st.session_state.current_view = "Coffre-Fort"
-                st.rerun()
-
-            st.markdown(f'<div class="pavel-card-grid" style="margin-top: 20px;"><h3 style="color:{sub_title_color}; font-size: 1.1rem;">🎴 Contacts & Emails</h3><p style="color: {desc_color}; font-size: 0.8rem;">Répertoire et templates d\'emails.</p></div>', unsafe_allow_html=True)
-            if st.button("Ouvrir Contacts & Emails", use_container_width=True):
-                st.session_state.current_view = "Contacts & Emails"
-                st.rerun()
-
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Section de Gestion & Sauvegarde Globale du Workspace sous le dashboard
         with st.expander("⚙️ Gestion & Sauvegarde Globale du Workspace (Backup JSON)"):
             workspace_data = {
                 "agenda_events": [
