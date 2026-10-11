@@ -130,29 +130,32 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # CSS anti-empilement mobile pour forcer ces 2 colonnes à rester côte à côte
-        st.markdown("""
-            <style>
-                @media (max-width: 640px) {
-                    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-                        width: 50% !important;
-                        flex: 1 1 50% !important;
-                        min-width: unset !important;
-                    }
-                }
-            </style>
-        """, unsafe_allow_html=True)
+        # Gestion instantanée via les paramètres Streamlit natifs (sans rechargement HTTP lent)
+        if "auth" in query_params:
+            target_mode = query_params["auth"]
+            if target_mode in ["login", "signup"] and st.session_state.auth_mode != target_mode:
+                st.session_state.auth_mode = target_mode
+                st.query_params.clear()
+                st.rerun()
 
-        # Boutons natifs instantanés (Zéro latence réseau via WebSocket)
-        auth_col1, auth_col2 = st.columns(2)
-        with auth_col1:
-            if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
-                st.session_state.auth_mode = "login"
-                st.rerun()
-        with auth_col2:
-            if st.button("✨ Inscription", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
-                st.session_state.auth_mode = "signup"
-                st.rerun()
+        is_login_active = st.session_state.auth_mode == "login"
+        is_signup_active = st.session_state.auth_mode == "signup"
+
+        # Boutons d'authentification en Flexbox HTML pur (strictement côte à côte sur mobile)
+        st.markdown(f"""
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
+                <div style="flex: 1; min-width: 0;">
+                    <a href="?auth=login" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_login_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_login_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
+                        🔑 Connexion
+                    </a>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <a href="?auth=signup" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_signup_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_signup_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
+                        ✨ Inscription
+                    </a>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
