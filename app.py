@@ -130,21 +130,16 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # Callback atomique pour éliminer la latence et le double rechargement
-        def update_auth_mode():
-            selected = st.session_state.get("auth_segmented_switch", "🔑 Connexion")
-            st.session_state.auth_mode = "login" if "Connexion" in selected else "signup"
-
-        current_label = "🔑 Connexion" if st.session_state.auth_mode == "login" else "✨ Créer un Compte"
-        
-        st.segmented_control(
-            "Mode d'authentification",
-            options=["🔑 Connexion", "✨ Créer un Compte"],
-            default=current_label,
-            label_visibility="collapsed",
-            key="auth_segmented_switch",
-            on_change=update_auth_mode
-        )
+        # Boutons natifs Streamlit côte à côte pour un basculement instantané sans latence HTTP
+        b_col1, b_col2 = st.columns(2)
+        with b_col1:
+            if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
+        with b_col2:
+            if st.button("✨ Inscription", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
+                st.session_state.auth_mode = "signup"
+                st.rerun()
 
         st.markdown("<br>", unsafe_allow_html=True)
 
