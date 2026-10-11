@@ -181,50 +181,50 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               7. ONGLETS STREAMLIT (st.tabs) PERSONNALISÉS & FORCÉS
+               7. ONGLETS STREAMLIT (st.tabs) PERSONNALISÉS & CORRIGÉS
                ========================================================= */
-            div[data-baseweb="tab-list"] {
-                gap: 10px !important;
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 8px !important;
                 background-color: #230E3D !important;
-                padding: 8px !important;
-                border-radius: 14px !important;
+                padding: 6px !important;
+                border-radius: 12px !important;
                 border: 1px solid rgba(236, 72, 153, 0.3) !important;
             }
 
-            div[data-baseweb="tab"] {
+            .stTabs button[data-baseweb="tab"] {
                 background-color: transparent !important;
-                border-radius: 10px !important;
-                padding: 10px 20px !important;
+                border-radius: 8px !important;
+                padding: 8px 16px !important;
+                border: none !important;
             }
 
-            div[data-baseweb="tab"] p, 
-            div[data-baseweb="tab"] span {
+            .stTabs button[data-baseweb="tab"] p, 
+            .stTabs button[data-baseweb="tab"] span {
                 color: #CBD5E1 !important;
                 font-weight: 600 !important;
-                font-size: 0.95rem !important;
             }
 
-            div[data-baseweb="tab"]:hover {
+            .stTabs button[data-baseweb="tab"]:hover {
                 background-color: rgba(139, 92, 246, 0.2) !important;
             }
 
-            div[data-baseweb="tab"]:hover p,
-            div[data-baseweb="tab"]:hover span {
+            .stTabs button[data-baseweb="tab"]:hover p,
+            .stTabs button[data-baseweb="tab"]:hover span {
                 color: #FFFFFF !important;
             }
 
-            div[data-baseweb="tab"][aria-selected="true"] {
+            .stTabs button[data-baseweb="tab"][aria-selected="true"] {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
                 box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
             }
 
-            div[data-baseweb="tab"][aria-selected="true"] p,
-            div[data-baseweb="tab"][aria-selected="true"] span {
+            .stTabs button[data-baseweb="tab"][aria-selected="true"] p,
+            .stTabs button[data-baseweb="tab"][aria-selected="true"] span {
                 color: #FFFFFF !important;
                 font-weight: 700 !important;
             }
 
-            div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
+            .stTabs [data-baseweb="tab-highlight"] {
                 display: none !important;
             }
         </style>
