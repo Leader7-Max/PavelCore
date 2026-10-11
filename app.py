@@ -130,36 +130,21 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # CSS anti-empilement mobile pour forcer ces 2 colonnes à rester côte à côte
-        st.markdown("""
-            <style>
-                @media (max-width: 640px) {
-                    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-                        width: 50% !important;
-                        flex: 1 1 50% !important;
-                        min-width: unset !important;
-                    }
-                }
-            </style>
-        """, unsafe_allow_html=True)
+        # Callback atomique pour éliminer la latence et le double rechargement
+        def update_auth_mode():
+            selected = st.session_state.get("auth_segmented_switch", "🔑 Connexion")
+            st.session_state.auth_mode = "login" if "Connexion" in selected else "signup"
 
-        # Boutons natifs instantanés (Zéro latence réseau via WebSocket)
-        auth_col1, auth_col2 = st.columns(2)
-        with auth_col1:
-            if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
-                st.session_state.auth_mode = "login"
-                st.rerun()
-        with auth_col2:
-            if st.button("✨ Inscription", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
-                st.session_state.auth_mode = "signup"
-                st.rerun()
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # Bouton d'accès direct à l'Agenda remonté ici (juste après les onglets)
-        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
-            st.session_state.direct_agenda = True
-            st.rerun()
+        current_label = "🔑 Connexion" if st.session_state.auth_mode == "login" else "✨ Créer un Compte"
+        
+        st.segmented_control(
+            "Mode d'authentification",
+            options=["🔑 Connexion", "✨ Créer un Compte"],
+            default=current_label,
+            label_visibility="collapsed",
+            key="auth_segmented_switch",
+            on_change=update_auth_mode
+        )
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -196,6 +181,11 @@ elif not st.session_state.get("authenticated", False):
                             st.success(msg)
                         else:
                             st.error(msg)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
+            st.session_state.direct_agenda = True
+            st.rerun()
 
 else:
     col_logo, col_user, col_logout = st.columns([2, 2, 1])
