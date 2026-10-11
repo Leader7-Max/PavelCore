@@ -53,6 +53,8 @@ def inject_custom_design():
                 background-color: #2A104D !important;
             }
 
+            div[data-baseweb="input"] input,
+            div[data-baseweb="textarea"] textarea,
             input, textarea {
                 color: #0F172A !important;
                 font-weight: 600 !important;
