@@ -156,6 +156,13 @@ elif not st.session_state.get("authenticated", False):
 
         st.markdown("<br>", unsafe_allow_html=True)
 
+        # Bouton d'accès direct à l'Agenda remonté ici (juste après les onglets)
+        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
+            st.session_state.direct_agenda = True
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
         if st.session_state.auth_mode == "login":
             with st.form("login_form"):
                 email = st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
@@ -189,11 +196,6 @@ elif not st.session_state.get("authenticated", False):
                             st.success(msg)
                         else:
                             st.error(msg)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
-            st.session_state.direct_agenda = True
-            st.rerun()
 
 else:
     col_logo, col_user, col_logout = st.columns([2, 2, 1])
