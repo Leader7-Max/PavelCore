@@ -1,7 +1,7 @@
 import streamlit as st
 
 def inject_custom_design():
-    """Injecte le système de design Silicon Valley et supprime le fond blanc des uploaders."""
+    """Injecte le système de design Silicon Valley et supprime le fond blanc des uploaders et boutons de téléchargement."""
     
     st.markdown("""
         <style>
@@ -68,7 +68,7 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               4. BOUTONS NÉON VIP
+               4. BOUTONS NÉON VIP & BOUTON DE TÉLÉCHARGEMENT
                ========================================================= */
             div[data-testid="stButton"] > button,
             div[data-testid="stFormSubmitButton"] > button,
@@ -83,6 +83,7 @@ def inject_custom_design():
                 box-shadow: 0 4px 18px rgba(236, 72, 153, 0.45) !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 cursor: pointer !important;
+                width: 100% !important;
             }
 
             div[data-testid="stButton"] > button:hover,
@@ -91,6 +92,13 @@ def inject_custom_design():
                 transform: translateY(-3px) scale(1.02) !important;
                 box-shadow: 0 8px 28px rgba(236, 72, 153, 0.75) !important;
                 border-color: #FFFFFF !important;
+            }
+
+            /* Correction spécifique pour enlever tout conteneur blanc autour du bouton de téléchargement */
+            div[data-testid="stDownloadButton"] {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
             }
 
             /* =========================================================
