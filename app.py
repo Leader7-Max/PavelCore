@@ -3,6 +3,7 @@ import os
 import re
 import time
 import importlib
+import logging
 import streamlit as st
 
 # ── Chemins ────────────────────────────────────────────────
@@ -210,6 +211,7 @@ def run_background_alarms():
             render_notifier(load_events_from_db(user["id"]), show_panel=False)
     except Exception as exc:
         st.session_state["alarm_engine_error"] = str(exc)
+        logging.error(f"Erreur dans le moteur d'alarmes d'arrière-plan : {exc}")
 
 # Toast affiché une seule fois
 if st.session_state.get("flash"):
