@@ -1,8 +1,9 @@
 import streamlit as st
+import time
 import random
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec des notifications de témoignages internationaux en temps réel."""
+    """Affiche le Tableau de Bord principal de PavelCore avec des notifications rotatives internationales en direct."""
     
     # CSS pour le style des cartes et l'animation de la notification flottante
     st.markdown("""
@@ -91,61 +92,59 @@ def render_home_view():
         </div>
     """, unsafe_allow_html=True)
 
-    # --- LISTE DES TÉMOIGNAGES INTERNATIONAUX EN DIRECT ---
-    live_notifications = [
+    # --- LISTE ÉTENDUE DES TÉMOIGNAGES INTERNATIONAUX ---
+    international_testimonials = [
         {
             "name": "Yannick M.",
             "role": "Cameroun 🇨🇲",
             "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
             "comment": "J'adore cette application ! L'agenda et la gestion des events sont parfaits depuis Douala.",
-            "time": "À l'instant"
+            "time": "En direct"
         },
         {
             "name": "Aïssatou B.",
             "role": "France 🇫🇷",
             "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
             "comment": "Une fluidité remarquable, bravo à l'équipe pour ce bijou technologique depuis Grenoble !",
-            "time": "Il y a 1 min"
+            "time": "En direct"
         },
         {
             "name": "Koffi K.",
             "role": "Côte d'Ivoire 🇨🇮",
             "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
             "comment": "Franchement propre ! Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan.",
-            "time": "Il y a 3 min"
+            "time": "En direct"
         },
         {
             "name": "Fatoumata D.",
             "role": "Guinée 🇬🇳",
             "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-            "comment": "J'adore l'interface et la recherche universelle, c'est ultra intuitif.",
-            "time": "Il y a 5 min"
+            "comment": "J'adore l'interface et la recherche universelle, c'est ultra intuitif à Conakry.",
+            "time": "En direct"
         },
         {
             "name": "John S.",
             "role": "USA 🇺🇸",
             "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
             "comment": "Amazing workspace! The performance and security standards are top notch.",
-            "time": "Il y a 8 min"
+            "time": "En direct"
         },
         {
             "name": "Emre K.",
             "role": "Turquie 🇹🇷",
             "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
             "comment": "Harika bir uygulama! Design and speed are incredible. Greetings from Istanbul!",
-            "time": "Il y a 10 min"
+            "time": "En direct"
         }
     ]
 
-    # Rotation automatique de la notification à chaque actualisation/action
+    # Gestion de l'index rotatif dans l'état de session
     if "notif_idx" not in st.session_state:
         st.session_state.notif_idx = 0
-    else:
-        st.session_state.notif_idx = (st.session_state.notif_idx + 1) % len(live_notifications)
 
-    curr_notif = live_notifications[st.session_state.notif_idx]
+    curr_notif = international_testimonials[st.session_state.notif_idx]
 
-    # Rendu HTML de la notification flottante style popup
+    # Affichage du conteneur de notification en temps réel
     st.markdown(f"""
         <div class="pavel-live-notification">
             <img src="{curr_notif['avatar']}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #EC4899; box-shadow: 0 0 10px rgba(236,72,153,0.5);" alt="Avatar">
@@ -155,13 +154,18 @@ def render_home_view():
                         <strong style="color: #FFFFFF; font-size: 0.95rem;">{curr_notif['name']}</strong>
                         <span style="color: #A78BFA; font-size: 0.75rem; margin-left: 6px;">({curr_notif['role']})</span>
                     </div>
-                    <span style="font-size: 0.7rem; color: #94A3B8;">🔔 {curr_notif['time']}</span>
+                    <span style="font-size: 0.7rem; color: #34C759; font-weight: 700;">● {curr_notif['time']}</span>
                 </div>
                 <p style="color: #CBD5E1; font-size: 0.88rem; margin: 0; font-style: italic; line-height: 1.3;">"{curr_notif['comment']}"</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
-    # -----------------------------------------------------
+
+    # Passage automatique au témoignage suivant et actualisation toutes les 5 secondes
+    st.session_state.notif_idx = (st.session_state.notif_idx + 1) % len(international_testimonials)
+    time.sleep(5)
+    st.rerun()
+    # -------------------------------------------------------------------------
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### ⚡ Accès Rapide aux Modules")
