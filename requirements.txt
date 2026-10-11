@@ -1,4 +1,4 @@
 streamlit>=1.30.0
 pandas>=2.0.0
 cryptography>=41.0.0
-pip install supabase
+supabase
