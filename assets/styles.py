@@ -178,28 +178,5 @@ def inject_custom_design():
                 font-size: 0.75rem !important;
                 font-weight: 700 !important;
             }
-
-            /* =========================================================
-               7. CIBLAGE STRICT DES BOUTONS D'AUTHENTIFICATION SUR MOBILE
-               ========================================================= */
-            @media (max-width: 900px) {
-                .auth-buttons-container div[data-testid="stHorizontalBlock"] {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    flex-wrap: nowrap !important;
-                    gap: 8px !important;
-                    width: 100% !important;
-                }
-                .auth-buttons-container div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
-                    width: 50% !important;
-                    flex: 1 1 50% !important;
-                    min-width: 0 !important;
-                }
-                .auth-buttons-container button {
-                    font-size: 0.75rem !important;
-                    padding: 8px 4px !important;
-                    white-space: nowrap !important;
-                }
-            }
         </style>
     """, unsafe_allow_html=True)
