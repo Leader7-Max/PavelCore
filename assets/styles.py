@@ -1,7 +1,7 @@
 import streamlit as st
 
 def inject_custom_design():
-    """Injecte le système de design Silicon Valley et assure la visibilité permanente de tous les boutons et uploaders."""
+    """Injecte le design et force l'affichage permanent du bouton de téléchargement."""
     
     st.markdown("""
         <style>
@@ -68,11 +68,10 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               4. BOUTONS NÉON VIP & BOUTON DE TÉLÉCHARGEMENT PERMANENT
+               4. BOUTONS NÉON VIP & CORRECTION CIBLÉE DU DOWNLOAD BUTTON
                ========================================================= */
             div[data-testid="stButton"] > button,
-            div[data-testid="stFormSubmitButton"] > button,
-            div[data-testid="stDownloadButton"] > button {
+            div[data-testid="stFormSubmitButton"] > button {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
                 color: #FFFFFF !important;
                 font-weight: 700 !important;
@@ -86,18 +85,32 @@ def inject_custom_design():
                 width: 100% !important;
             }
 
+            /* Règle spécifique implacable pour le bouton de téléchargement */
+            div[data-testid="stDownloadButton"] button,
+            .stDownloadButton button {
+                background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+                background-color: #EC4899 !important;
+                color: #FFFFFF !important;
+                font-weight: 700 !important;
+                font-size: 0.95rem !important;
+                border-radius: 50px !important;
+                border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                padding: 10px 24px !important;
+                box-shadow: 0 4px 18px rgba(236, 72, 153, 0.45) !important;
+                width: 100% !important;
+                opacity: 1 !important;
+            }
+
+            div[data-testid="stDownloadButton"] button * {
+                color: #FFFFFF !important;
+            }
+
             div[data-testid="stButton"] > button:hover,
             div[data-testid="stFormSubmitButton"] > button:hover,
-            div[data-testid="stDownloadButton"] > button:hover {
+            div[data-testid="stDownloadButton"] button:hover {
                 transform: translateY(-3px) scale(1.02) !important;
                 box-shadow: 0 8px 28px rgba(236, 72, 153, 0.75) !important;
                 border-color: #FFFFFF !important;
-            }
-
-            div[data-testid="stDownloadButton"] {
-                background: transparent !important;
-                border: none !important;
-                padding: 0 !important;
             }
 
             /* =========================================================
