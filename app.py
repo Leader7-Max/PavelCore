@@ -127,9 +127,23 @@ elif not st.session_state.get("authenticated", False):
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        tab_login, tab_signup = st.tabs(["🔑 Connexion", "✨ Créer un Compte"])
-        
-        with tab_login:
+        # Sélecteur de mode d'authentification propre par boutons stylisés
+        if "auth_mode" not in st.session_state:
+            st.session_state.auth_mode = "login"
+
+        col_b1, col_b2 = st.columns(2)
+        with col_b1:
+            if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
+        with col_b2:
+            if st.button("✨ Créer un Compte", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
+                st.session_state.auth_mode = "signup"
+                st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.session_state.auth_mode == "login":
             with st.form("login_form"):
                 email = st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
                 password = st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
@@ -144,8 +158,7 @@ elif not st.session_state.get("authenticated", False):
                         st.rerun()
                     else:
                         st.error(res)
-
-        with tab_signup:
+        else:
             with st.form("signup_form"):
                 new_email = st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
                 new_pass = st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
