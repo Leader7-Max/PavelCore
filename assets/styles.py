@@ -33,32 +33,71 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               3. CHAMPS DE SAISIE (INPUTS / TEXTAREAS)
+               3. CHAMPS DE SAISIE — fond sombre + texte blanc lisible
+                  (toutes les couches, quelle que soit la version de Streamlit)
                ========================================================= */
-            div[data-baseweb="input"] > div, 
-            div[data-baseweb="textarea"] > div,
-            div[data-baseweb="select"] > div {
-                background-color: #230E3D !important;
-                border: 1px solid rgba(236, 72, 153, 0.4) !important;
-                border-radius: 10px !important;
-                color: #FFFFFF !important;
-                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
-            }
-
-            div[data-baseweb="input"]:focus-within > div, 
-            div[data-baseweb="textarea"]:focus-within > div,
-            div[data-baseweb="select"]:focus-within > div {
-                border-color: #EC4899 !important;
-                box-shadow: 0 0 12px rgba(236, 72, 153, 0.5) !important;
-                background-color: #2A104D !important;
-            }
-
-            /* CORRECTION : texte saisi en blanc (il était #0F172A, sombre sur fond sombre) */
+            div[data-baseweb="input"],
+            div[data-baseweb="base-input"],
+            div[data-baseweb="textarea"],
+            div[data-baseweb="select"] > div,
+            [data-testid="stTextInputRootElement"],
+            [data-testid="stTextAreaRootElement"],
+            [data-testid="stNumberInputContainer"],
             div[data-baseweb="input"] input,
-            div[data-baseweb="textarea"] textarea,
-            input, textarea {
+            div[data-baseweb="base-input"] input,
+            textarea,
+            input[type="text"], input[type="password"], input[type="email"],
+            input[type="number"], input[type="search"], input[type="date"], input[type="time"] {
+                background-color: #230E3D !important;
                 color: #FFFFFF !important;
                 -webkit-text-fill-color: #FFFFFF !important;
+            }
+
+            /* Bordure + coins arrondis (une seule couche pour éviter le double cadre) */
+            div[data-baseweb="base-input"],
+            div[data-baseweb="textarea"],
+            div[data-baseweb="select"] > div {
+                border: 1px solid rgba(236, 72, 153, 0.4) !important;
+                border-radius: 10px !important;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+            }
+            div[data-baseweb="input"] {
+                border: none !important;
+                border-radius: 10px !important;
+                box-shadow: none !important;
+            }
+            [data-testid="stTextInputRootElement"],
+            [data-testid="stTextAreaRootElement"] {
+                border-radius: 10px !important;
+            }
+            /* Si Streamlit n'utilise plus BaseWeb : bordure sur le conteneur */
+            [data-testid="stTextInputRootElement"]:not(:has([data-baseweb])),
+            [data-testid="stTextAreaRootElement"]:not(:has([data-baseweb])) {
+                border: 1px solid rgba(236, 72, 153, 0.4) !important;
+            }
+
+            /* Focus */
+            div[data-baseweb="input"]:focus-within,
+            div[data-baseweb="base-input"]:focus-within,
+            div[data-baseweb="textarea"]:focus-within,
+            div[data-baseweb="select"]:focus-within > div,
+            [data-testid="stTextInputRootElement"]:focus-within,
+            [data-testid="stTextAreaRootElement"]:focus-within,
+            div[data-baseweb="input"]:focus-within input,
+            div[data-baseweb="base-input"]:focus-within input,
+            div[data-baseweb="textarea"]:focus-within textarea {
+                background-color: #2A104D !important;
+            }
+            div[data-baseweb="base-input"]:focus-within,
+            div[data-baseweb="textarea"]:focus-within,
+            div[data-baseweb="select"]:focus-within > div,
+            [data-testid="stTextInputRootElement"]:not(:has([data-baseweb])):focus-within,
+            [data-testid="stTextAreaRootElement"]:not(:has([data-baseweb])):focus-within {
+                border-color: #EC4899 !important;
+                box-shadow: 0 0 12px rgba(236, 72, 153, 0.5) !important;
+            }
+
+            input, textarea {
                 font-weight: 600 !important;
                 caret-color: #EC4899 !important;
             }
@@ -66,6 +105,15 @@ def inject_custom_design():
             input::placeholder, textarea::placeholder {
                 color: #94A3B8 !important;
                 -webkit-text-fill-color: #94A3B8 !important;
+            }
+
+            /* Remplissage automatique du navigateur (évite le fond clair) */
+            input:-webkit-autofill,
+            input:-webkit-autofill:hover,
+            input:-webkit-autofill:focus {
+                -webkit-box-shadow: 0 0 0 1000px #230E3D inset !important;
+                -webkit-text-fill-color: #FFFFFF !important;
+                caret-color: #EC4899 !important;
             }
 
             div[data-baseweb="select"] span {
@@ -183,53 +231,86 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               7. ONGLETS (st.tabs) — MÊME DESIGN QUE CONNEXION / INSCRIPTION
+               7. ONGLETS — PILULES (même design que Connexion / Inscription)
+                  Sélecteurs multiples : compatible toutes versions de Streamlit
                ========================================================= */
-            div[data-baseweb="tab-list"] {
+            [role="tablist"],
+            div[data-baseweb="tab-list"],
+            [data-testid="stTabs"] > div:first-child {
                 gap: 10px !important;
                 background: transparent !important;
-                padding: 4px 0 14px 0 !important;
+                padding: 4px 0 16px 0 !important;
                 flex-wrap: wrap !important;
                 overflow: visible !important;
+                border-bottom: none !important;
+                box-shadow: none !important;
             }
 
-            /* Supprime le soulignement natif de Streamlit */
+            /* Suppression du soulignement natif (rouge/rose) */
             div[data-baseweb="tab-highlight"],
-            div[data-baseweb="tab-border"] {
+            div[data-baseweb="tab-border"],
+            [data-testid="stTabHighlight"],
+            [data-testid="stTabBorder"] {
+                display: none !important;
+                height: 0 !important;
+                background: transparent !important;
+            }
+            button[role="tab"]::after,
+            button[data-baseweb="tab"]::after,
+            [data-testid="stTab"]::after {
                 display: none !important;
             }
 
-            button[data-baseweb="tab"] {
+            /* Onglet inactif */
+            button[role="tab"],
+            button[data-baseweb="tab"],
+            button[data-testid="stTab"] {
                 background: #230E3D !important;
+                background-image: none !important;
                 border: 1px solid rgba(236, 72, 153, 0.4) !important;
                 border-radius: 50px !important;
                 padding: 10px 22px !important;
                 height: auto !important;
                 min-height: 0 !important;
+                margin: 0 !important;
                 box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3) !important;
-                transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+                transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease !important;
+                opacity: 1 !important;
             }
 
+            button[role="tab"] p,
+            button[role="tab"] div,
+            button[role="tab"] span,
             button[data-baseweb="tab"] p,
-            button[data-baseweb="tab"] div {
+            button[data-baseweb="tab"] div,
+            button[data-testid="stTab"] p,
+            button[data-testid="stTab"] div {
                 color: #FFFFFF !important;
                 font-weight: 700 !important;
                 font-size: 0.9rem !important;
                 margin: 0 !important;
+                opacity: 1 !important;
             }
 
-            button[data-baseweb="tab"]:hover {
+            button[role="tab"]:hover,
+            button[data-baseweb="tab"]:hover,
+            button[data-testid="stTab"]:hover {
                 transform: translateY(-2px) !important;
                 box-shadow: 0 8px 22px rgba(236, 72, 153, 0.55) !important;
+                border-color: #EC4899 !important;
             }
 
-            /* Onglet actif */
-            button[data-baseweb="tab"][aria-selected="true"] {
+            /* Onglet actif : dégradé rose/violet */
+            button[role="tab"][aria-selected="true"],
+            button[data-baseweb="tab"][aria-selected="true"],
+            button[data-testid="stTab"][aria-selected="true"] {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-                border: 1px solid rgba(255, 255, 255, 0.4) !important;
+                border: 1px solid rgba(255, 255, 255, 0.45) !important;
+                box-shadow: 0 6px 20px rgba(236, 72, 153, 0.55) !important;
             }
 
-            div[data-baseweb="tab-panel"] {
+            div[data-baseweb="tab-panel"],
+            [role="tabpanel"] {
                 padding-top: 8px !important;
             }
 
@@ -255,7 +336,6 @@ def inject_custom_design():
                 font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif !important;
             }
 
-            /* Titres mois / année et flèches */
             div[data-baseweb="calendar"] div[role="heading"] {
                 font-weight: 800 !important;
                 letter-spacing: 0.3px !important;
@@ -267,7 +347,6 @@ def inject_custom_design():
                 border: 1px solid rgba(236, 72, 153, 0.35) !important;
             }
 
-            /* Noms des jours (Lun, Mar...) */
             div[data-baseweb="calendar"] [role="columnheader"],
             div[data-baseweb="calendar"] abbr {
                 color: #F9A8D4 !important;
@@ -278,7 +357,6 @@ def inject_custom_design():
                 letter-spacing: 0.8px !important;
             }
 
-            /* Cases des jours */
             div[data-baseweb="calendar"] div[role="gridcell"] > div,
             div[data-baseweb="calendar"] [aria-label^="Choose"],
             div[data-baseweb="calendar"] [aria-label^="Selected"] {
@@ -292,7 +370,6 @@ def inject_custom_design():
                 transform: scale(1.08) !important;
             }
 
-            /* Jour sélectionné */
             div[data-baseweb="calendar"] [aria-selected="true"],
             div[data-baseweb="calendar"] [aria-label^="Selected"] {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
@@ -300,12 +377,10 @@ def inject_custom_design():
                 border-radius: 50% !important;
             }
 
-            /* Jours hors du mois / désactivés */
             div[data-baseweb="calendar"] [aria-disabled="true"] {
                 opacity: 0.35 !important;
             }
 
-            /* Listes déroulantes (selectbox, mois, année) */
             ul[role="listbox"], div[data-baseweb="menu"] {
                 background: #230E3D !important;
                 border: 1px solid rgba(236, 72, 153, 0.4) !important;
