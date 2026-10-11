@@ -1,8 +1,7 @@
 import streamlit as st
-import random
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec un widget de témoignages mondiaux en bas à droite (dynamique au clic/action, 0 latence)."""
+    """Affiche le Tableau de Bord principal de PavelCore avec un widget de témoignages optimisé et fluide (0 latence réseau)."""
     
     # CSS pour positionner le widget fixe en bas à droite et forcer l'alignement des colonnes sur mobile
     st.markdown("""
@@ -53,7 +52,7 @@ def render_home_view():
                 border: 1px solid rgba(236, 72, 153, 0.4) !important;
                 border-radius: 14px !important;
                 padding: 14px 16px !important;
-                width: 350px;
+                width: 330px;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
                 display: flex;
                 align-items: center;
@@ -87,26 +86,27 @@ def render_home_view():
         </div>
     """, unsafe_allow_html=True)
 
-    # --- BASE DE DONNÉES MONDIALE DES TÉMOIGNAGES ---
+    # --- BASE DE DONNÉES MONDIALE DES TÉMOIGNAGES (Optimisée sans images lourdes) ---
     world_testimonials = [
-        {"name": "Yannick M.", "country": "🇨🇲 Cameroun", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "J'adore cette application ! L'agenda est parfait depuis Douala."},
-        {"name": "Koffi K.", "country": "🇨🇮 Côte d'Ivoire", "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "comment": "Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan."},
-        {"name": "Éléonore V.", "country": "🇫🇷 France", "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80", "comment": "Une fluidité remarquable, bravo pour ce bijou technologique depuis Grenoble !"},
-        {"name": "Emre K.", "country": "🇹🇷 Turquie", "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", "comment": "Harika bir uygulama! Design and speed are incredible from Istanbul."},
-        {"name": "Hans W.", "country": "🇩🇪 Allemagne", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "Ausgezeichnet! Incredible speed and clean architecture from Berlin."},
-        {"name": "Michael S.", "country": "🇺🇸 USA", "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80", "comment": "Amazing workspace! The performance and security standards are top notch."}
+        {"name": "Yannick M.", "country": "🇨🇲 Cameroun", "emoji": "👨🏾‍💻", "comment": "J'adore cette application ! L'agenda est parfait depuis Douala."},
+        {"name": "Koffi K.", "country": "🇨🇮 Côte d'Ivoire", "emoji": "🚀", "comment": "Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan."},
+        {"name": "Éléonore V.", "country": "🇫🇷 France", "emoji": "⚡", "comment": "Une fluidité remarquable, bravo pour ce bijou technologique depuis Grenoble !"},
+        {"name": "Emre K.", "country": "🇹🇷 Turquie", "emoji": "🌟", "comment": "Harika bir uygulama! Design and speed are incredible from Istanbul."},
+        {"name": "Hans W.", "country": "🇩🇪 Allemagne", "emoji": "💡", "comment": "Ausgezeichnet! Incredible speed and clean architecture from Berlin."},
+        {"name": "Michael S.", "country": "🇺🇸 USA", "emoji": "💎", "comment": "Amazing workspace! The performance and security standards are top notch."}
     ]
 
+    # Initialisation fixe pour éviter le défilement intempestif à chaque clic
     if "notif_idx" not in st.session_state:
         st.session_state.notif_idx = 0
-    else:
-        st.session_state.notif_idx = (st.session_state.notif_idx + 1) % len(world_testimonials)
 
     curr_notif = world_testimonials[st.session_state.notif_idx]
 
     st.markdown(f"""
         <div class="pavel-bottom-right-toast">
-            <img src="{curr_notif['avatar']}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #EC4899;" alt="Avatar">
+            <div style="font-size: 2rem; background: rgba(236,72,153,0.2); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #EC4899;">
+                {curr_notif['emoji']}
+            </div>
             <div style="flex-grow: 1; min-width: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                     <strong style="color: #FFFFFF; font-size: 0.88rem;">{curr_notif['name']}</strong>
