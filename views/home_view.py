@@ -1,235 +1,253 @@
+import sys
+import os
+import json
+import base64
 import streamlit as st
-import random
+import pandas as pd
+from datetime import datetime, date, time
 
-def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec un widget de témoignages mondiaux en bas à droite (dynamique au clic/action, 0 latence)."""
+# Correctif robuste pour les chemins sur Streamlit Cloud
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
+
+# Configuration de la page
+st.set_page_config(
+    page_title="PavelCore — Workspace & Agenda Premium",
+    page_icon="🔮",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Import de l'état global modulaire
+from modules.state import init_session_state
+init_session_state()
+
+# Import sécurisé et injection du design CSS global
+try:
+    from assets.styles import inject_custom_design
+    inject_custom_design()
+except Exception:
+    pass
+
+# Import des fonctions base de données utilisateurs
+from modules.database import create_user_db, authenticate_user_db
+
+# Import de toutes les vues modulaires
+from views.home_view import render_home_view
+from views.agenda_view import render_agenda_view
+from views.dev_ia_view import render_dev_ia_view
+from views.projets_view import render_projets_view
+from views.media_view import render_media_view
+from views.vault_contacts_view import render_vault_view, render_contacts_view
+from views.backup_view import render_backup_view
+
+# Dossier local pour le stockage des fichiers uploadés
+UPLOADS_DIR = os.path.join(ROOT_DIR, "uploaded_files")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+
+# Définition sécurisée des couleurs pour les variables de texte
+theme_mode = st.session_state.get("theme_mode", "Sombre Nuit")
+if theme_mode == "Blanc Épuré":
+    text_color = "#0F172A"
+    sub_title_color = "#0F172A"
+    desc_color = "#475569"
+    header_box_bg = "#F1F5F9"
+    header_box_text = "#475569"
+    card_border = "#E2E8F0"
+    card_bg = "#FFFFFF"
+else:
+    text_color = "#F8FAFC"
+    sub_title_color = "#FFF"
+    desc_color = "#CBD5E1"
+    header_box_bg = "#1E0A3C"
+    header_box_text = "#A78BFA"
+    card_border = "#2B1552"
+    card_bg = "#170A2E"
+
+def render_global_search():
+    st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+    search_query = st.text_input("⚡ Recherche Rapide Universelle", placeholder="🔍 Tapez un mot-clé (ex: Flyer, Python, DJ, Client, Prompt...)", key="global_search_input")
     
-    # CSS pour positionner le widget fixe en bas à droite et forcer l'alignement des colonnes sur mobile
-    st.markdown("""
-        <style>
-            /* Correction pour forcer les boutons et colonnes côte à côte sur mobile sans latence */
-            [data-testid="column"] {
-                width: calc(50% - 1rem) !important;
-                flex: 1 1 calc(50% - 1rem) !important;
-                min-width: calc(50% - 1rem) !important;
-            }
+    if search_query.strip():
+        q = search_query.strip().lower()
+        results_count = 0
+        st.markdown(f"### 🔎 Résultats de recherche pour : *'{search_query}'*")
 
-            /* Badges de compteurs néon */
-            .pavel-counter-badge {
-                background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-                color: #FFFFFF !important;
-                font-weight: 800 !important;
-                font-size: 0.85rem !important;
-                padding: 4px 12px !important;
-                border-radius: 20px !important;
-                box-shadow: 0 0 12px rgba(236, 72, 153, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4) !important;
-                border: 1px solid rgba(255, 255, 255, 0.4) !important;
-                letter-spacing: 0.5px !important;
-            }
+        # 1. Prompts
+        matched_prompts = [p for p in st.session_state.saved_prompts_library if q in p["title"].lower() or q in p["prompt"].lower() or q in p["category"].lower()]
+        if matched_prompts:
+            st.markdown("#### 🧠 Prompts & IA")
+            for item in matched_prompts:
+                results_count += 1
+                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["category"]}</span><h4 style="margin-top:5px;">{item["title"]}</h4>', unsafe_allow_html=True)
+                st.code(item["prompt"], language="markdown")
+                st.markdown('</div>', unsafe_allow_html=True)
 
-            /* Halo lumineux au survol des cartes de modules */
-            .pavel-card-grid {
-                background: rgba(23, 10, 46, 0.75) !important;
-                border: 1px solid rgba(255, 255, 255, 0.12) !important;
-                border-radius: 16px !important;
-                padding: 18px !important;
-                backdrop-filter: blur(12px) !important;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            }
+        # 2. Fichiers & Médias
+        matched_files = [f for f in st.session_state.saved_media_files if q in f["title"].lower() or q in f.get("filename", "").lower() or q in f.get("type", "").lower() or q in f.get("desc", "").lower()]
+        if matched_files:
+            st.markdown("#### 📁 Médias & Fichiers")
+            for item in matched_files:
+                results_count += 1
+                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["type"]}</span><h4 style="margin-top:5px;">{item["title"]}</h4></div>', unsafe_allow_html=True)
 
-            .pavel-card-grid:hover {
-                border-color: rgba(236, 72, 153, 0.6) !important;
-                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25) !important;
-                transform: translateY(-3px) !important;
-            }
+        # 3. Événements Agenda
+        matched_events = [e for e in st.session_state.agenda_events if q in e["title"].lower() or q in e.get("desc", "").lower() or q in e.get("category", "").lower()]
+        if matched_events:
+            st.markdown("#### 📅 Agenda & Événements")
+            for item in matched_events:
+                results_count += 1
+                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["category"]}</span><h4 style="margin-top:5px;">{item["title"]}</h4><p>Date: {item["date"]} à {item["time"]}</p></div>', unsafe_allow_html=True)
 
-            /* Widget de notification fixe en bas à droite */
-            .pavel-bottom-right-toast {
-                position: fixed;
-                bottom: 25px;
-                right: 25px;
-                z-index: 99999;
-                background: rgba(23, 10, 46, 0.95) !important;
-                border: 1px solid rgba(236, 72, 153, 0.4) !important;
-                border-radius: 14px !important;
-                padding: 14px 16px !important;
-                width: 350px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                backdrop-filter: blur(10px);
-            }
-        </style>
-    """, unsafe_allow_html=True)
+        # 4. Contacts
+        matched_contacts = [c for c in st.session_state.saved_contacts if q in c["name"].lower() or q in c.get("email", "").lower() or q in c.get("phone", "").lower() or q in c.get("notes", "").lower()]
+        if matched_contacts:
+            st.markdown("#### 🎴 Contacts")
+            for item in matched_contacts:
+                results_count += 1
+                st.markdown(f'<div class="zapio-card"><span class="zapio-badge">{item["cat"]}</span><h4 style="margin-top:5px;">{item["name"]}</h4><p>📧 {item["email"]} | 📞 {item["phone"]}</p></div>', unsafe_allow_html=True)
+
+        # 5. Projets & Idées
+        matched_projects = [p for p in st.session_state.saved_current_projects + st.session_state.saved_future_projects if q in p["name"].lower() or q in p.get("desc", "").lower() or q in p.get("client", "").lower()]
+        if matched_projects:
+            st.markdown("#### 🚀 Projets")
+            for item in matched_projects:
+                results_count += 1
+                st.markdown(f'<div class="zapio-card"><h4 style="margin-top:5px;">{item["name"]}</h4></div>', unsafe_allow_html=True)
+
+        if results_count == 0:
+            st.warning("Aucun élément ne correspond à votre recherche.")
+        st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 25px 0;'>", unsafe_allow_html=True)
+
+# AUTH & NAVIGATION
+query_params = st.query_params
+is_direct_agenda_link = query_params.get("app", None) == "agenda"
+
+if is_direct_agenda_link or st.session_state.get("direct_agenda", False):
+    render_agenda_view(sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
+
+elif not st.session_state.get("authenticated", False):
+    st.markdown(f'<div style="text-align: center; margin-top: 25px; margin-bottom: 20px;"><h1 style="font-size: 2.8rem; margin-bottom: 5px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 10px; border-radius: 8px; font-size: 2rem; margin-left: 6px;">CORE</span></h1><div style="margin-top: 10px;"><span class="zapio-badge">🔮 Workspace Centralisé & Sécurisé</span></div></div>', unsafe_allow_html=True)
     
-    user_email = st.session_state.user_info.get("email", "Utilisateur") if st.session_state.get("user_info") else "Mode Invité"
-    
-    # Récupération des compteurs en temps réel
-    count_agenda = len(st.session_state.get("agenda_events", []))
-    count_prompts = len(st.session_state.get("saved_prompts_library", []))
-    count_media = len(st.session_state.get("saved_media_files", []))
-    count_projects = len(st.session_state.get("saved_current_projects", [])) + len(st.session_state.get("saved_future_projects", []))
-    count_vault = len(st.session_state.get("saved_api_keys", [])) + len(st.session_state.get("saved_user_credentials", []))
-    count_contacts = len(st.session_state.get("saved_contacts", []))
-    
-    # En-tête / Bannière Héroïque
-    st.markdown(f"""
-        <div class="pavel-hero-banner" style="position: relative; overflow: hidden;">
-            <div style="position: relative; z-index: 2;">
-                <span class="pavel-counter-badge">🚀 Workspace Actif (300+ Membres Mondiaux)</span>
-                <h1 style="color: #FFFFFF; margin-top: 10px; font-size: 2.2rem; font-weight: 800;">Tableau de Bord</h1>
-                <p style="color: #CBD5E1; font-size: 1.05rem; margin-bottom: 0;">
-                    Bienvenue dans votre espace sécurisé, <strong style="color: #F472B6;">{user_email}</strong>. 
-                    Pilotez vos agendas, votre coffre-fort et vos projets en toute fluidité.
-                </p>
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if "auth_mode" not in st.session_state:
+            st.session_state.auth_mode = "login"
+
+        # Gestion instantanée via les paramètres Streamlit natifs (sans latence réseau lourde)
+        if "auth" in query_params:
+            target_mode = query_params["auth"]
+            if target_mode in ["login", "signup"] and st.session_state.auth_mode != target_mode:
+                st.session_state.auth_mode = target_mode
+                st.query_params.clear()
+                st.rerun()
+
+        is_login_active = st.session_state.auth_mode == "login"
+        is_signup_active = st.session_state.auth_mode == "signup"
+
+        # Boutons d'authentification en Flexbox HTML pur : parfaitement alignés, centrés et zéro latence
+        st.markdown(f"""
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
+                <div style="flex: 1; min-width: 0;">
+                    <a href="?auth=login" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_login_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_login_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
+                        🔑 Connexion
+                    </a>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <a href="?auth=signup" target="_self" style="display: block; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_signup_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_signup_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
+                        ✨ Inscription
+                    </a>
+                </div>
             </div>
-        </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    # --- BASE DE DONNÉES MONDIALE DES TÉMOIGNAGES (TOUS LES PAYS AVEC DRAPEAUX) ---
-    world_testimonials = [
-        # Afrique
-        {"name": "Yannick M.", "country": "🇨🇲 Cameroun", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "J'adore cette application ! L'agenda est parfait depuis Douala."},
-        {"name": "Koffi K.", "country": "🇨🇮 Côte d'Ivoire", "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "comment": "Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan."},
-        {"name": "Aïssatou D.", "country": "🇬🇳 Guinée", "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&auto=format&fit=crop&q=80", "comment": "L'interface et la recherche universelle sont ultra intuitives à Conakry."},
-        {"name": "Mamadou S.", "country": "🇸🇳 Sénégal", "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80", "comment": "Le top du top pour gérer mes plannings et projets depuis Dakar. J'valide !"},
-        {"name": "Amine B.", "country": "🇲🇦 Maroc", "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", "comment": "Application magnifique et extrêmement rapide depuis Casablanca."},
-        {"name": "Mehdi T.", "country": "🇹🇳 Tunisie", "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80", "comment": "Un outil de travail exceptionnel. Salutations depuis Tunis !"},
-        {"name": "Ibrahim K.", "country": "🇲🇱 Mali", "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", "comment": "Une fluidité exemplaire, bravo pour PavelCore depuis Bamako."},
+        st.markdown("<br>", unsafe_allow_html=True)
 
-        # Europe
-        {"name": "Éléonore V.", "country": "🇫🇷 France", "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80", "comment": "Une fluidité remarquable, bravo pour ce bijou technologique depuis Grenoble !"},
-        {"name": "Emre K.", "country": "🇹🇷 Turquie", "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", "comment": "Harika bir uygulama! Design and speed are incredible from Istanbul."},
-        {"name": "Hans W.", "country": "🇩🇪 Allemagne", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "Ausgezeichnet! Incredible speed and clean architecture from Berlin."},
-        {"name": "Matteo R.", "country": "🇮🇹 Italie", "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "comment": "Fantastico! Un workspace davvero potente ed elegante da Milano."},
-        {"name": "Carmen G.", "country": "🇪🇸 Espagne", "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", "comment": "Me encanta esta aplicación, muy fluida y profesional desde Madrid."},
-        {"name": "Lucas D.", "country": "🇧🇪 Belgique", "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80", "comment": "Super boulot, c'est devenu mon outil quotidien à Bruxelles."},
-        {"name": "Noah S.", "country": "🇨🇭 Suisse", "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80", "comment": "Précis, sécurisé et ultra rapide. Salutations depuis Genève !"},
+        if st.session_state.auth_mode == "login":
+            with st.form("login_form"):
+                email = st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
+                password = st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
+                submit_login = st.form_submit_button("Se connecter au Workspace", use_container_width=True)
+                
+                if submit_login:
+                    ok, res = authenticate_user_db(email, password)
+                    if ok:
+                        st.session_state.authenticated = True
+                        st.session_state.user_info = res
+                        st.toast(f"🔓 Bienvenue, {res['email']} !", icon="✨")
+                        st.rerun()
+                    else:
+                        st.error(res)
+        else:
+            with st.form("signup_form"):
+                new_email = st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
+                new_pass = st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
+                confirm_pass = st.text_input("Confirmer le mot de passe", type="password", placeholder="••••••••", key="signup_confirm_pass")
+                submit_signup = st.form_submit_button("S'inscrire et rejoindre PavelCore", use_container_width=True)
+                
+                if submit_signup:
+                    if new_pass != confirm_pass:
+                        st.error("Les deux mots de passe ne correspondent pas.")
+                    elif len(new_pass) < 6:
+                        st.warning("Le mot de passe doit contenir au moins 6 caractères.")
+                    else:
+                        ok, msg = create_user_db(new_email, new_pass)
+                        if ok:
+                            st.success(msg)
+                        else:
+                            st.error(msg)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
+            st.session_state.direct_agenda = True
+            st.rerun()
 
-        # Amérique & Asie
-        {"name": "Michael S.", "country": "🇺🇸 USA", "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80", "comment": "Amazing workspace! The performance and security standards are top notch."},
-        {"name": "Sophie L.", "country": "🇨🇦 Canada", "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80", "comment": "Super clean interface, very fast and secure from Montreal."},
-        {"name": "Kenji T.", "country": "🇯🇵 Japon", "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "comment": "Subarashii! The design and reactivity are futuristic from Tokyo."},
-        {"name": "Beatriz S.", "country": "🇧🇷 Brésil", "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", "comment": "Maravilhoso! Estou amando usar o PavelCore no Rio de Janeiro."}
-    ]
+else:
+    col_logo, col_user, col_logout = st.columns([2, 2, 1])
+    
+    with col_logo:
+        st.markdown(f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 6px;"><span style="color: {text_color};">pavel</span><span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; padding: 2px 6px; border-radius: 6px; font-size: 0.85rem;">CORE</span><span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>', unsafe_allow_html=True)
+    
+    with col_user:
+        current_email = st.session_state.get("user_info", {}).get("email", "Session Active") if st.session_state.get("user_info") else "Membre"
+        st.markdown(f'<div style="text-align: center; color: {desc_color}; font-size: 0.85rem; padding-top: 5px;">👤 Connecté en tant que : <strong style="color: {sub_title_color};">{current_email}</strong></div>', unsafe_allow_html=True)
 
-    # Rotation propre et instantanée à chaque interaction de l'utilisateur (0 latence)
-    if "notif_idx" not in st.session_state:
-        st.session_state.notif_idx = 0
+    with col_logout:
+        if st.button("🔒 Déconnexion", use_container_width=True, type="secondary"):
+            st.session_state.authenticated = False
+            st.session_state.user_info = None
+            st.session_state.current_view = "home"
+            st.toast("🔒 Déconnexion effectuée.", icon="👋")
+            st.rerun()
+
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0 15px 0;'>", unsafe_allow_html=True)
+    
+    render_global_search()
+
+    if st.session_state.current_view == "home":
+        render_home_view()
+        render_backup_view(sub_title_color)
     else:
-        st.session_state.notif_idx = (st.session_state.notif_idx + 1) % len(world_testimonials)
-
-    curr_notif = world_testimonials[st.session_state.notif_idx]
-
-    # Affichage du widget fixe en bas à droite
-    st.markdown(f"""
-        <div class="pavel-bottom-right-toast">
-            <img src="{curr_notif['avatar']}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #EC4899;" alt="Avatar">
-            <div style="flex-grow: 1; min-width: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <strong style="color: #FFFFFF; font-size: 0.88rem;">{curr_notif['name']}</strong>
-                    <span style="font-size: 0.78rem; color: #A78BFA; font-weight: 700;">{curr_notif['country']}</span>
-                </div>
-                <p style="color: #CBD5E1; font-size: 0.82rem; margin: 0; font-style: italic; line-height: 1.25;">"{curr_notif['comment']}"</p>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-    # -----------------------------------------------------------------------------------
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### ⚡ Accès Rapide aux Modules")
-    
-    # Ligne 1
-    r_col1, r_col2 = st.columns(2)
-    with r_col1:
-        st.markdown(f"""
-            <div class="pavel-card-grid" style="min-height: 125px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🗓️ Gérer l'Agenda</h3>
-                    <span class="pavel-counter-badge">{count_agenda}</span>
-                </div>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Consultez votre calendrier et planifiez vos événements.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        if st.button("Ouvrir l'Agenda", key="btn_agenda", use_container_width=True):
-            st.session_state.current_view = "Agenda"
+        current = st.session_state.current_view
+        
+        if st.button("← Retour au Tableau de Bord", key="back_to_home_universal", type="secondary"):
+            st.session_state.current_view = "home"
             st.rerun()
+            
+        st.markdown(f"<h2 style='color: #EC4899; margin-top: 15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
 
-    with r_col2:
-        st.markdown(f"""
-            <div class="pavel-card-grid" style="min-height: 125px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🔐 Coffre-Fort Sécurisé</h3>
-                    <span class="pavel-counter-badge">{count_vault}</span>
-                </div>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Stockez vos clés API et mots de passe en toute sécurité.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        if st.button("Ouvrir le Coffre-Fort", key="btn_vault", use_container_width=True):
-            st.session_state.current_view = "Coffre-Fort"
-            st.rerun()
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Ligne 2
-    r_col3, r_col4 = st.columns(2)
-    with r_col3:
-        st.markdown(f"""
-            <div class="pavel-card-grid" style="min-height: 125px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🤖 Prompts & IA</h3>
-                    <span class="pavel-counter-badge">{count_prompts}</span>
-                </div>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Bibliothèque complète de prompts et scripts.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        if st.button("Ouvrir Prompts & IA", key="btn_prompts", use_container_width=True):
-            st.session_state.current_view = "Prompts & IA"
-            st.rerun()
-
-    with r_col4:
-        st.markdown(f"""
-            <div class="pavel-card-grid" style="min-height: 125px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🚀 Projets & Idées</h3>
-                    <span class="pavel-counter-badge">{count_projects}</span>
-                </div>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Suivi de vos projets actifs et futurs.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        if st.button("Ouvrir Projets", key="btn_projects", use_container_width=True):
-            st.session_state.current_view = "Projets"
-            st.rerun()
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Ligne 3
-    r_col5, r_col6 = st.columns(2)
-    with r_col5:
-        st.markdown(f"""
-            <div class="pavel-card-grid" style="min-height: 125px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">📁 Médias & Fichiers</h3>
-                    <span class="pavel-counter-badge">{count_media}</span>
-                </div>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Gestion des images, documents et fichiers.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        if st.button("Ouvrir Médias & Fichiers", key="btn_media", use_container_width=True):
-            st.session_state.current_view = "Médias & Fichiers"
-            st.rerun()
-
-    with r_col6:
-        st.markdown(f"""
-            <div class="pavel-card-grid" style="min-height: 125px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🎴 Contacts & Emails</h3>
-                    <span class="pavel-counter-badge">{count_contacts}</span>
-                </div>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Répertoire et templates de communication.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        if st.button("Ouvrir Contacts & Emails", key="btn_contacts", use_container_width=True):
-            st.session_state.current_view = "Contacts & Emails"
-            st.rerun()
+        if current == "Agenda":
+            render_agenda_view(sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
+        elif current == "Prompts & IA":
+            render_dev_ia_view(sub_title_color)
+        elif current == "Projets":
+            render_projets_view(sub_title_color, desc_color)
+        elif current == "Médias & Fichiers":
+            render_media_view(sub_title_color, UPLOADS_DIR)
+        elif current == "Coffre-Fort":
+            render_vault_view(sub_title_color, desc_color)
+        elif current == "Contacts & Emails":
+            render_contacts_view(sub_title_color, desc_color)
+        elif current == "Sauvegarde":
+            render_backup_view(sub_title_color)
