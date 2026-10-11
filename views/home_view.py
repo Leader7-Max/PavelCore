@@ -1,9 +1,17 @@
 import streamlit as st
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore avec un design ultra-premium et responsive."""
+    """Affiche le Tableau de Bord principal de PavelCore avec compteurs dynamiques et design ultra-premium."""
     
     user_email = st.session_state.user_info.get("email", "Utilisateur") if st.session_state.get("user_info") else "Mode Invité"
+    
+    # Récupération des compteurs en temps réel pour chaque option
+    count_agenda = len(st.session_state.get("agenda_events", []))
+    count_prompts = len(st.session_state.get("saved_prompts_library", []))
+    count_media = len(st.session_state.get("saved_media_files", []))
+    count_projects = len(st.session_state.get("saved_current_projects", [])) + len(st.session_state.get("saved_future_projects", []))
+    count_vault = len(st.session_state.get("saved_api_keys", [])) + len(st.session_state.get("saved_user_credentials", []))
+    count_contacts = len(st.session_state.get("saved_contacts", []))
     
     # En-tête / Bannière Héroïque
     st.markdown(f"""
@@ -19,29 +27,29 @@ def render_home_view():
         </div>
     """, unsafe_allow_html=True)
 
-    # Grille de Métriques
+    # Grille de Métriques Globales
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
+        st.markdown(f"""
             <div class="pavel-card-grid">
                 <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase;">📅 Agenda</div>
-                <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Synchronisé</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">{count_agenda} Événement(s)</div>
                 <div style="font-size: 0.8rem; color: #34C759; font-weight: 600;">● Module actif</div>
             </div>
         """, unsafe_allow_html=True)
 
     with col2:
-        st.markdown("""
+        st.markdown(f"""
             <div class="pavel-card-grid">
                 <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase;">🔐 Coffre-Fort</div>
-                <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Chiffré</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">{count_vault} Élément(s)</div>
                 <div style="font-size: 0.8rem; color: #F472B6; font-weight: 600;">● Cloisonné</div>
             </div>
         """, unsafe_allow_html=True)
 
     with col3:
-        st.markdown("""
+        st.markdown(f"""
             <div class="pavel-card-grid">
                 <div style="font-size: 0.85rem; color: #A78BFA; font-weight: 700; text-transform: uppercase;">⚡ Performance</div>
                 <div style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin: 6px 0;">Ultra-Fluide</div>
@@ -55,9 +63,12 @@ def render_home_view():
     # Première ligne de modules
     r_col1, r_col2 = st.columns(2)
     with r_col1:
-        st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 120px;">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🗓️ Gérer l'Agenda</h3>
+        st.markdown(f"""
+            <div class="pavel-card-grid" style="min-height: 125px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🗓️ Gérer l'Agenda</h3>
+                    <span class="zapio-badge">{count_agenda}</span>
+                </div>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Consultez votre calendrier et planifiez vos événements.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -66,9 +77,12 @@ def render_home_view():
             st.rerun()
 
     with r_col2:
-        st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 120px;">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🔐 Coffre-Fort Sécurisé</h3>
+        st.markdown(f"""
+            <div class="pavel-card-grid" style="min-height: 125px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🔐 Coffre-Fort Sécurisé</h3>
+                    <span class="zapio-badge">{count_vault}</span>
+                </div>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Stockez vos clés API et mots de passe en toute sécurité.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -81,9 +95,12 @@ def render_home_view():
     # Seconde ligne de modules
     r_col3, r_col4 = st.columns(2)
     with r_col3:
-        st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 120px;">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🤖 Prompts & IA</h3>
+        st.markdown(f"""
+            <div class="pavel-card-grid" style="min-height: 125px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🤖 Prompts & IA</h3>
+                    <span class="zapio-badge">{count_prompts}</span>
+                </div>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Bibliothèque complète de prompts et scripts.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -92,9 +109,12 @@ def render_home_view():
             st.rerun()
 
     with r_col4:
-        st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 120px;">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🚀 Projets & Idées</h3>
+        st.markdown(f"""
+            <div class="pavel-card-grid" style="min-height: 125px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🚀 Projets & Idées</h3>
+                    <span class="zapio-badge">{count_projects}</span>
+                </div>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Suivi de vos projets actifs et futurs.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -107,9 +127,12 @@ def render_home_view():
     # Troisième ligne de modules
     r_col5, r_col6 = st.columns(2)
     with r_col5:
-        st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 120px;">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">📁 Médias & Fichiers</h3>
+        st.markdown(f"""
+            <div class="pavel-card-grid" style="min-height: 125px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">📁 Médias & Fichiers</h3>
+                    <span class="zapio-badge">{count_media}</span>
+                </div>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Gestion des images, documents et fichiers.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -118,9 +141,12 @@ def render_home_view():
             st.rerun()
 
     with r_col6:
-        st.markdown("""
-            <div class="pavel-card-grid" style="min-height: 120px;">
-                <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🎴 Contacts & Emails</h3>
+        st.markdown(f"""
+            <div class="pavel-card-grid" style="min-height: 125px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: #FFFFFF; margin-top: 0; font-size: 1.1rem;">🎴 Contacts & Emails</h3>
+                    <span class="zapio-badge">{count_contacts}</span>
+                </div>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 0;">Répertoire et templates de communication.</p>
             </div>
         """, unsafe_allow_html=True)
