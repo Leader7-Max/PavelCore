@@ -133,16 +133,16 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # CSS universel anti-empilement mobile pour forcer les boutons Connexion/Inscription côte à côte sans latence
+        # CSS ciblé UNIQUEMENT sur les boutons d'authentification pour garder le reste de la page centré
         st.markdown("""
             <style>
-                div[data-testid="stHorizontalBlock"] {
+                .custom-auth-buttons div[data-testid="stHorizontalBlock"] {
                     display: flex !important;
                     flex-direction: row !important;
                     flex-wrap: nowrap !important;
                     gap: 10px !important;
                 }
-                div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+                .custom-auth-buttons div[data-testid="column"] {
                     width: 50% !important;
                     flex: 1 1 50% !important;
                     min-width: 0 !important;
@@ -150,7 +150,8 @@ elif not st.session_state.get("authenticated", False):
             </style>
         """, unsafe_allow_html=True)
 
-        # Boutons natifs instantanés (Zéro latence réseau via WebSocket)
+        # Conteneur isolé pour les boutons d'authentification
+        st.markdown('<div class="custom-auth-buttons">', unsafe_allow_html=True)
         auth_col1, auth_col2 = st.columns(2)
         with auth_col1:
             if st.button("🔑 Connexion", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
@@ -160,6 +161,7 @@ elif not st.session_state.get("authenticated", False):
             if st.button("✨ Inscription", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
                 st.session_state.auth_mode = "signup"
                 st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
