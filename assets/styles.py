@@ -29,23 +29,118 @@ def inject_custom_design():
             color: #1A0B2E !important;
             background-color: #FFFFFF !important;
             border: 2px solid #D8B4FE !important;
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             font-weight: 600 !important;
             font-size: 0.95rem !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        div[data-baseweb="input"] input:focus, 
+        .stTextInput input:focus {
+            border-color: #EC4899 !important;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.4) !important;
         }
 
         div[data-baseweb="select"] > div {
             background-color: #FFFFFF !important;
             color: #1A0B2E !important;
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             font-weight: 600 !important;
         }
 
         /* ====================================================
-           🔥 FORÇAGE RESPONSIVE MOBILE POUR LA GRILLE 7 JOURS
+            🔥 DESIGN ULTRA-PREMIUM POUR LE TABLEAU DE BORD & CARTES
            ==================================================== */
         
-        /* Conserver les 7 colonnes côte à côte même sur Mobile */
+        .pavel-card-grid, div[data-testid="stMetric"], .dashboard-card {
+            background: linear-gradient(135deg, rgba(46, 16, 80, 0.85) 0%, rgba(27, 9, 48, 0.95) 100%) !important;
+            border: 1px solid rgba(168, 85, 247, 0.35) !important;
+            border-radius: 20px !important;
+            padding: 22px !important;
+            margin-bottom: 16px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            backdrop-filter: blur(12px) !important;
+        }
+
+        .pavel-card-grid:hover, div[data-testid="stMetric"]:hover {
+            border-color: #EC4899 !important;
+            transform: translateY(-4px) scale(1.01) !important;
+            box-shadow: 0 15px 40px rgba(236, 72, 153, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            background: linear-gradient(135deg, rgba(58, 20, 102, 0.95) 0%, rgba(35, 11, 63, 0.98) 100%) !important;
+        }
+
+        /* ====================================================
+            🔥 FORMES DE BOUTONS ULTRA-FLUIDES ET 3D
+           ==================================================== */
+
+        button[kind="primary"] {
+            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 9999px !important;
+            padding: 12px 28px !important;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.6), 0 6px 20px rgba(0,0,0,0.4) !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        button[kind="secondary"] {
+            background: linear-gradient(135deg, #2D1452 0%, #1E0A3C 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            border: 2px solid #7C3AED !important;
+            border-radius: 9999px !important;
+            padding: 12px 28px !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        button[kind="primary"] p, button[kind="secondary"] p,
+        button[kind="primary"] span, button[kind="secondary"] span {
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+        }
+
+        button[kind="secondary"]:hover {
+            background: linear-gradient(135deg, #5B21B6 0%, #31105E 100%) !important;
+            border-color: #EC4899 !important;
+            transform: translateY(-3px) scale(1.03) !important;
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.5) !important;
+        }
+
+        button[kind="primary"]:hover {
+            transform: translateY(-3px) scale(1.03) !important;
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.9), 0 8px 25px rgba(0,0,0,0.5) !important;
+        }
+
+        div[data-testid="stFormSubmitButton"] > button {
+            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 1rem !important;
+            border: none !important;
+            border-radius: 16px !important;
+            padding: 14px 24px !important;
+            width: 100% !important;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.45) !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        div[data-testid="stFormSubmitButton"] > button:hover {
+            transform: translateY(-2px) scale(1.01) !important;
+            box-shadow: 0 12px 35px rgba(236, 72, 153, 0.65) !important;
+        }
+
+        /* ====================================================
+            🔥 RESPONSIVE MOBILE CALENDRIER & BADGES
+           ==================================================== */
+
         div[data-testid="stHorizontalBlock"]:has(.calendar-day-box),
         div[data-testid="stHorizontalBlock"]:has(.calendar-header-box) {
             display: flex !important;
@@ -62,15 +157,14 @@ def inject_custom_design():
             flex: 1 1 0 !important;
         }
 
-        /* Styles des entêtes et cases du calendrier */
         .calendar-header-box {
             text-align: center;
             font-weight: 800;
-            color: #EC4899;
+            color: #F472B6;
             padding: 6px 2px;
             background: #261245;
-            border-radius: 8px;
-            border: 1px solid #5B21B6;
+            border-radius: 10px;
+            border: 1px solid #7C3AED;
             font-size: 0.75rem;
             white-space: nowrap;
             overflow: hidden;
@@ -78,98 +172,18 @@ def inject_custom_design():
         }
 
         .calendar-day-box {
-            border-radius: 10px;
+            border-radius: 12px;
             min-height: 75px;
             max-height: 110px;
             padding: 4px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        @media (max-width: 768px) {
-            .calendar-header-box {
-                font-size: 0.65rem !important;
-                padding: 4px 1px !important;
-            }
-            .calendar-day-box {
-                min-height: 60px !important;
-                padding: 3px !important;
-            }
-            .calendar-day-number {
-                font-size: 0.75rem !important;
-            }
-        }
-
-        /* ====================================================
-           🔥 STYLES DES BOUTONS DE NAVIGATION EN PILULES 3D
-           ==================================================== */
-
-        button[kind="primary"] {
-            background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            font-size: 0.95rem !important;
-            border: 2px solid #F472B6 !important;
-            border-radius: 50px !important;
-            padding: 12px 24px !important;
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.7), 0 6px 15px rgba(0,0,0,0.4) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        button[kind="secondary"] {
-            background: linear-gradient(135deg, #2D1452 0%, #1E0A3C 100%) !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            font-size: 0.95rem !important;
-            border: 2px solid #5B21B6 !important;
-            border-radius: 50px !important;
-            padding: 12px 24px !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        button[kind="primary"] p, button[kind="secondary"] p,
-        button[kind="primary"] span, button[kind="secondary"] span {
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
-        }
-
-        button[kind="secondary"]:hover {
-            background: linear-gradient(135deg, #4C1D95 0%, #31105E 100%) !important;
-            border-color: #EC4899 !important;
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 8px 22px rgba(236, 72, 153, 0.45) !important;
-        }
-
-        button[kind="primary"]:hover {
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 0 25px rgba(236, 72, 153, 0.9) !important;
-        }
-
-        div[data-testid="stFormSubmitButton"] > button {
-            background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%) !important;
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-            font-size: 1rem !important;
-            border: none !important;
-            border-radius: 14px !important;
-            padding: 14px 24px !important;
-            width: 100% !important;
-            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        div[data-testid="stFormSubmitButton"] > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .zapio-card {
             background: linear-gradient(135deg, rgba(46, 16, 80, 0.8) 0%, rgba(27, 9, 48, 0.9) 100%) !important;
-            border: 1px solid #6D28D9 !important;
-            border-radius: 18px;
+            border: 1px solid #7C3AED !important;
+            border-radius: 20px;
             padding: 20px;
             margin-bottom: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -205,7 +219,7 @@ def inject_custom_design():
             background-color: #4C1D95;
             color: #F472B6;
             padding: 5px 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.8rem;
             font-weight: 700;
             border: 1px solid #7C3AED;
@@ -215,7 +229,7 @@ def inject_custom_design():
             background-color: rgba(52, 199, 89, 0.15);
             color: #34C759;
             padding: 5px 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.8rem;
             font-weight: 700;
         }
