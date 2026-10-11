@@ -179,5 +179,41 @@ def inject_custom_design():
                 font-size: 0.75rem !important;
                 font-weight: 700 !important;
             }
+
+            /* =========================================================
+               7. ONGLETS STREAMLIT (st.tabs) PERSONNALISÉS
+               ========================================================= */
+            div[data-baseweb="tab-list"] {
+                gap: 8px !important;
+                background-color: rgba(23, 10, 46, 0.5) !important;
+                padding: 6px !important;
+                border-radius: 14px !important;
+                border: 1px solid rgba(236, 72, 153, 0.2) !important;
+            }
+
+            div[data-baseweb="tab"] {
+                background-color: transparent !important;
+                border-radius: 10px !important;
+                color: #CBD5E1 !important;
+                font-weight: 600 !important;
+                padding: 10px 18px !important;
+                transition: all 0.3s ease !important;
+            }
+
+            div[data-baseweb="tab"]:hover {
+                background-color: rgba(139, 92, 246, 0.15) !important;
+                color: #FFFFFF !important;
+            }
+
+            div[data-baseweb="tab"][aria-selected="true"] {
+                background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
+                color: #FFFFFF !important;
+                font-weight: 700 !important;
+                box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
+            }
+
+            div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
+                background-color: #EC4899 !important;
+            }
         </style>
     """, unsafe_allow_html=True)
