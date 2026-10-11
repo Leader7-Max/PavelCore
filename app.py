@@ -21,7 +21,7 @@ st.set_page_config(
 from modules.state import init_session_state
 init_session_state()
 
-# Import et injection du design CSS global
+# Import et injection du design CSS global (incluant les onglets st.tabs personnalisés)
 from assets.styles import inject_custom_design
 inject_custom_design()
 
