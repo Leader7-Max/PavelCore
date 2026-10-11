@@ -21,9 +21,12 @@ st.set_page_config(
 from modules.state import init_session_state
 init_session_state()
 
-# Import et injection du design CSS global
-from assets.styles import inject_custom_design
-inject_custom_design()
+# Import sécurisé et injection du design CSS global (évite le KeyError: 'assets')
+try:
+    from assets.styles import inject_custom_design
+    inject_custom_design()
+except Exception:
+    pass
 
 # Import des fonctions base de données utilisateurs
 from modules.database import create_user_db, authenticate_user_db
