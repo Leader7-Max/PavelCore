@@ -1,14 +1,27 @@
 import streamlit as st
 
 def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
-    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec des expanders en texte blanc lisible."""
+    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec des expanders sur fond rouge et texte blanc."""
     
-    # Correction CSS pour forcer le texte des expanders en blanc éclatant sur fond sombre
+    # CSS personnalisé pour forcer le fond rouge (avec un effet dégradé chic) et le texte en blanc
     st.markdown("""
         <style>
+            div[data-testid="stExpander"] {
+                background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+                border-radius: 12px !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                margin-bottom: 12px !important;
+            }
             .streamlit-expanderHeader p, .streamlit-expanderHeader span, div[data-testid="stExpander"] summary, div[data-testid="stExpander"] summary p {
                 color: #FFFFFF !important;
-                font-weight: 600 !important;
+                font-weight: 700 !important;
+            }
+            div[data-testid="stExpanderDetails"] {
+                background-color: rgba(0, 0, 0, 0.2) !important;
+                border-bottom-left-radius: 12px !important;
+                border-bottom-right-radius: 12px !important;
+                padding: 15px !important;
+                color: #FFFFFF !important;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -68,7 +81,7 @@ def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
                 
                 st.markdown("---")
                 st.markdown("**Description du projet :**")
-                st.info(cp['desc'] if cp['desc'] else "Aucune description renseignée pour ce projet.")
+                st.write(cp['desc'] if cp['desc'] else "Aucune description renseignée pour ce projet.")
 
     elif sub_tab == "🔮 Projets futurs":
         st.markdown(f'''
@@ -107,7 +120,7 @@ def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
             with st.expander(f"🔮 {fp['name']} ({fp['horizon']})"):
                 st.markdown(f"**Objectif :** {fp['goal']}")
                 st.markdown(f"**Ressources requises :**")
-                st.info(fp['resources'] if fp['resources'] else "Aucune ressource spécifiée.")
+                st.write(fp['resources'] if fp['resources'] else "Aucune ressource spécifiée.")
 
     elif sub_tab == "💡 Idées":
         st.markdown(f'''
@@ -145,4 +158,4 @@ def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
         for id_item in st.session_state.saved_ideas:
             with st.expander(f"💡 {id_item['title']} [{id_item['cat']}] (Impact: {id_item['impact']})"):
                 st.markdown(f"**Description détaillée :**")
-                st.info(id_item['desc'] if id_item['desc'] else "Aucune description fournie.")
+                st.write(id_item['desc'] if id_item['desc'] else "Aucune description fournie.")
