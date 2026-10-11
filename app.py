@@ -130,21 +130,21 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # Basculement instantané par WebSocket via st.segmented_control (sans rechargement HTTP)
+        # Callback atomique pour éliminer la latence et le double rechargement
+        def update_auth_mode():
+            selected = st.session_state.get("auth_segmented_switch", "🔑 Connexion")
+            st.session_state.auth_mode = "login" if "Connexion" in selected else "signup"
+
         current_label = "🔑 Connexion" if st.session_state.auth_mode == "login" else "✨ Créer un Compte"
         
-        selected_action = st.segmented_control(
+        st.segmented_control(
             "Mode d'authentification",
             options=["🔑 Connexion", "✨ Créer un Compte"],
             default=current_label,
             label_visibility="collapsed",
-            key="auth_segmented_switch"
+            key="auth_segmented_switch",
+            on_change=update_auth_mode
         )
-
-        desired_mode = "login" if "Connexion" in selected_action else "signup"
-        if desired_mode != st.session_state.auth_mode:
-            st.session_state.auth_mode = desired_mode
-            st.rerun()
 
         st.markdown("<br>", unsafe_allow_html=True)
 
