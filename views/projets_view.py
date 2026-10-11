@@ -1,14 +1,13 @@
 import streamlit as st
 
 def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
-    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec un design sombre corrigé pour les expanders."""
+    """Gère l'affichage des projets en cours, futurs et de la boîte à idées avec des expanders en texte blanc lisible."""
     
-    # Injection d'un correctif CSS local pour forcer l'affichage lisible des expanders sur fond sombre
+    # Correction CSS pour forcer le texte des expanders en blanc éclatant sur fond sombre
     st.markdown("""
         <style>
-            /* Correction du texte des expanders sur thème sombre */
-            .streamlit-expanderHeader p, .streamlit-expanderHeader span, div[data-testid="stExpander"] summary {
-                color: #0F172A !important;
+            .streamlit-expanderHeader p, .streamlit-expanderHeader span, div[data-testid="stExpander"] summary, div[data-testid="stExpander"] summary p {
+                color: #FFFFFF !important;
                 font-weight: 600 !important;
             }
         </style>
