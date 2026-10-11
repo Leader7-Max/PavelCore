@@ -181,7 +181,7 @@ def inject_custom_design():
             }
 
             /* =========================================================
-               7. ONGLETS STREAMLIT (st.tabs) - VERSION FORCÉE ULTIME
+               7. ONGLETS STREAMLIT (st.tabs) - FORÇAGE RADICAL CSS
                ========================================================= */
             div[data-baseweb="tab-list"] {
                 background-color: #230E3D !important;
@@ -225,9 +225,10 @@ def inject_custom_design():
             }
 
             div[data-baseweb="tab-highlight"],
-            div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
-                display: none !important;
-                height: 0px !important;
+            div[data-testid="stTabs"] div[data-baseweb="tab-highlight"],
+            [data-baseweb="tab-border"] {
+                background-color: #EC4899 !important;
+                background: #EC4899 !important;
             }
         </style>
     """, unsafe_allow_html=True)
