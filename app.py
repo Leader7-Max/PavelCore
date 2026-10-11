@@ -133,15 +133,19 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # CSS anti-empilement mobile pour forcer ces 2 colonnes à rester côte à côte
+        # CSS universel anti-empilement mobile pour forcer les boutons Connexion/Inscription côte à côte sans latence
         st.markdown("""
             <style>
-                @media (max-width: 640px) {
-                    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-                        width: 50% !important;
-                        flex: 1 1 50% !important;
-                        min-width: unset !important;
-                    }
+                div[data-testid="stHorizontalBlock"] {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    gap: 10px !important;
+                }
+                div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+                    width: 50% !important;
+                    flex: 1 1 50% !important;
+                    min-width: 0 !important;
                 }
             </style>
         """, unsafe_allow_html=True)
@@ -159,7 +163,7 @@ elif not st.session_state.get("authenticated", False):
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Bouton d'accès direct à l'Agenda remonté ici (juste après les onglets)
+        # Bouton d'accès direct à l'Agenda
         if st.button("📅 Accéder directement à l'Agenda (Hors-ligne / Démo)", use_container_width=True, type="secondary"):
             st.session_state.direct_agenda = True
             st.rerun()
