@@ -317,6 +317,16 @@ elif not st.session_state.get("authenticated", False):
         unsafe_allow_html=True,
     )
 
+    # 🚀 Bouton d'accès direct positionné juste après le badge de sécurité
+    _, col_top_btn, _ = st.columns([1, 2, 1])
+    with col_top_btn:
+        st.button(
+            "📅 Accéder directement à l'Agenda (Hors-ligne / Démo)",
+            key="btn_direct_agenda_top",
+            use_container_width=True, type="secondary", on_click=go_direct_agenda,
+        )
+        st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+
     if "auth_mode" not in st.session_state:
         st.session_state.auth_mode = "login"
 
@@ -360,12 +370,6 @@ elif not st.session_state.get("authenticated", False):
                 )
 
         show_auth_msg()
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.button(
-            "📅 Accéder directement à l'Agenda (Hors-ligne / Démo)",
-            use_container_width=True, type="secondary", on_click=go_direct_agenda,
-        )
 
 # ── APPLICATION (utilisateur connecté) ────────────────────
 else:
