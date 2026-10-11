@@ -135,36 +135,37 @@ elif not st.session_state.get("authenticated", False):
         if "auth_mode" not in st.session_state:
             st.session_state.auth_mode = "login"
 
-        # CSS Forçant l'alignement côte-à-côte 50/50 strict des boutons natifs
-        st.markdown("""
-            <style>
-                .auth-btn-container div[data-testid="stHorizontalBlock"] {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    gap: 10px !important;
-                    width: 100% !important;
-                }
-                .auth-btn-container div[data-testid="column"] {
-                    flex: 1 1 50% !important;
-                    width: 50% !important;
-                    min-width: 0 !important;
-                }
-            </style>
-        """, unsafe_allow_html=True)
+        if "auth" in query_params:
+            target_mode = query_params["auth"]
+            if target_mode in ["login", "signup"] and st.session_state.auth_mode != target_mode:
+                st.session_state.auth_mode = target_mode
+                st.query_params.clear()
+                st.rerun()
 
-        st.markdown('<div class="auth-btn-container">', unsafe_allow_html=True)
-        b_col1, b_col2 = st.columns(2)
-        with b_col1:
-            if st.button("🔑 Connexion", key="btn_switch_login", use_container_width=True, type="primary" if st.session_state.auth_mode == "login" else "secondary"):
-                if st.session_state.auth_mode != "login":
-                    st.session_state.auth_mode = "login"
-                    st.rerun()
-        with b_col2:
-            if st.button("✨ Inscription", key="btn_switch_signup", use_container_width=True, type="primary" if st.session_state.auth_mode == "signup" else "secondary"):
-                if st.session_state.auth_mode != "signup":
-                    st.session_state.auth_mode = "signup"
-                    st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        is_login_active = st.session_state.auth_mode == "login"
+        is_signup_active = st.session_state.auth_mode == "signup"
+
+        # Conteneur Flexbox HTML strict avec formulaires GET intégrés pour les boutons côte à côte
+        st.markdown(f"""
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
+                <div style="flex: 1; min-width: 0;">
+                    <form method="get" style="margin:0;">
+                        <input type="hidden" name="auth" value="login">
+                        <button type="submit" style="width: 100%; cursor: pointer; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_login_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_login_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
+                            🔑 Connexion
+                        </button>
+                    </form>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <form method="get" style="margin:0;">
+                        <input type="hidden" name="auth" value="signup">
+                        <button type="submit" style="width: 100%; cursor: pointer; text-align: center; background: {'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' if is_signup_active else '#230E3D'}; color: #FFF; padding: 12px 8px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; border: 1px solid {'rgba(255,255,255,0.4)' if is_signup_active else 'rgba(236,72,153,0.4)'}; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
+                            ✨ Inscription
+                        </button>
+                    </form>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
