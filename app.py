@@ -117,6 +117,19 @@ AUTH_SWITCH_CSS = """
     gap: 15px !important;
 }
 
+/* Design Card Connexion Réussie */
+.pavel-login-success-banner {
+    background: linear-gradient(135deg, rgba(30, 10, 60, 0.95) 0%, rgba(15, 5, 30, 0.98) 100%) !important;
+    border: 2px solid #EC4899 !important;
+    border-radius: 16px !important;
+    padding: 18px 22px !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 0 25px rgba(236, 72, 153, 0.4), inset 0 0 15px rgba(139, 92, 246, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 18px !important;
+}
+
 /* Design Card Coffre-Fort Sécurisé */
 .pavel-vault-success-banner {
     background: linear-gradient(135deg, rgba(30, 10, 60, 0.95) 0%, rgba(15, 5, 30, 0.98) 100%) !important;
@@ -174,7 +187,8 @@ def do_login():
         st.session_state.user_info = res
         st.session_state.login_attempts = 0
         st.session_state.pop("login_pass", None)
-        st.session_state.flash = f"🔓 Bienvenue, {res['email']} !"
+        # On stocke un message persistant pour l'affichage en bannière (au lieu d'un simple toast éphémère)
+        st.session_state.welcome_banner_msg = f"🔓 Bienvenue dans votre Workspace sécurisé, {res['email']} !"
     else:
         n = st.session_state.get("login_attempts", 0) + 1
         st.session_state.login_attempts = n
@@ -211,6 +225,7 @@ def do_logout():
     st.session_state.authenticated = False
     st.session_state.user_info = None
     st.session_state.current_view = "home"
+    st.session_state.welcome_banner_msg = None
     st.session_state.flash = "🔒 Déconnexion effectuée."
 
 def go_direct_agenda():
@@ -441,6 +456,32 @@ else:
         st.button("🔒 Déconnexion", use_container_width=True, type="secondary", on_click=do_logout)
 
     st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0;'>", unsafe_allow_html=True)
+
+    # 🔓 Affichage persistant et élégant du message de bienvenue après connexion
+    if st.session_state.get("welcome_banner_msg"):
+        welcome_text = st.session_state.welcome_banner_msg
+        st.markdown(
+            f"""
+            <div class="pavel-login-success-banner">
+                <div style="font-size: 2.2rem; background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); 
+                            border-radius: 14px; width: 52px; height: 52px; display: flex; 
+                            align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(236,72,153,0.6);
+                            border: 1px solid rgba(255,255,255,0.4);">
+                    🔓
+                </div>
+                <div style="flex-grow: 1;">
+                    <span class="zapio-badge" style="margin-bottom: 4px; display: inline-block;">✨ Authentification Réussie</span>
+                    <h3 style="color: #FFFFFF; margin: 0 0 2px 0; font-size: 1.15rem;">Connexion établie</h3>
+                    <p style="color: #CBD5E1; font-size: 0.86rem; margin: 0;">{welcome_text}</p>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Fermer cette notification", key="btn_close_welcome_banner", type="secondary"):
+            st.session_state.welcome_banner_msg = None
+            st.rerun()
+
     render_global_search()
 
     current = st.session_state.current_view
@@ -455,7 +496,6 @@ else:
         st.button("← Retour au Tableau de Bord", key="back_to_home_universal",
                   type="secondary", on_click=go_home)
         
-        # 🛡️ Si l'utilisateur entre dans l'espace Coffre-Fort, affichage de la bannière spectaculaire "Coffre-fort verrouillé par chaînes et cadenas robustes"
         if current == "Coffre-Fort":
             st.markdown(
                 """
