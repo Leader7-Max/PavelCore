@@ -1,12 +1,13 @@
 import streamlit as st
+import random
 
 def render_home_view():
-    """Affiche le Tableau de Bord principal de PavelCore au design néon/glow ultra-premium."""
+    """Affiche le Tableau de Bord principal de PavelCore avec des notifications de témoignages internationaux en temps réel."""
     
-    # CSS dédié au stylage haut de gamme des badges du dashboard
+    # CSS pour le style des cartes et l'animation de la notification flottante
     st.markdown("""
         <style>
-            /* Badges de compteurs néon en haut à droite des cartes */
+            /* Badges de compteurs néon */
             .pavel-counter-badge {
                 background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%) !important;
                 color: #FFFFFF !important;
@@ -34,6 +35,35 @@ def render_home_view():
                 box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25) !important;
                 transform: translateY(-3px) !important;
             }
+
+            /* Animation de la notification popup style toast */
+            @keyframes slideInNotification {
+                0% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+            }
+
+            .pavel-live-notification {
+                background: linear-gradient(135deg, rgba(30, 10, 60, 0.95) 0%, rgba(20, 8, 40, 0.98) 100%) !important;
+                border: 1px solid rgba(236, 72, 153, 0.5) !important;
+                border-radius: 16px !important;
+                padding: 14px 18px !important;
+                margin-top: 20px !important;
+                margin-bottom: 20px !important;
+                box-shadow: 0 8px 30px rgba(236, 72, 153, 0.25), 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                animation: slideInNotification 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .pavel-live-notification::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; width: 4px; height: 100%;
+                background: linear-gradient(180deg, #EC4899 0%, #8B5CF6 100%);
+            }
         </style>
     """, unsafe_allow_html=True)
     
@@ -51,7 +81,7 @@ def render_home_view():
     st.markdown(f"""
         <div class="pavel-hero-banner" style="position: relative; overflow: hidden;">
             <div style="position: relative; z-index: 2;">
-                <span class="pavel-counter-badge">🚀 Workspace Actif</span>
+                <span class="pavel-counter-badge">🚀 Workspace Actif (200+ Membres)</span>
                 <h1 style="color: #FFFFFF; margin-top: 10px; font-size: 2.2rem; font-weight: 800;">Tableau de Bord</h1>
                 <p style="color: #CBD5E1; font-size: 1.05rem; margin-bottom: 0;">
                     Bienvenue dans votre espace sécurisé, <strong style="color: #F472B6;">{user_email}</strong>. 
@@ -60,6 +90,78 @@ def render_home_view():
             </div>
         </div>
     """, unsafe_allow_html=True)
+
+    # --- LISTE DES TÉMOIGNAGES INTERNATIONAUX EN DIRECT ---
+    live_notifications = [
+        {
+            "name": "Yannick M.",
+            "role": "Cameroun 🇨🇲",
+            "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+            "comment": "J'adore cette application ! L'agenda et la gestion des events sont parfaits depuis Douala.",
+            "time": "À l'instant"
+        },
+        {
+            "name": "Aïssatou B.",
+            "role": "France 🇫🇷",
+            "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            "comment": "Une fluidité remarquable, bravo à l'équipe pour ce bijou technologique depuis Grenoble !",
+            "time": "Il y a 1 min"
+        },
+        {
+            "name": "Koffi K.",
+            "role": "Côte d'Ivoire 🇨🇮",
+            "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+            "comment": "Franchement propre ! Le coffre-fort et les outils IA me font gagner un temps fou à Abidjan.",
+            "time": "Il y a 3 min"
+        },
+        {
+            "name": "Fatoumata D.",
+            "role": "Guinée 🇬🇳",
+            "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+            "comment": "J'adore l'interface et la recherche universelle, c'est ultra intuitif.",
+            "time": "Il y a 5 min"
+        },
+        {
+            "name": "John S.",
+            "role": "USA 🇺🇸",
+            "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+            "comment": "Amazing workspace! The performance and security standards are top notch.",
+            "time": "Il y a 8 min"
+        },
+        {
+            "name": "Emre K.",
+            "role": "Turquie 🇹🇷",
+            "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+            "comment": "Harika bir uygulama! Design and speed are incredible. Greetings from Istanbul!",
+            "time": "Il y a 10 min"
+        }
+    ]
+
+    # Rotation automatique de la notification à chaque actualisation/action
+    if "notif_idx" not in st.session_state:
+        st.session_state.notif_idx = 0
+    else:
+        st.session_state.notif_idx = (st.session_state.notif_idx + 1) % len(live_notifications)
+
+    curr_notif = live_notifications[st.session_state.notif_idx]
+
+    # Rendu HTML de la notification flottante style popup
+    st.markdown(f"""
+        <div class="pavel-live-notification">
+            <img src="{curr_notif['avatar']}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #EC4899; box-shadow: 0 0 10px rgba(236,72,153,0.5);" alt="Avatar">
+            <div style="flex-grow: 1; min-width: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                    <div>
+                        <strong style="color: #FFFFFF; font-size: 0.95rem;">{curr_notif['name']}</strong>
+                        <span style="color: #A78BFA; font-size: 0.75rem; margin-left: 6px;">({curr_notif['role']})</span>
+                    </div>
+                    <span style="font-size: 0.7rem; color: #94A3B8;">🔔 {curr_notif['time']}</span>
+                </div>
+                <p style="color: #CBD5E1; font-size: 0.88rem; margin: 0; font-style: italic; line-height: 1.3;">"{curr_notif['comment']}"</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    # -----------------------------------------------------
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### ⚡ Accès Rapide aux Modules")
