@@ -308,3 +308,102 @@ elif not st.session_state.get("authenticated", False):
 
     _, col, _ = st.columns([1, 2, 1])
     with col:
+        st.markdown(AUTH_SWITCH_CSS, unsafe_allow_html=True)
+        mode = st.session_state.auth_mode
+
+        # Boutons côte à côte, design d'origine, sans rechargement de page
+        with st.container(key="auth_switch"):
+            b1, b2 = st.columns(2)
+            with b1:
+                st.button(
+                    "🔑 Connexion", key="btn_mode_login", use_container_width=True,
+                    type="primary" if mode == "login" else "secondary",
+                    on_click=set_auth_mode, args=("login",),
+                )
+            with b2:
+                st.button(
+                    "✨ Inscription", key="btn_mode_signup", use_container_width=True,
+                    type="primary" if mode == "signup" else "secondary",
+                    on_click=set_auth_mode, args=("signup",),
+                )
+
+        st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
+        if mode == "login":
+            with st.form("login_form"):
+                st.text_input("Adresse Email", placeholder="votre.email@exemple.com", key="login_email")
+                st.text_input("Mot de passe", type="password", placeholder="••••••••", key="login_pass")
+                st.form_submit_button(
+                    "Se connecter au Workspace", use_container_width=True, on_click=do_login
+                )
+        else:
+            with st.form("signup_form"):
+                st.text_input("Adresse Email", placeholder="nom@exemple.com", key="signup_email")
+                st.text_input("Créer un mot de passe", type="password", placeholder="••••••••", key="signup_pass")
+                st.text_input("Confirmer le mot de passe", type="password", placeholder="••••••••", key="signup_confirm_pass")
+                st.form_submit_button(
+                    "S'inscrire et rejoindre PavelCore", use_container_width=True, on_click=do_signup
+                )
+
+        show_auth_msg()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.button(
+            "📅 Accéder directement à l'Agenda (Hors-ligne / Démo)",
+            use_container_width=True, type="secondary", on_click=go_direct_agenda,
+        )
+
+# ── APPLICATION (utilisateur connecté) ────────────────────
+else:
+    col_logo, col_user, col_logout = st.columns([2, 2, 1])
+    with col_logo:
+        st.markdown(
+            f'<h1 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 6px;">'
+            f'<span style="color: {text_color};">pavel</span>'
+            f'<span style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); color: #FFF; '
+            f'padding: 2px 6px; border-radius: 6px; font-size: 0.85rem;">CORE</span>'
+            f'<span class="zapio-badge-green" style="font-size: 0.55rem;">● Live</span></h1>',
+            unsafe_allow_html=True,
+        )
+    with col_user:
+        email = (st.session_state.get("user_info") or {}).get("email", "Membre")
+        st.markdown(
+            f'<div style="text-align: center; color: {desc_color}; font-size: 0.85rem; padding-top: 5px;">'
+            f'👤 Connecté en tant que : <strong style="color: {sub_title_color};">{email}</strong></div>',
+            unsafe_allow_html=True,
+        )
+    with col_logout:
+        st.button("🔒 Déconnexion", use_container_width=True, type="secondary", on_click=do_logout)
+
+    st.markdown("<hr style='border-color: rgba(236,72,153,0.2); margin: 15px 0;'>", unsafe_allow_html=True)
+    render_global_search()
+
+    current = st.session_state.current_view
+
+    # Moteur d'alarmes invisible dans toutes les rubriques (l'Agenda a son propre panneau)
+    if current != "Agenda":
+        run_background_alarms()
+
+    if current == "home":
+        _view("home_view", "render_home_view")()
+        _view("backup_view", "render_backup_view")(sub_title_color)
+    else:
+        st.button("← Retour au Tableau de Bord", key="back_to_home_universal",
+                  type="secondary", on_click=go_home)
+        st.markdown(f"<h2 style='color: #EC4899; margin-top: 15px;'>Espace : {current}</h2>", unsafe_allow_html=True)
+
+        if current == "Agenda":
+            _view("agenda_view", "render_agenda_view")(
+                sub_title_color, card_bg, card_border, header_box_bg, header_box_text, text_color)
+        elif current == "Prompts & IA":
+            _view("dev_ia_view", "render_dev_ia_view")(sub_title_color)
+        elif current == "Projets":
+            _view("projets_view", "render_projets_view")(sub_title_color, desc_color)
+        elif current == "Médias & Fichiers":
+            _view("media_view", "render_media_view")(sub_title_color, UPLOADS_DIR)
+        elif current == "Coffre-Fort":
+            _view("vault_contacts_view", "render_vault_view")(sub_title_color, desc_color)
+        elif current == "Contacts & Emails":
+            _view("vault_contacts_view", "render_contacts_view")(sub_title_color, desc_color)
+        elif current == "Sauvegarde":
+            _view("backup_view", "render_backup_view")(sub_title_color)
