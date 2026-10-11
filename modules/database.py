@@ -24,7 +24,7 @@ def verify_password(password: str, stored_hash: str, stored_salt: str) -> bool:
     return pwd_hash == stored_hash
 
 def init_db():
-    """Initialise la base de données et crée toutes les tables nécessaires."""
+    """Initialise la base de données et crée toutes les tables nécessaires (Exécuté une seule fois)."""
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -85,9 +85,11 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Initialisation automatique au chargement du module (Évite les appels redondants)
+init_db()
+
 # --- GESTION UTILISATEURS ---
 def create_user_db(email: str, password: str) -> tuple[bool, str]:
-    init_db()
     email_clean = email.strip().lower()
     if not email_clean or not password:
         return False, "Veuillez remplir tous les champs."
@@ -108,7 +110,6 @@ def create_user_db(email: str, password: str) -> tuple[bool, str]:
         return False, "Cet e-mail est déjà utilisé."
 
 def authenticate_user_db(email: str, password: str) -> tuple[bool, dict | str]:
-    init_db()
     email_clean = email.strip().lower()
     conn = get_connection()
     cursor = conn.cursor()
@@ -126,7 +127,6 @@ def authenticate_user_db(email: str, password: str) -> tuple[bool, dict | str]:
 
 # --- GESTION AGENDA (Filtré par user_id) ---
 def load_events_from_db(user_id: int):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, title, event_date, event_time, category, description, ringtone FROM events WHERE user_id = ?", (user_id,))
@@ -151,7 +151,6 @@ def load_events_from_db(user_id: int):
     return events
 
 def add_event_to_db(user_id: int, title, ev_date, ev_time, category, desc, ringtone):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -162,7 +161,6 @@ def add_event_to_db(user_id: int, title, ev_date, ev_time, category, desc, ringt
     conn.close()
 
 def delete_event_from_db(event_id: int):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
@@ -171,7 +169,6 @@ def delete_event_from_db(event_id: int):
 
 def clear_all_events_db(user_id: int):
     """Supprime tous les événements de la base de données pour un utilisateur."""
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM events WHERE user_id = ?", (user_id,))
@@ -180,7 +177,6 @@ def clear_all_events_db(user_id: int):
 
 # --- GESTION COFFRE-FORT (Filtré par user_id) ---
 def load_api_keys_from_db(user_id: int):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, service, encrypted_key FROM api_keys WHERE user_id = ?", (user_id,))
@@ -189,7 +185,6 @@ def load_api_keys_from_db(user_id: int):
     return [{"id": r[0], "service": r[1], "key": r[2]} for r in rows]
 
 def add_api_key_to_db(user_id: int, service, encrypted_key):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO api_keys (user_id, service, encrypted_key) VALUES (?, ?, ?)", (user_id, service, encrypted_key))
@@ -197,7 +192,6 @@ def add_api_key_to_db(user_id: int, service, encrypted_key):
     conn.close()
 
 def load_credentials_from_db(user_id: int):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, site, username, encrypted_password FROM credentials WHERE user_id = ?", (user_id,))
@@ -206,7 +200,6 @@ def load_credentials_from_db(user_id: int):
     return [{"id": r[0], "site": r[1], "user": r[2], "pass": r[3]} for r in rows]
 
 def add_credential_to_db(user_id: int, site, username, encrypted_password):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO credentials (user_id, site, username, encrypted_password) VALUES (?, ?, ?, ?)", (user_id, site, username, encrypted_password))
@@ -215,7 +208,6 @@ def add_credential_to_db(user_id: int, site, username, encrypted_password):
 
 # --- GESTION CONTACTS (Filtré par user_id) ---
 def load_contacts_from_db(user_id: int):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, email, phone, category, notes FROM contacts WHERE user_id = ?", (user_id,))
@@ -224,7 +216,6 @@ def load_contacts_from_db(user_id: int):
     return [{"id": r[0], "name": r[1], "email": r[2], "phone": r[3], "cat": r[4], "notes": r[5]} for r in rows]
 
 def add_contact_to_db(user_id: int, name, email, phone, category, notes):
-    init_db()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO contacts (user_id, name, email, phone, category, notes) VALUES (?, ?, ?, ?, ?, ?)", (user_id, name, email, phone, category, notes))
