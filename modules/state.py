@@ -1,38 +1,33 @@
 import streamlit as st
 
+_DEFAULTS = {
+    "authenticated": False,
+    "user_info": None,
+    "current_view": "home",
+    "theme_mode": "Sombre Nuit",
+    "auth_mode": "login",
+    "direct_agenda": False,
+}
+
+_LIST_KEYS = (
+    "saved_prompts_library",
+    "saved_media_files",
+    "agenda_events",
+    "saved_contacts",
+    "saved_current_projects",
+    "saved_future_projects",
+    "saved_api_keys",
+    "saved_user_credentials",
+)
+
+
 def init_session_state():
     """Initialise toutes les variables de session globales de PavelCore."""
-    
-    # Correction du KeyError 'modules'
     if "modules" not in st.session_state:
         st.session_state["modules"] = {}
 
-    if "authenticated" not in st.session_state:
-        st.session_state.authenticated = False
+    for key, value in _DEFAULTS.items():
+        st.session_state.setdefault(key, value)
 
-    if "user_info" not in st.session_state:
-        st.session_state.user_info = None
-
-    if "current_view" not in st.session_state:
-        st.session_state.current_view = "home"
-
-    if "theme_mode" not in st.session_state:
-        st.session_state.theme_mode = "Sombre Nuit"
-
-    if "saved_prompts_library" not in st.session_state:
-        st.session_state.saved_prompts_library = []
-
-    if "saved_media_files" not in st.session_state:
-        st.session_state.saved_media_files = []
-
-    if "agenda_events" not in st.session_state:
-        st.session_state.agenda_events = []
-
-    if "saved_contacts" not in st.session_state:
-        st.session_state.saved_contacts = []
-
-    if "saved_current_projects" not in st.session_state:
-        st.session_state.saved_current_projects = []
-
-    if "saved_future_projects" not in st.session_state:
-        st.session_state.saved_future_projects = []
+    for key in _LIST_KEYS:
+        st.session_state.setdefault(key, [])
