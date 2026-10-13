@@ -10,12 +10,15 @@ const store = {
 };
 const pad = n => String(n).padStart(2,"0");
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let lastTone = store.get("pavel_tone") || "Standard";
 
 // ───────────── SONNERIES (Web Audio, aucun fichier) ─────────────
 let ctx = null, loopTimer = null;
 function audio(){
-  if(!ctx){ const AC = window.AudioContext || window.webkitAudioContext; if(AC) ctx = new AC(); }
-  if(ctx && ctx.state === "suspended") ctx.resume();
+  try {
+    if(!ctx){ const AC = window.AudioContext || window.webkitAudioContext; if(AC) ctx = new AC(); }
+    if(ctx && ctx.state === "suspended") ctx.resume();
+  } catch(e){}
   return ctx;
 }
 function beep(f, s, d, type, v, f2){
@@ -61,15 +64,19 @@ function banner(ev, text){
   try {
     const D = P.document;
     const old = D.getElementById("pavel-alarm"); if(old) old.remove();
+    const silent = ev.ringtone === "Silencieux";
+    const soundOff = !silent && !(ctx && ctx.state === "running");
     const b = D.createElement("div"); b.id = "pavel-alarm";
     b.style.cssText = "position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:999999;width:420px;max-width:92vw;"
       + "background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:1px solid rgba(255,255,255,.5);"
       + "border-radius:18px;padding:16px 18px;box-shadow:0 18px 50px rgba(0,0,0,.6);font-family:Inter,sans-serif";
     b.innerHTML = '<div style="font-weight:800;font-size:1.05rem">⏰ ' + esc(ev.title) + '</div>'
-                + '<div style="opacity:.95;margin-top:4px;font-size:.9rem">' + esc(text) + '</div>';
+                + '<div style="opacity:.95;margin-top:4px;font-size:.9rem">' + esc(text) + '</div>'
+                + (soundOff ? '<div style="margin-top:6px;font-size:.8rem;opacity:.95">🔊 Touchez la bannière pour activer le son</div>' : '');
+    b.onclick = () => { try { audio(); if(!silent) ring(ev.ringtone, 3); } catch(e){} };
     const btn = D.createElement("button"); btn.textContent = "🔕 Arrêter";
     btn.style.cssText = "margin-top:12px;background:#170A2E;color:#fff;font-weight:700;border:1px solid rgba(255,255,255,.4);border-radius:50px;padding:8px 18px;cursor:pointer";
-    btn.onclick = () => { try { stopRing(); } catch(e){} b.remove(); };
+    btn.onclick = e => { try { if(e && e.stopPropagation) e.stopPropagation(); stopRing(); } catch(err){} b.remove(); };
     b.appendChild(btn); D.body.appendChild(b);
     setTimeout(() => { if(b.parentNode) b.remove(); }, 60000);
   } catch(e){}
@@ -102,6 +109,9 @@ function check(){
   if(changed) store.set("pavel_fired", JSON.stringify(fired));
   renderStatus(next);
 }
+function safeCheck(){
+  try { check(); } catch(e){ try { $("status").textContent = "Erreur du moteur d'alarmes : " + e.message; } catch(err){} }
+}
 
 function renderStatus(next){
   let perm = "Notifications à activer";
@@ -114,27 +124,47 @@ function renderStatus(next){
     const d = new Date(next.at);
     nxt = "⏭ Prochaine alarme : " + esc(next.ev.title) + " — " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear() + " à " + pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
-  $("status").innerHTML = nxt + "<br>" + perm + " · " + snd;
+  const t = new Date();
+  $("status").innerHTML = nxt + "<br>" + perm + " · " + snd
+    + "<br>✅ Moteur actif — vérifié à " + pad(t.getHours()) + ":" + pad(t.getMinutes()) + ":" + pad(t.getSeconds());
 }
 
 // ───────────── INTERFACE ─────────────
 Object.keys(TONES).forEach(name => {
   const b = document.createElement("button"); b.className = "ghost"; b.textContent = "▶ " + name;
-  b.onclick = () => ring(name, 1);
+  b.onclick = () => { lastTone = name; store.set("pavel_tone", name); ring(name, 1); };
   $("tests").appendChild(b);
 });
 
 $("offset").value = store.get("pavel_offset") || "0";
-$("offset").onchange = () => { store.set("pavel_offset", $("offset").value); check(); };
+$("offset").onchange = () => { store.set("pavel_offset", $("offset").value); safeCheck(); };
 
 $("enable").onclick = async () => {
   audio();
   try { if(N && N.permission === "default") await N.requestPermission(); } catch(e){}
   ring("Doux", 1);
-  check();
+  safeCheck();
+};
+
+if($("testalarm")) $("testalarm").onclick = () => {
+  audio();
+  try { if(N && N.permission === "default") N.requestPermission(); } catch(e){}
+  $("status").textContent = "⏳ Alarme de test dans 3 secondes…";
+  setTimeout(() => {
+    const d = new Date();
+    fire({
+      id: "test",
+      title: "Test d'alarme",
+      date: d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()),
+      time: pad(d.getHours()) + ":" + pad(d.getMinutes()),
+      desc: "L'agenda déclenche bien les alarmes.",
+      ringtone: lastTone
+    }, 0);
+    safeCheck();
+  }, 3000);
 };
 
 try { P.document.addEventListener("click", () => { audio(); }, true); } catch(e){}
 
-check();
-setInterval(check, 5000);
+safeCheck();
+setInterval(safeCheck, 5000);
