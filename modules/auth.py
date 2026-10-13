@@ -53,3 +53,13 @@ def supabase_login(email: str, password: str):
         if any(w in msg for w in ("timeout", "timed out", "connection", "network", "getaddrinfo", "resolution")):
             return False, "Service momentanément indisponible. Réessayez dans un instant."
         return False, "Identifiants invalides ou e-mail non confirmé."
+
+
+def supabase_logout():
+    """Révoque la session Supabase côté serveur (appelée à la déconnexion)."""
+    if not supabase:
+        return
+    try:
+        supabase.auth.sign_out()
+    except Exception:
+        logging.warning("Déconnexion Supabase : échec silencieux")
