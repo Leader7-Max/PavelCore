@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-import streamlit.components.v1 as components
+import streamlit as st
 
 _ENGINE_JS = Path(__file__).parent / "notifier_assets" / "engine.js"
 
@@ -36,13 +36,24 @@ _PANEL = r"""<!DOCTYPE html>
     </select>
   </div>
   <div class="row" id="tests"></div>
+  <div class="row"><button class="pill" id="testalarm">⏰ Tester l'alarme (3 s)</button></div>
   <div id="status"></div>
 </div>
 <script>__SCRIPT__</script>
 </body></html>"""
 
 
-def render_notifier(events, height=270, show_panel=True):
+def _render_html(code: str, height: int):
+    """components.html est déprécié dans les versions récentes de Streamlit :
+    on l'utilise tant qu'il existe, sinon on bascule automatiquement sur st.iframe."""
+    try:
+        import streamlit.components.v1 as components
+        components.html(code, height=height)
+    except Exception:
+        st.iframe(code, height=height)
+
+
+def render_notifier(events, height=300, show_panel=True):
     """Affiche le panneau Notifications & sonneries et lance le moteur d'alarmes (navigateur).
     show_panel=False : moteur invisible (utilisé dans les autres rubriques)."""
     payload = []
@@ -67,4 +78,4 @@ def render_notifier(events, height=270, show_panel=True):
         code = code.replace('<div class="panel">', '<div class="panel" style="display:none">')
         height = 1
 
-    components.html(code, height=height)
+    _render_html(code, height)
