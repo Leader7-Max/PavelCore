@@ -1,0 +1,61 @@
+{
+  "build": "2026-10-13-r4",
+  "files": {
+    "app.py": {
+      "lines": 568,
+      "sha": "be53993bce"
+    },
+    ".streamlit/config.toml": {
+      "lines": 7,
+      "sha": "38a9cfa650"
+    },
+    "assets/styles.py": {
+      "lines": 525,
+      "sha": "a7995feb09"
+    },
+    "assets/theme.py": {
+      "lines": 145,
+      "sha": "16d63adff7"
+    },
+    "modules/auth.py": {
+      "lines": 85,
+      "sha": "4105f5facd"
+    },
+    "modules/calendar_ui.py": {
+      "lines": 92,
+      "sha": "d00d7a91a9"
+    },
+    "modules/database.py": {
+      "lines": 224,
+      "sha": "ecefa63f55"
+    },
+    "modules/diagnostics.py": {
+      "lines": 123,
+      "sha": "84658df0a2"
+    },
+    "modules/notifier.py": {
+      "lines": 81,
+      "sha": "a79c61b3e0"
+    },
+    "modules/notifier_assets/engine.js": {
+      "lines": 170,
+      "sha": "81f263de27"
+    },
+    "modules/state.py": {
+      "lines": 33,
+      "sha": "4478e6212e"
+    },
+    "modules/vault_crypto.py": {
+      "lines": 65,
+      "sha": "e66e6f0b55"
+    },
+    "views/agenda_view.py": {
+      "lines": 87,
+      "sha": "530ea8f27e"
+    },
+    "views/vault_contacts_view.py": {
+      "lines": 175,
+      "sha": "e94dee148c"
+    }
+  }
+}
