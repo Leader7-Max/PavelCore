@@ -1,22 +1,62 @@
+import html
+import re
 import streamlit as st
 from modules.database import (
-    load_api_keys_from_db, add_api_key_to_db,
-    load_credentials_from_db, add_credential_to_db,
-    load_contacts_from_db, add_contact_to_db
+    load_api_keys_from_db, add_api_key_to_db, delete_api_key_from_db,
+    load_credentials_from_db, add_credential_to_db, delete_credential_from_db,
+    load_contacts_from_db, add_contact_to_db, delete_contact_from_db,
+    migrate_vault_to_encrypted,
 )
+from modules.vault_crypto import vault_status, VaultKeyError
+
+EMAIL_RE = re.compile(r"^[^@\s<>\"']+@[^@\s<>\"']+\.[^@\s<>\"']+$")
+
+
+def esc(value) -> str:
+    return html.escape("" if value is None else str(value))
+
+
+def _mask(secret) -> str:
+    if secret is None:
+        return "🔒 illisible (clé de chiffrement différente)"
+    if len(secret) <= 8:
+        return "•" * 8
+    return f"{secret[:4]}{'•' * 8}{secret[-4:]}"
+
+
+def _current_user_id():
+    info = st.session_state.get("user_info")
+    if info and info.get("id") not in (None, ""):
+        return info["id"]
+    return None
+
 
 def render_vault_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
     """Gère l'affichage et l'ajout sécurisé dans le Coffre-Fort cloisonné par utilisateur."""
-    
-    # Récupération sécurisée du user_id de la session
-    user_id = st.session_state.user_info["id"] if st.session_state.get("user_info") else 0
+
+    user_id = _current_user_id()
+    if user_id is None:
+        st.warning("Session expirée : reconnectez-vous pour accéder au Coffre-Fort.")
+        return
 
     st.markdown(f"<h2 style='color: {sub_title_color}; margin-top: 10px;'>🔐 Coffre-Fort Sécurisé</h2>", unsafe_allow_html=True)
     st.markdown(f"<p style='color: {desc_color};'>Stockez vos clés API et identifiants de manière chiffrée et isolée.</p>", unsafe_allow_html=True)
 
+    ok, message = vault_status()
+    if not ok:
+        st.error(f"🔑 Chiffrement indisponible : {message}")
+        return
+
+    # Chiffrement des anciens secrets enregistrés en clair (une fois par session)
+    if st.session_state.get("_vault_migrated_for") != user_id:
+        migrate_vault_to_encrypted(user_id)
+        st.session_state["_vault_migrated_for"] = user_id
+
     # Rafraîchissement des données de l'utilisateur
     st.session_state.saved_api_keys = load_api_keys_from_db(user_id)
     st.session_state.saved_user_credentials = load_credentials_from_db(user_id)
+
+    show_values = st.checkbox("👁️ Afficher les valeurs", key="vault_show_values")
 
     tab_api, tab_cred = st.tabs(["🔑 Clés API", "🔑 Identifiants & Mots de passe"])
 
@@ -26,20 +66,27 @@ def render_vault_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
             st.info("Aucune clé API enregistrée.")
         else:
             for item in st.session_state.saved_api_keys:
-                st.code(f"Service: {item['service']} | Clé: {item['key']}", language="text")
+                shown = item["key"] if (show_values and item["key"] is not None) else _mask(item["key"])
+                st.code(f"Service: {item['service']} | Clé: {shown}", language="text")
+                if st.button("🗑️ Supprimer", key=f"del_api_{item['id']}"):
+                    delete_api_key_from_db(item["id"], user_id)
+                    st.toast("Clé API supprimée.", icon="🗑️")
+                    st.rerun()
 
         st.markdown("---")
         st.markdown("### Ajouter une clé API")
-        with st.form("api_key_form"):
+        with st.form("api_key_form", clear_on_submit=True):
             service_name = st.text_input("Nom du Service (ex: OpenAI, GitHub, Stripe)")
             api_key_val = st.text_input("Clé Secrète", type="password")
             submit_api = st.form_submit_button("Enregistrer la Clé API", use_container_width=True)
             if submit_api:
                 if service_name.strip() and api_key_val.strip():
-                    add_api_key_to_db(user_id, service_name, api_key_val)
-                    st.session_state.saved_api_keys = load_api_keys_from_db(user_id)
-                    st.toast("✅ Clé API enregistrée en toute sécurité.", icon="🔒")
-                    st.rerun()
+                    try:
+                        add_api_key_to_db(user_id, service_name, api_key_val)
+                        st.toast("✅ Clé API enregistrée en toute sécurité.", icon="🔒")
+                        st.rerun()
+                    except VaultKeyError as exc:
+                        st.error(f"Enregistrement refusé : {exc}")
                 else:
                     st.error("Tous les champs sont obligatoires.")
 
@@ -50,28 +97,39 @@ def render_vault_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
         else:
             for item in st.session_state.saved_user_credentials:
                 st.markdown(f"- **{item['site']}** (Utilisateur : `{item['user']}`)")
+                shown = item["pass"] if (show_values and item["pass"] is not None) else _mask(item["pass"])
+                st.code(f"Mot de passe : {shown}", language="text")
+                if st.button("🗑️ Supprimer", key=f"del_cred_{item['id']}"):
+                    delete_credential_from_db(item["id"], user_id)
+                    st.toast("Identifiants supprimés.", icon="🗑️")
+                    st.rerun()
 
         st.markdown("---")
         st.markdown("### Ajouter des identifiants")
-        with st.form("cred_form"):
+        with st.form("cred_form", clear_on_submit=True):
             site_name = st.text_input("Site / Application")
             username = st.text_input("Nom d'utilisateur / Email")
             password = st.text_input("Mot de passe", type="password")
             submit_cred = st.form_submit_button("Enregistrer les Identifiants", use_container_width=True)
             if submit_cred:
                 if site_name.strip() and username.strip() and password.strip():
-                    add_credential_to_db(user_id, site_name, username, password)
-                    st.session_state.saved_user_credentials = load_credentials_from_db(user_id)
-                    st.toast("✅ Identifiants enregistrés avec succès.", icon="🔒")
-                    st.rerun()
+                    try:
+                        add_credential_to_db(user_id, site_name, username, password)
+                        st.toast("✅ Identifiants enregistrés avec succès.", icon="🔒")
+                        st.rerun()
+                    except VaultKeyError as exc:
+                        st.error(f"Enregistrement refusé : {exc}")
                 else:
                     st.error("Veuillez remplir tous les champs.")
 
+
 def render_contacts_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
     """Gère l'affichage et l'ajout dans le carnet de contacts cloisonné par utilisateur."""
-    
-    # Récupération sécurisée du user_id de la session
-    user_id = st.session_state.user_info["id"] if st.session_state.get("user_info") else 0
+
+    user_id = _current_user_id()
+    if user_id is None:
+        st.warning("Session expirée : reconnectez-vous pour accéder à vos contacts.")
+        return
 
     st.markdown(f"<h2 style='color: {sub_title_color}; margin-top: 10px;'>🎴 Contacts & Répertoire</h2>", unsafe_allow_html=True)
     st.markdown(f"<p style='color: {desc_color};'>Gérez vos contacts professionnels et personnels.</p>", unsafe_allow_html=True)
@@ -86,27 +144,32 @@ def render_contacts_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
         for c in st.session_state.saved_contacts:
             st.markdown(f"""
                 <div style="background-color: #170A2E; border: 1px solid #2B1552; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
-                    <h4 style="margin: 0; color: {sub_title_color};">{c['name']} <span style="font-size: 0.8rem; background: #8B5CF6; color: #FFF; padding: 2px 6px; border-radius: 4px;">{c['cat']}</span></h4>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #CBD5E1;">📧 {c['email']} | 📞 {c['phone']}</p>
-                    <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: #94A3B8;">📝 {c['notes']}</p>
+                    <h4 style="margin: 0; color: {sub_title_color};">{esc(c['name'])} <span style="font-size: 0.8rem; background: #8B5CF6; color: #FFF; padding: 2px 6px; border-radius: 4px;">{esc(c['cat'])}</span></h4>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #CBD5E1;">📧 {esc(c['email'])} | 📞 {esc(c['phone'])}</p>
+                    <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: #94A3B8;">📝 {esc(c['notes'])}</p>
                 </div>
             """, unsafe_allow_html=True)
+            if st.button("🗑️ Supprimer", key=f"del_contact_{c['id']}"):
+                delete_contact_from_db(c["id"], user_id)
+                st.toast("Contact supprimé.", icon="🗑️")
+                st.rerun()
 
     st.markdown("---")
     st.markdown("### Ajouter un Contact")
-    with st.form("contact_form"):
+    with st.form("contact_form", clear_on_submit=True):
         name = st.text_input("Nom complet")
         email = st.text_input("Adresse Email")
         phone = st.text_input("Numéro de Téléphone")
         category = st.selectbox("Catégorie", ["Client", "Partenaire", "Prestataire", "Personnel", "Autre"])
         notes = st.text_area("Notes / Remarques")
         submit_contact = st.form_submit_button("Enregistrer le Contact", use_container_width=True)
-        
+
         if submit_contact:
-            if name.strip():
+            if not name.strip():
+                st.error("Le nom du contact est obligatoire.")
+            elif email.strip() and not EMAIL_RE.match(email.strip()):
+                st.error("L'adresse email du contact n'est pas valide.")
+            else:
                 add_contact_to_db(user_id, name, email, phone, category, notes)
-                st.session_state.saved_contacts = load_contacts_from_db(user_id)
                 st.toast("✅ Contact enregistré avec succès !", icon="🎴")
                 st.rerun()
-            else:
-                st.error("Le nom du contact est obligatoire.")
