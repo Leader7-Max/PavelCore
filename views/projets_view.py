@@ -1,80 +1,87 @@
+import html
 import streamlit as st
+from datetime import date, time
+from modules.database import add_event_to_db, delete_event_from_db, clear_all_events_db, load_events_from_db
+from modules.calendar_ui import render_month_calendar
+from modules.notifier import render_notifier
 
-def render_projets_view(sub_title_color="#FFF", desc_color="#CBD5E1"):
-    """Gère l'affichage et la gestion des projets actuels et futurs dans PavelCore."""
-    
-    st.markdown(f'''
-        <div class="sub-section-header">
-            <span class="zapio-badge">WORKSPACE</span>
-            <h1 style="color: {sub_title_color}; font-size: 1.8rem; margin: 5px 0 0 0;">🚀 Gestion des Projets</h1>
-        </div>
-    ''', unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
 
-    # Initialisation des listes dans le session_state si elles n'existent pas
-    if "saved_current_projects" not in st.session_state:
-        st.session_state.saved_current_projects = []
-    if "saved_future_projects" not in st.session_state:
-        st.session_state.saved_future_projects = []
+def _fmt_date(value):
+    return value.strftime("%d/%m/%Y") if hasattr(value, "strftime") else str(value)
 
-    tab_current, tab_future, tab_add = st.tabs(["🟢 Projets en Cours", "🔮 Projets Futurs", "➕ Ajouter un Projet"])
 
-    with tab_current:
-        st.markdown(f"<p style='color: {desc_color};'>Suivi de vos projets actifs et en cours de développement.</p>", unsafe_allow_html=True)
-        
-        if not st.session_state.saved_current_projects:
-            st.info("Aucun projet en cours pour le moment. Utilisez l'onglet 'Ajouter un Projet' pour en créer un.")
+def _fmt_time(value):
+    return value.strftime("%H:%M") if hasattr(value, "strftime") else str(value)[:5]
+
+
+def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#2B1552", header_box_bg="#1E0A3C", header_box_text="#A78BFA", text_color="#F8FAFC"):
+    """Gère l'affichage complet du module Agenda connecté à SQLite et cloisonné par utilisateur."""
+
+    # Récupération sécurisée du user_id de la session
+    user_id = st.session_state.user_info["id"] if st.session_state.get("user_info") else 0
+
+    st.markdown(f"<h2 style='color: {sub_title_color}; margin-top: 10px;'>📅 Espace Agenda & Planning</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: {text_color}; opacity: 0.8;'>Gérez vos événements, rendez-vous et plannings en toute sécurité.</p>", unsafe_allow_html=True)
+
+    # Rafraîchissement des événements de l'utilisateur
+    st.session_state.agenda_events = load_events_from_db(user_id)
+
+    # Panneau notifications & sonneries + moteur d'alarmes
+    render_notifier(st.session_state.agenda_events)
+
+    tab_vue, tab_ajout = st.tabs(["📋 Liste & Calendrier", "➕ Ajouter un Événement"])
+
+    with tab_vue:
+        # Calendrier mensuel premium
+        render_month_calendar(st.session_state.agenda_events)
+
+        st.markdown("### Vos Événements Enregistrés")
+        if not st.session_state.agenda_events:
+            st.info("Aucun événement dans votre agenda pour le moment.")
         else:
-            for idx, proj in enumerate(st.session_state.saved_current_projects):
-                st.markdown(f'''
-                    <div class="zapio-card" style="margin-bottom: 15px;">
-                        <span class="zapio-badge">ACTIF</span>
-                        <h3 style="color: {sub_title_color}; margin-top: 8px;">{proj.get("name", "Sans nom")}</h3>
-                        <p style="color: {desc_color};">{proj.get("desc", "Aucune description")}</p>
-                        <p style="font-size: 0.85rem; color: #94A3B8;">Client / Contexte : <strong>{proj.get("client", "N/A")}</strong></p>
-                    </div>
-                ''', unsafe_allow_html=True)
+            for ev in st.session_state.agenda_events:
+                with st.container():
+                    title = html.escape(str(ev.get("title") or ""))
+                    category = html.escape(str(ev.get("category") or "Général"))
+                    desc = html.escape(str(ev.get("desc") or "Aucune description"))
+                    ringtone = html.escape(str(ev.get("ringtone") or "Standard"))
+                    st.markdown(f"""
+                        <div style="background-color: {card_bg}; border: 1px solid {card_border}; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                            <h4 style="color: {sub_title_color}; margin: 0 0 5px 0;">{title}</h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #CBD5E1;">📅 Date : {_fmt_date(ev['date'])} à {_fmt_time(ev['time'])} | 🏷️ Catégorie : {category} | 🔔 {ringtone}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #94A3B8;">📝 {desc}</p>
+                        </div>
+                    """, unsafe_allow_html=True)
 
-    with tab_future:
-        st.markdown(f"<p style='color: {desc_color};'>Idées et projets planifiés pour le futur.</p>", unsafe_allow_html=True)
-        
-        if not st.session_state.saved_future_projects:
-            st.info("Aucun projet futur enregistré.")
-        else:
-            for idx, proj in enumerate(st.session_state.saved_future_projects):
-                st.markdown(f'''
-                    <div class="zapio-card" style="margin-bottom: 15px;">
-                        <span class="zapio-badge" style="background: #8B5CF6 !important;">FUTUR</span>
-                        <h3 style="color: {sub_title_color}; margin-top: 8px;">{proj.get("name", "Sans nom")}</h3>
-                        <p style="color: {desc_color};">{proj.get("desc", "Aucune description")}</p>
-                    </div>
-                ''', unsafe_allow_html=True)
+                    if st.button("🗑️ Supprimer", key=f"del_ev_{ev['id']}"):
+                        delete_event_from_db(ev['id'], user_id)
+                        st.session_state.agenda_events = load_events_from_db(user_id)
+                        st.toast("Événement supprimé avec succès.", icon="🗑️")
+                        st.rerun()
 
-    with tab_add:
-        st.markdown("### ➕ Créer un nouveau projet")
-        
-        with st.form("form_add_project"):
-            p_name = st.text_input("Nom du Projet", placeholder="ex: Application PavelConnect")
-            p_desc = st.text_area("Description & Objectifs", placeholder="Détails du projet...")
-            p_client = st.text_input("Client ou Cible", placeholder="ex: Interne / Nom du client")
-            p_type = st.selectbox("Type de projet", ["Projet en Cours", "Projet Futur"])
-            
-            submit_proj = st.form_submit_button("Enregistrer le projet", use_container_width=True)
-            
-            if submit_proj:
-                if p_name.strip():
-                    new_item = {
-                        "name": p_name.strip(),
-                        "desc": p_desc.strip(),
-                        "client": p_client.strip()
-                    }
-                    if p_type == "Projet en Cours":
-                        st.session_state.saved_current_projects.append(new_item)
-                    else:
-                        st.session_state.saved_future_projects.append(new_item)
-                    
-                    st.toast("✅ Projet ajouté avec succès !", icon="🚀")
+            if st.button("⚠️ Vider tout l'agenda", type="secondary"):
+                clear_all_events_db(user_id)
+                st.session_state.agenda_events = load_events_from_db(user_id)
+                st.toast("Agenda vidé.", icon="🧹")
+                st.rerun()
+
+    with tab_ajout:
+        st.markdown("### Créer un nouvel événement")
+        with st.form("agenda_add_form"):
+            title = st.text_input("Titre de l'événement", placeholder="Ex: Réunion client, Session DJ...")
+            ev_date = st.date_input("Date", value=date.today(), format="DD/MM/YYYY")
+            ev_time = st.time_input("Heure", value=time(12, 0))
+            category = st.selectbox("Catégorie", ["Général", "Professionnel", "Musique / DJ", "Personnel", "Urgent"])
+            desc = st.text_area("Description / Notes", placeholder="Détails de l'événement...")
+            ringtone = st.selectbox("Sonnette d'alarme", ["Standard", "Doux", "Énergique", "Futuriste", "Silencieux"])
+            st.caption("🔔 Testez les sonneries avec les boutons ▶ du panneau « Notifications & sonneries » en haut de l'agenda.")
+
+            submit_ev = st.form_submit_button("Enregistrer l'événement", use_container_width=True)
+            if submit_ev:
+                if title.strip():
+                    add_event_to_db(user_id, title, ev_date, ev_time, category, desc, ringtone)
+                    st.session_state.agenda_events = load_events_from_db(user_id)
+                    st.toast("✅ Événement ajouté avec succès dans votre espace personnel.", icon="🎉")
                     st.rerun()
                 else:
-                    st.error("Le nom du projet est obligatoire.")
+                    st.error("Le titre de l'événement est obligatoire.")
