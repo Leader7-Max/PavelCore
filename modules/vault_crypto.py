@@ -33,13 +33,11 @@ def _fernet(user_id):
         raise VaultKeyError(
             "Le paquet `cryptography` n'est pas installé. Ajoutez-le à requirements.txt."
         ) from exc
-    # Clé dérivée par utilisateur : une ligne copiée vers un autre compte reste illisible
     derived = hmac.new(_master_key(), f"pavelcore-vault:{user_id}".encode("utf-8"), hashlib.sha256).digest()
     return Fernet(base64.urlsafe_b64encode(derived))
 
 
 def vault_status():
-    """Retourne (ok, message) : le chiffrement est-il opérationnel ?"""
     try:
         _fernet("check")
         return True, ""
@@ -57,8 +55,6 @@ def encrypt_secret(user_id, plaintext: str) -> str:
 
 
 def decrypt_secret(user_id, stored):
-    """Retourne le texte clair, la valeur telle quelle si elle est ancienne (non chiffrée),
-    ou None si le déchiffrement est impossible."""
     if stored is None:
         return ""
     if not is_encrypted(stored):
