@@ -34,7 +34,7 @@ def render_agenda_view(sub_title_color="#FFF", card_bg="#170A2E", card_border="#
                     """, unsafe_allow_html=True)
                     
                     if st.button(f"🗑️ Supprimer", key=f"del_ev_{ev['id']}"):
-                        delete_event_from_db(ev['id'])
+                                                delete_event_from_db(ev['id'], user_id)
                         st.session_state.agenda_events = load_events_from_db(user_id)
                         st.toast("Événement supprimé avec succès.", icon="🗑️")
                         st.rerun()
